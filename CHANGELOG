@@ -1,3 +1,7 @@
+------** Version: 1.8.13 By: Lior Date 8/9/2011 **-------
+* TODO - add mmon --nodes flag
+* TODO - add infodctl listing of modules
+* TODO - Indicate a dead node with bad description 
 
 ------** Version: 1.8.12 By: Lior **-------
 
@@ -5,12 +9,6 @@
   crash with SEGFAULT since no check was made to verify that there 
   is enough space.
 
-
-TODO:
-
-* Add support for external command runner plugin.
-* Add to infoctl info the ability to view the loaded plugins with
-  their versions
 
 ------** Version: 1.8.11 By: Lior Date: 04.05.2011 **-------
 * Added toggling between modules side windows using 'a'
