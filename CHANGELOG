@@ -1,0 +1,368 @@
+
+------** Version: 1.8.12 By: Lior **-------
+
+* Bugfix in infod - when messages are too big (topusage) then infod
+  crash with SEGFAULT since no check was made to verify that there 
+  is enough space.
+
+
+TODO:
+
+* Add support for external command runner plugin.
+* Add to infoctl info the ability to view the loaded plugins with
+  their versions
+
+------** Version: 1.8.11 By: Lior Date: 04.05.2011 **-------
+* Added toggling between modules side windows using 'a'
+* Modified the free memory calculation to not included buffers
+* Added version printout to syslog once infod starts
+* Added kernel version to information and to mmon
+* Added iowait information to infod + mmon
+* Fixed a bug with multiples plugins not generating the same description
+  due to bug in sorting the modules by names
+
+------** Version: 1.8.10 By: Lior Date: 12.04.2011 **-------
+* Added a side window to mmon
+* Fixed few issues in mmon 
+
+------** Version: 1.8.9 By: Lior Date: 27.12.2010 **-------
+* Fixing infod-best to use the /etc/gossimon directory
+* Adding support for side window info in mmon. Due to that
+  the plugin interface has changed
+* Fixed printout of number of cpus > 9
+
+------** Version: 1.8.8 By: Lior Date: 6.12.2010 **-------
+Minor fix:
+* The xml printed by infod-client when connected to a mosix node was not leagal
+* Fixed the --info flag of infod-client to correctly print selected items
+* Minor man pages and --help messages fixes
+
+Added 32 bit deb packages
+
+------** Version: 1.8.7 By: Lior Date: 24.11.2010 **-------
+Minor fix:
+* The -h flag of mmon was ignored (and also some other flags) due to a
+  problem in the initializaion order at mmon_init
+
+------** Version: 1.8.6 By: Lior Date: 18.11.2010 **-------
+Minor fixes:
+* Fixed the debian package description to be a short one.
+* Changed the way plugins are detected. Now using the /etc/gossimon/plugins-enabled
+  directory.
+* Added a logging facility ModuleLogger to be used instead of the debug_lr macros.
+  It works from within the plugins too. 
+* Removed forgotten debug printouts from infod-client
+* Adding INFOD_NIC to /etc/default/infod file. Detecting IP of node from given nice
+
+------** Version: 1.8.5 By: Lior Date: 7.11.2010 **-------
+Minor fixes:
+ * Using the CMAKE_INSTALL_PREFIX from the cache when compiling from source
+ * Adding a prep-bin-package script to generate the binary packages with 
+   CMAKE_INSTALL_PREFIX=/usr
+ * Adding the GOSSIMON_CONFIG_DIR variable (default /etc/) and fixing the sources
+   to take default config files from this location (no more hard coding /etc/gossimon)
+
+------** Version: 1.8.4 By: Lior Date: 20.10.2010 **-------
+Minor fixes: 
+ * Adding version inside the CMakeLists.txt
+ * Moved tests from all to check1 (there is a problem creating a target called 
+   check..?)
+ * Issuing a warning when check is not installed (instead of error)
+ * Adding version numbers and copyright message to binaries
+            
+------** Version: 1.8.3 By: Lior Date: 20.10.2010 **-------
+Adding generation of debian package and rpm.
+infod: Adding support for .so infod modules (plugins)
+
+       Fixed problem with /var/run/infod.pid detection
+       Detection was done in a stage where error messages
+       only goes to log file and it was not shown on terminal...
+
+
+mmon: Adding support for .so display modules (plugins)
+
+------** Version: 1.8.2 By: Lior Date: 26.9.2010 **-------
+Branching to use cmake for build and install
+Moving to BSD license
+Project now called gossimon
+
+------** Version: 1.8.1 By: Lior Date: 22.4.2010 **-------
+infod: moved the infod guardian parent to infod_parent
+       changed the name of the core file to infod-core.counter
+       Added a sleed before respawning infod after crash
+
+------** Version: 1.8.0 By: Lior Date: 10.2.2010 **-------
+IN PROGRESS
+infod: Must use a configuration file (default /etc/infod/infod.conf)
+       TopUsage module gets its configuration from a configuration
+       files.
+Compiling for 64bit
+
+
+------** Version: 1.7.0 By: Lior Date: 13,1.2010 **-------
+infod: Added the TopUsage PIM
+mmon: added suppurt to the TopUsage information
+
+------** Version: 1.6.0 By: Lior Date: 13.7.2009 **-------
+	Moving to SVN + ClusterLogic maintainance
+	
+------** Version: 1.5.0 By: Lior Date: 22.6.2009 **-------
+infod:  Cleanups in the PIM modules and adding support for multiple 
+        network cards statistics
+
+------** Version: 1.4.0 By: Lior Date: 22.6.2009 **-------
+infod: Added support to configuration file using the --conf option
+mmon: Added initial support for saving the current display
+
+------** Version: 1.3.2 By: Tal Date: 23.2.2009 **-------
+c4: Added search paths for external utils
+prep: New and improved install script
+
+------** Version: 1.3.1 By: Lior Date: 11.9.2008 **-------
+infod: Added the ability to start without map and later update
+       the map. Also suport IP change during run.
+       The doTimeStep function was moved from the alarm handler
+       to infod_periodic_admin (selects uses timeouts now)
+------** Version: 1.3.0 By: Lior Date: 28.7.2008 **-------
+infod: Added the ability to auto calculate window size
+       to produce a desierd age property
+       Bugfix, when 0 lenght data is received the connection
+       was not closed
+
+------** Version: 1.2.21 By: Lior Date: 25.6.2008 **-------
+mmon: bugfix at EcoInfo.c 
+------** Version: 1.2.20 By: Lior Date: 16.6.2008 **-------
+mmon: Added support for displaying the economy user
+
+------** Version: 1.2.19 By: Lior Date: 25.5.2008 **-------
+infod: in provider=linux mode, autodetects /proc/loadavg2 and 
+       use this to present a more updated load than supplied
+       in /proc/loadavg
+------** Version: 1.2.18 By: Lior Date: 17.3.2008 **-------
+infod:  infod on 64bit works. Detects if the machine is 64 and if so read 
+        the mosix information in a different way.
+------** Version: 1.2.17 By: Lior Date: 6.2.2008 **-------
+infod:  Modification in MOSIX now place the .mosixinfo file at 
+        /etc/mosix/var/.mosixinfo Infod now search the new place and
+	if file is not there tries the previous place (/var/.mosixinfo)
+------** Version: 1.2.16 By: Lior Date: 3.9.2007 **-------
+prep:  Changing the name of the tarball and directory
+install: Also installing the infod.init 
+------** Version: 1.2.15 By: Lior Date: 30.7.2007 **-------
+mmon2: Speling correction in help screen
+------** Version: 1.2.14 By: Alex Date: 30.7.2007 **-------
+mmon2: bugfix when --help option was given a segfault happend
+------** Version: 1.2.13 By: Lior Date: 30.7.2007 **-------
+mmon2: bugfix when there is more than 4GB of ram the free memory
+       was not calculated/displayed correctly
+infod: added infod.init as an example for a startup script for infod
+
+------** Version: 1.2.12 By: Lior Date: 31.5.2007 **-------
+testload: Fixed a bug in --tlow --thigh options. Some fixes to the 
+          manpage and the --help option
+------** Version: 1.2.11 By: Lior Alex Date: 8.5.2007 **-------
+infod: Addes support for different cycles for the provider information modules
+mmon:  Some fixups
+------** Version: 1.2.10 By: Lior  Date: 22.4.2007 **-------
+mmon2: some bug fixes and it is now called mmon and mmon is calld mmon.old
+------** Version: 1.2.9 By: Lior  Date: 23.10.2006 **-------
+infod: A Memory leak fixed
+------** Version: 1.2.8 By: Alex  Date: 18.10.2006 **-------
+mmon2:  New cluster/grid monitor application introduced
+------** Version: 1.2.7 By: Lior  Date: 11.10.2006 **-------
+infod:  bug-fix: A very old bug in the death log
+
+------** Version: 1.2.6 By: Lior  Date: 28.9.2006 **-------
+infod:  non mosix local load is counted for user nobody (instead of root)
+        Also for the usedby info the partner files are reloaded every
+	few seconds.
+
+------** Version: 1.2.5 By: Lior  Date: 10.9.2006 **-------
+infod:  several bug fixes by Udi
+misc:   manual cleanup by Amnon Shilo & Barak. Added the contrib
+        site which is for general mosix users. 
+------** Version: 1.2.4 By: Lior  Date: 10.82006 **-------
+infod:  bug-fix: memory leak when client request stat information
+        added CidCrc PIM, for computing the crc32 of the cluster mapper
+mmon:   Displaying the priod when running and infod configured to proc-watch
+        Displaying the cluster crc when pressing 'c'
+priod:  Adding pid file 
+
+------** Version: 1.2.3 By: Lior  Date: 11.7.2006 **-------
+infod:     Added support for checking the freeze space
+mmon:      Added freeze space display
+
+------** Version: 1.2.2 By: Lior  Date: 6.7.2006 **-------
+usedbyinf:  bug-fix: xml tag can not start with a number
+------** Version: 1.2.1 By: Lior  Date: 5.7.2006 **-------
+infod:     Added support to proc-watch info
+libutil:   Addes used-by info as xml
+
+------** Version: 1.2.0 By: Lior  Date: 29.6.2006 **-------
+infod:     Support for variable length info items that can be
+           added easily
+
+infolib:  Fixed to reflect the new vlen interface
+infod-client: upgraded to work with the new vlen info
+mmon:     Fixed to work with the new vlen interface also added
+          support for using-clusters and using-users
+
+------** Version: 1.1.2 By: Lior  Date: 13.6.2006 **-------
+mmon: 	   Support for fair share screen
+------** Version: 1.1.1 By: Lior  Date: 8.5.2006 **-------
+testload:  Running testload without the -t flag will 
+           result in testload running for 15min. This is to avoid leaving
+           testload around that run for days. To run an infinit testload do
+           testload -t 0
+
+xnothing:  Added a check that the parent of xnothing exist once it start running.
+           This is usefull when the xnothing was in the queue and its parent died
+           during the wating time
+
+mpi:       Bug fixes in the mpirun script so a job can be aborted from the q 
+           and by signals.
+
+------** Version: 1.1.0 By: Lior  Date: 10.4.2006 **-------
+infod:    The information structure changed, so this version
+	  is not compatible with previous versions	
+
+	  Added support for external information --info-file option
+
+mmon:     Added initial support for fair shair display
+
+
+------** Version: 1.0.10 By: Lior  Date: 23.3.2006 **-------
+xmosq:	  A GUI to the mosq program (by Moti)
+
+xnothing: Added to the package, it is used by the mpi pach
+          to hold the queue tokens while the parallel job 
+	  is running
+mpi:      The mpi directory was added to the package. It contains the 
+	  files needed to make and MPICH use the mosix queue before
+	  starting the job, and also use the infod-best initial
+	  assignment.
+mmon:     In the load display shows a 'G' character when there
+	  are guests in a machine
+
+------** Version: 1.0.9 By: Lior  Date: 14.3.2006 **-------
+
+testload: Addes support for filling memory with a random pattern
+	  so compression of the process will not reduce its 
+	  memory size
+
+mmon:     In case of error retrieving information from the infod
+ 	  blackout screen only after 5 failures and not one. This
+	  takes care of the flashes we get on mmon when network load
+	  and cpu load are very very high.
+
+infod-best: Addes support to use a private load constraint file
+
+xmosrun:  Fixed the problem with redirecting output of a process
+	  to a file
+
+------** Version: 1.0.8 By: Lior  Date: 13.3.2006 **-------
+infod:  Added the token value to the information description
+
+mmon:   Added display of queue tokens
+
+infod-best: 
+        Now uses the load constaraints file
+
+------** Version: 1.0.7 By: Lior  Date: 05.3.2006 **-------
+infod-best 1.0:
+	A new program that select the best possible nodes
+	for usage. It also knows to select multiple nodes
+	for a parallel program (such as MPI).
+
+------** Version: 1.0.6 By: Lior  Date: 1.3.2006 **-------
+infod:
+	Added manual page for infod
+mmon: 
+	Bug-fix. when more than one cluster are viewed, the
+	description of information should be reloaded when
+	moving from one cluster to the other. This is since
+	different clusters can have different descriptions
+
+infod-client:
+	Addes synonym options for the numerical options
+	Added a timeout flag --timeout <tim> 
+
+------** Version: 1.0.5 By: Lior  Date: 27.2.2006 **-------
+infod:
+	Added support for nfs_client_rpc_ops, now the number
+	of client rpc operations is monitored too
+
+	Added support for the push-pull gossip algorithm
+
+mmon:
+	Added a display for NFS client RPC operation rate 
+	pressing the 'o' keys toggle the network stuff. 
+
+------** Version: 1.0.4 By: Lior  Date: 29.12.2005 **-------
+
+mmon: 
+	Fixed the toggling display bug. Now moving from l to m 
+	for example does not advance the l display.
+
+
+------** Version: 1.0.3 By: Tal  Date: 29.12.2005 **-------
+
+c4: -> 1.4a
+
+   new: Added the ability to concatenate single letter flags with no
+	extra params.
+
+   new: Added options to print only good command results and skip log
+	cleanup (logs are deleted by default now).
+
+   fixed: Fixed some faulty command-line error detections.
+
+cps: -> 1.2a
+
+   new: Now cps can filter out garbage before or after the ps output,
+	caused by faulty or noisy custom user init files (like .cshrc).
+
+------** Version: 1.0.2 By: Tal  Date: 29.12.2005 **-------
+
+c4: -> 1.3a
+
+   new: Added a sanity check to see if infod-client exists in the system when
+        required.
+
+   new: Added support for several simultanious c4 executions on the same 
+	machine.
+
+   fixed: running a command on a remote machine does NOT run the user's .cshrc
+          file.
+
+cps: -> 1.1a
+
+   new: Added a sanity check to see if c4 exists in the system.
+
+   new: Added support for several simultanious cps executions on the same
+	machine.
+
+------** Version: 1.0.2 By: Tal  Date: 27.12.2005 **-------
+
+c4: -> 1.2a
+
+   new: Added the option to add an entire cluster via infod directly into the
+        machine-list by adding '@' before the name of the machine who's infod 
+	is to be queried.
+   
+   removed: Due to the new addition, the -I option was removed.
+   
+cps: -> 1.0a
+
+   cps is intoduced. It allows the user to run 'ps' on his entire cluster and
+   using smart filtering, see which users/processes use most of the cluster's
+   resources.
+
+------** Version: 1.0.1 By: lior Date: 24.12.2005 **-------
+
+infod-client: -> 1.0.1
+
+   new: Added new option: live-list, all-list, dead list. Which gives a comma
+   seperated list of nodes
+
+------- Begins at 24.12.2005 by lior ---------

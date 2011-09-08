@@ -1,0 +1,34 @@
+#ifndef GOSSIMON_CONFIG_H
+#define	GOSSIMON_CONFIG_H
+
+#define GOSSIMON_VERSION_MAJOR             @GOSSIMON_VERSION_MAJOR@
+#define GOSSIMON_VERSION_MINOR             @GOSSIMON_VERSION_MINOR@
+#define GOSSIMON_VERSION_PATCH             @GOSSIMON_VERSION_PATCH@
+
+#define GOSSIMON_VERSION_STR               "@GOSSIMON_VERSION_MAJOR@.@GOSSIMON_VERSION_MINOR@.@GOSSIMON_VERSION_PATCH@"
+
+#define PIM_DEF_EXTERNAL_MODULE_DIR        "@GOSSIMON_PLUGINS_DIR@"
+#define MMON_DEF_EXTERNAL_MODULE_DIR       "@GOSSIMON_PLUGINS_DIR@"
+
+#define GOSSIMON_PLUGINS_DIR               "@GOSSIMON_PLUGINS_DIR@"
+
+// Configuration directory of gossimon
+#define GOSSIMON_CONFIG_DIR                "@GOSSIMON_CONFIG_DIR@"
+
+// Available plugins directory
+#define GOSSIMON_AVAILABLE_PLUGINS_DIR     GOSSIMON_CONFIG_DIR"/plugins-available"
+// Enabled plugins directory
+#define GOSSIMON_ENABLED_PLUGINS_DIR       GOSSIMON_CONFIG_DIR"/plugins-enabled"
+
+// TMP dir
+#define GOSSIMON_TMP_DIR                   "@GOSSIMON_TMP_DIR@"
+
+
+// Copyright message
+#define GOSSIMON_COPYRIGHT_STR             "@GOSSIMON_COPYRIGHT_STR@"
+
+
+
+
+#endif
+

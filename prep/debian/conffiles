@@ -1,0 +1,4 @@
+/etc/gossimon/infod.conf
+/etc/gossimon/infod.map
+/etc/gossimon/mmon.conf
+/etc/default/infod

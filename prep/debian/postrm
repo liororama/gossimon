@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# postrm script for gossimon
+set -e
+
+echo "Running gossimon postrm 1:[$1] 2:[$2]"
+
+if [ "$1" = purge  -o "$1" = "remove" ]; then
+    update-rc.d infod remove
+fi

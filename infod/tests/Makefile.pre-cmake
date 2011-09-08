@@ -1,0 +1,81 @@
+
+include ../../Rules.make
+
+INC    	 = $(GENINC) -I../ -I../../include 
+CFLAGS 	 = $(GENCFLAGS)  -Wall -g -fPIC $(INC) $(ECFLAGS)
+#LIBS     = $(GENLIB)  -linfo -lcheck -lmapper -lutil  -lefence  
+LIBS     = $(GENLIB)  -linfo -lcheck -lmapper -lutil  
+LDFLAGS  = -L ../../bin  $(LIBS) -fPIC
+
+
+
+
+TEST_PROVIDER_INFO_MODULE_SRC = test_ProviderInfoModule.c ../ProviderInfoModule.c
+TEST_PROC_WATCH_PIM_SRC = test_ProcWatchPIM.c ../ProcessWatchPIM.c
+TEST_FREEZE_INFO_SRC = test_freezeInfo.c ../provider_util.c
+
+TEST_INFO_VEC_SRC             = ../InfoVec.c test_InfoVec.c 	
+
+all: run_test_iv run_test_pim run_test_pwpim run_test_fi
+
+
+############# InfoVec tests ############################
+test_InfoVec: $(TEST_INFO_VEC_SRC) 
+	$(CC) $(CFLAGS) -o $@ $(TEST_INFO_VEC_SRC) $(LDFLAGS) -lm 
+
+test_iv: test_InfoVec
+run_test_iv: test_iv
+	@echo
+	@echo "------------- Running Info Vec tests ---------------"
+	@export CK_FORK=yes ; time ./test_InfoVec
+	@echo "----------------------------------------------------"
+
+
+
+
+############## Provider Module Info ############################
+test_ProviderInfoModule: $(TEST_PROVIDER_INFO_MODULE_SRC)
+	$(CC) -g $(CFLAGS) -o $@ $(TEST_PROVIDER_INFO_MODULE_SRC) $(LDFLAGS) 
+
+test_pim: test_ProviderInfoModule
+
+run_test_pim: test_pim
+	@echo
+	@echo "------------- Running Provider Info Module ---------"
+	@export CK_FORK=yes ; time ./test_ProviderInfoModule
+	@echo "----------------------------------------------------"
+
+
+############## ProcWatchPIM tests  ############################
+test_ProcWatchPIM: $(TEST_PROC_WATCH_PIM_SRC)
+	$(CC) -g $(CFLAGS) -o $@ $(TEST_PROC_WATCH_PIM_SRC) $(LDFLAGS) 
+
+test_pwpim: test_ProcWatchPIM
+
+run_test_pwpim: test_pwpim
+	@echo
+	@echo "------------- Running Proc Watch PIM TEST ----------"
+	@export CK_FORK=yes ; time ./test_ProcWatchPIM
+	@echo "----------------------------------------------------"
+
+############## Freeze Info tests  ############################
+test_freezeInfo: $(TEST_FREEZE_INFO_SRC)
+	$(CC) -g $(CFLAGS) -o $@ $(TEST_FREEZE_INFO_SRC) $(LDFLAGS) 
+
+test_fi: test_freezeInfo
+
+run_test_fi: test_fi
+	@echo
+	@echo "------------- Freeze Info --------------------------"
+	@export CK_FORK=yes ; time ./test_freezeInfo
+	@echo "----------------------------------------------------"
+
+
+########################################################
+clean:
+	\rm -f test_InfoVec
+	\rm -f test_ProviderInfoModule
+	\rm -f test_ProcWatchPIM
+	\rm -f test_freezeInfo
+	\rm -f *.o *~
+

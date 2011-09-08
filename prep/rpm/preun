@@ -1,0 +1,10 @@
+#!/bin/sh 
+
+set -e
+
+echo "Running RPM preun script"
+if [ "$1" = 0 ]
+then
+	/sbin/service infod stop > /dev/null 2>&1 || :
+	/sbin/chkconfig --del infod
+fi

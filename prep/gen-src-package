@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Generating gossimon source packages"
+make clean
+rm -f CMakeCache.txt
+/usr/local/bin/cmake .
+make package_source

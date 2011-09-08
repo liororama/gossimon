@@ -1,0 +1,174 @@
+.\"/=========================================================================
+.\"  gossimon - Gossip based resource usage monitoring for Linux clusters
+.\"  Copyright 2003-2010 Amnon Barak
+.\"
+.\"  Distributed under the OSI-approved BSD License (the "License");
+.\"  see accompanying file Copyright.txt for details.
+.\"
+.\"  This software is distributed WITHOUT ANY WARRANTY; without even the
+.\"  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"  See the License for more information.
+.\"==========================================================================
+
+.TH infod-client "1" "21 October 2010" "GOSSIMON" "GOSSIMON"
+.SH NAME
+.B infod-client
+is a client application that connect to the
+.Pa infod
+daemon to retrieve information about the cluster nodes.
+.SH SYNOPSIS
+.B infod-client [OPTIONS]
+.SH DESCRIPTION
+.B infod-client
+connects to the infod daemon running on the given host (default is localhost)
+to retrieve the information vector of that host. Once the cluster information
+vector is retireved it is parsed depending upon the selected query and 
+the query result is printed as text.
+.SH OPTIONS
+.TP
+.B  -h, --server <host>
+Uses the given host as the information provider
+.TP
+.B      --info item1,item2,...,itemN
+Select specific information item from the vector to be displayed.
+This is relevant to the default (all) query.
+.TP
+.B  -i, --interactive
+Runs the client in interactive mode, see below for commands.
+.TP
+.B -q, --query <operation>
+Selects a query to perform on the information vector. See list of queries below.
+.TP 
+.B -p, --port <port>
+Uses the given port to connect to the infod
+.TP
+.B -t, --timeout <SEC>
+Wait for
+.B SEC
+seconds before aborting the connection.
+.TP
+.B -v, --verbose 
+Output verbose messages.
+.TP
+.B --help
+Prints a short help message.
+
+.SH Queries
+.TP
+.B all         
+Get the data about all the nodes (DEFAULT)
+
+.TP
+.B stats
+Get the cluster statistics
+
+.TP
+.B desc
+Get the description of the information
+
+.TP
+.B dead-list
+Get list of dead nodes
+
+.TP
+.B live-list   
+Get comma separated list of live nodes
+
+.TP
+.B all-list    
+Get comma separated list of all cluster nodes
+
+.TP
+.B window      
+Get the node information window
+
+.TP
+.B age-histo   
+Get age histogram of information
+
+.TP
+.B age-cdf     
+Get age CDF of information
+
+.SH INTERACTIVE
+In interactive mode infod-client doesn't close the connection after returning
+the results. Interactive mode supports the following commands
+.TP
+.B get <host>
+Retrieves the information from a given host name and prints it
+.TP
+.B exit
+Exits infod-client
+
+.SH RESULTS
+On success,
+.B infod-client
+prints the output of the selected operation and exit with 0. 
+On error, 
+.Pa infod-client
+returns a non-zero exit code.
+
+.SH EXAMPLES
+
+.RS
+infod-client -h cmos-20 
+.RE
+
+The above command connects to "cmos-20" and prints an XML string
+containing all the information about the cluster cmos-20 belongs to.
+
+.RS
+infod-client -h mos1 -o stats
+.RE
+
+The above command will connect mos1 and will print status information 
+about the cluster mos1 is part of.
+
+.RS
+infod-client -h mos1 -i load,ncpus
+.RE
+
+The above command will connect mos1 and print status information about the
+cluster nodes. Only the load and ncpus items will displayed.
+
+.SH AUTHOR
+Amar Lior and Ilan Peer
+
+.SH SEE ALSO
+.B  infod(8), infod-ctl(1), infod-best(1), mmon(1),
+
+.SH HISTORY
+.B infod-client
+is part of the GOSSIMON package
+
+.SH REPORTING BUGS
+Report infod-client bugs to gossimon-users@lists.sourceforge.net
+
+.SH COPYRIGHT
+.PP
+Copyright (c) 2010, Amnon Barak All rights reserved.
+
+.PP
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+.PP 
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+.PP 
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+.PP
+Neither the name of the Hebrew University of Jerusalem nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+.PP
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

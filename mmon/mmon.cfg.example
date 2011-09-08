@@ -1,0 +1,55 @@
+##########################################################################
+# mmon configuration file
+#
+##########################################################################
+#
+#   COLOR_BLACK 
+#   COLOR_RED   
+#   COLOR_GREEN 
+#   COLOR_YELLOW        
+#   COLOR_BLUE  
+#   COLOR_MAGENTA      
+#   COLOR_CYAN  
+#   COLOR_WHITE 
+#
+#   N NORMAL        Normal display (no highlight)
+#   S STANDOUT      Best highlighting mode of the terminal.
+#   U UNDERLINE     Underlining
+#   R REVERSE       Reverse video
+#   B BLINK         Blinking
+#   D DIM           Half bright
+#   O BOLD          Extra bright or bold
+#   P PROTECT       Protected mode
+#   I INVIS         Invisible or blank mode
+#
+#
+#       
+####################################################################
+VerticalTableChar |             
+HorizTableChar    -
+MemswapGraphChar  *
+FrameCurrentOperation YELLOW BLACK  O 
+ChartColor            CYAN BLACK OB
+NodeCaption           BLACK GREEN O
+CopyrightsCaption     YELLOW BLACK OBU
+Multicluster          BLACK CYAN N
+NodeNameGridMode      BLACK CYAN N
+VertNodeName          MAGENTA BLACK N    
+HorizNodeName         MAGENTA BLACK O
+IdleCaption           GREEN BLACK N
+StringMB              BLACK YELLOW N
+DeadCaption           RED BLACK OB
+LoadCaption           MAGENTA BLACK N
+FrozenCaption	      BLUE BLACK N
+UtilCaption           MAGENTA BLACK N   
+NettotalCaption       GREEN BLACK N     
+SpeedCaption          BLACK YELLOW N    
+SwapCaption           BLUE BLACK O
+MemswapCaption        BLUE BLACK O   
+GridCaption           WHITE BLUE D
+reserveCaption        WHITE BLUE D 
+UptimeStatus          GREEN BLACK O
+StatusNodeName        GREEN BLACK O
+StatusLetter          RED BLACK O  
+BottomStatusbar       GREEN BLACK OB
+CurrentLoad           GREEN BLACK BUO   

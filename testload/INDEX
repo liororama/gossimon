@@ -1,0 +1,3 @@
+test_load	bin/test_load
+test_load.o	.legal/test_load
+test_load.man	man/man1/test_load.1

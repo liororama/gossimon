@@ -1,0 +1,7 @@
+# This is a sample configuration file for a 
+# a single node cluster map file
+# 
+# Change this file to suite your needs
+#
+
+1 127.0.0.1 1

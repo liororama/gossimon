@@ -1,0 +1,63 @@
+README for the mosix2 HUJI-contrib files:
+------------------------------------------
+
+This directory contains contributed programs that provide additional
+functionality to the core MOSIX2 package. These programs were developed
+in The Hebrew University of Jerusalem MOSIX lab.
+
+All the programs contained in this directory and any of its sub-directories
+to any depth (unless particular programs or sub-directories are explicitly
+covered by another license agreement,  are provided under the terms and
+conditions of the MOSIX SOFTWARE LICENSE AGREEMENT, a copy of which appears
+in the LICENSE file contained in this directory.
+
+The contributed programs are:
+1. Infod      - collecting and monitoring cluster information.
+2. Testload   - a test-program for MOSIX.
+
+Infod:
+======
+
+This package collects extended information about MOSIX cluster(s).
+The following programs are included:
+
+1. "infod".
+   This program should run in the background in each node: it collects
+   and propagates information such as load, memory, speed, user usage,
+   machine status, etc.  The collected information can then be used
+   by the client application below.
+   The sys-admin can also add externally collected information.
+   This program must run with root privileges. 
+
+2. "mmon".
+   A curses based graphical tool that presents information about
+   the nodes in the cluster. The file mmon.cfg.example is a sample 
+   color scheme configuration file. This file select the colors used
+   by mmon for different displays.
+
+3. "infod-client".
+   A utility to query a node and output in XML format what it knows
+   about other nodes.
+
+4. "infod-ctl".
+   An administator's tool to control/query infod - modify its algorithm,
+   query its status, etc.
+   This utility requires root privileges. 
+
+5. "infod-best".
+   Find the least loaded node(s) in the cluster (it can be used for
+   assigning jobs in the cluster).
+
+Testload:
+=========
+
+A program that generates load and consumes memory in a controlled way.
+This program is intended for novice users who wish to learn how to
+use MOSIX2. It can also be used for testing new installations of MOSIX2.
+The package contain the following files.
+
+1. "testload" - the test program.
+2. repeat-bg, a script for running in the background multiple copies of
+   the same program.
+
+---------------------- END of README ----------------------------------------

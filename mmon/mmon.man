@@ -1,0 +1,135 @@
+.\"/=========================================================================
+.\"  gossimon - Gossip based resource usage monitoring for Linux clusters
+.\"  Copyright 2003-2010 Amnon Barak
+.\"
+.\"  Distributed under the OSI-approved BSD License (the "License");
+.\"  see accompanying file Copyright.txt for details.
+.\"
+.\"  This software is distributed WITHOUT ANY WARRANTY; without even the
+.\"  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"  See the License for more information.
+.\"==========================================================================
+
+.TH MMON 1 "21 October 2010" "Version 2" "GOSSIMON"
+
+.SH NAME
+mmon - a cluster monitor for the MOSIX/Linux system. It is part of the gossimon package
+
+
+.SH SYNOPSIS
+.B mmon
+[\-v] [\-V] [\-w|\-W] [\-t|\-T] [\-d] [\-m] [\-s] [\-l] [\-u] 
+[\-h <\fIhost\fP>] [\-c <\fIhost list\fP>] [\-f <\fIfilename\fP>]
+[\-o <\fIstream|filename\fP>] [\-\-defaults|\-\-conf <\fIfilename\fP>] 
+
+.SH DESCRIPTION
+.PP
+The \fIMMON\fP is the MOSIX cluster/grid monitor, used for viewing various data,
+provided by the Infod client, for multiple clusters.
+.PP
+MMON uses a mutable color scheme, which may be loaded from a given file
+(must be of specific format). If no scheme specified - MMON will attempt
+to use \fI.mmon.conf\fP in \fI/etc/gossimon\fP.
+If no such file exists - the default settings will be applied. 
+.PP
+For a detailed assistance on usage, mmon has a detailed help page,
+activated by pressing 'h' while running.
+
+
+.SH OPTIONS
+.l 
+The \fImmon\fP accepts the following options:
+.TP 8
+.B  \-V
+Display in "super-vertical" mode - one space per node.
+.TP 8
+.B \-v
+Display in vertical mode - two space per node.
+.TP 8
+.B \-w,\-W
+Display in wide mode - every node number fits horizontally.
+.TP 8 
+.B \-t, \-T
+Show bottom status bar, displaying various information.
+.TP 8
+.B \-d
+Show dead nodes as well as live (indicating type of death).
+.TP 8
+.B \-m
+Set initial display type to memory.
+.TP 8
+.B \-s
+Set initial display type to speed.
+.TP 8
+.B \-l
+Set initial display type to load.
+.TP 8
+.B \-u
+Set initial display type to Utilizability.
+.TP 8
+.B \-h <\fIhost\fP>
+Set given host to be the source of displayed information.
+.TP 8
+.B \-c <\fIhost list\fP>
+Use multiple sources of information, given in a list format.
+For example: -c host1,cluster3,node8
+Each destination will be displayed seperatly.
+Selection using the Up/Down arrow keys. 
+.TP 8
+.B \-f <\fIfilename\fP>
+Use multiple sources of information, given in a specified file.
+Each destination will be displayed seperatly.
+Selection using the Up/Down arrow keys.
+.TP 8
+.B \-o <\fIstream|filename\fP>
+Output important (and unimportant) debugging information.
+.TP 8
+.B \-\-defaults
+Use default color scheme:
+If The default configuration file exists - MMON will use it.
+Otherwise - The MMON will use the default Black&White setting.
+.TP 8
+.B \-\-conf <\fIfilename\fP>
+Use customized color scheme defined in specified file.
+.TP 8
+
+
+.SH AUTHORS
+Alexander Margolin, Amnon Shiloh, Amar Lior, Ilan Peer, and Mordechai Guri
+
+.SH SEE ALSO
+.B  infod(8), infod-client(1), infod-best(1), testload(1)
+
+
+.SH REPORTING BUGS
+Report infod bugs to gossimon-users@lists.sourceforge.net
+
+.SH COPYRIGHT
+.PP
+Copyright (c) 2010, Amnon Barak All rights reserved.
+
+.PP
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+.PP 
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+.PP 
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+.PP
+Neither the name of the Hebrew University of Jerusalem nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+.PP
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+

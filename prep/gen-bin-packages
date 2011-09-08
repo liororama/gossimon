@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Generating gossimon binary packages"
+make clean
+rm -f CMakeCache.txt
+/usr/local/bin/cmake -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
+make package

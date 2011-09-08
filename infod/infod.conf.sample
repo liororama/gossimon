@@ -1,0 +1,103 @@
+# An example of infod.conf file
+# Lines starting with # are comments
+# Empty lines like above are ignored
+# A valid line is in the form of Var\s*=\s*Value
+
+
+### The provider type to use
+# Possible values:
+# o linux - a general purpose linux information provider
+# o mosix - a MOSIX specific information provider 
+provider = linux
+
+
+### Setting the IP of this node. This option is usefull for cases that
+### the IP of the node is not correctly detected.
+### Example: myip=192.168.224.1         
+
+### Setting an alternative port to use
+### Example: port=8000
+
+
+
+###Type of cluster map
+maptype = userview
+
+### Map file
+mapfile = /etc/gossimon/infod.map
+
+### Map command: the map will be built from the output of the givven command
+#mapcmd = cat /etc/gossimon/mosix.map
+
+
+### Cycle of information in milli seconds
+timestep = 500
+
+### Gossip algorithm to use
+#gossip-algo = mindead
+
+### Window type (fix / upto age)
+wintype = fix
+
+### Window parameter
+winparam = 16
+
+### Set the desired average age of the information vector. The value is 
+### a floating number of secconds. 
+### Using this option implys using a fixed window and gossip algorithm of
+### mindead or regular
+#avgage =  10 
+
+
+### Same as the avgage option but this time setting the desired average maximal 
+### age.
+#avgmax = 40
+
+ 
+### Save as the avgage option bu setting the desired number of entries that 
+### should up to a given age.
+#upto-entries 100, 24
+
+##################################
+# Information Modules Parameters
+##################################
+
+### A path to the file system the provider should watch (reporting disk 
+### capacity) on. Can be a comma seperated list of files like dir1,dir2
+### Example: watch-fs=/tmp,/var           
+
+### The names of the network cards to watch for
+#net-net=eth0,ib0
+
+### Tells the provider to add the content of the given file to the local 
+### information entry. This file should be a valid XML.
+#info-file=<file-name>     
+
+### Tells the provider to watch after processes given in file-name. The file 
+### should contain a line for each procesess with the name of the process and 
+### its pid-file
+#proc-file=<file-name>     
+
+### Defining debug modes
+### You need to take a look on the sources to see all options
+debug-mode =  map,kcomm,infod,comm
+
+
+######## Plugins Properties
+
+### Location of plugins .so files
+### Default: /usr/share/gossimon/plugins
+plugins.dir = /usr/share/gossimon/plugins
+
+### The directory that containes the configuration files for 
+### the enabled plugins. Files in this directory will be soft links
+### to the plugins-available directory
+plugins.enabled-dir = /etc/gossimon/plugins-enabled
+
+### List of plugins to load when starting.
+### The name of the module should be the name of the loadable object (ommiting
+### the .so suffix. For example: test-pim.so should be listed as test-pim
+### A configuration file for this plugin will be searched at plugins.enabled-dir
+###
+### If this list is empty then all plugins in the directory will be loaded
+# plugins.names = 

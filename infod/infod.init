@@ -1,0 +1,173 @@
+#!/bin/sh -
+#
+#	infod  $Id: infod.init,v 1.8 2008-09-11 11:38:43 lior Exp $
+#
+
+# chkconfig: 2345 96 5
+# description:  INFOD is an information dessiminiation system that spread 
+#               and collects information about the cluster nodes.
+#
+# infod 	Script to stop/start Infod
+#
+# Author:       Amnon Shiloh, Amar Lior
+#
+# Maintiained by ClusterLogic Ltd (www.clusterlogic.net)
+
+
+### BEGIN INIT INFO
+# Provides:          infod
+# Required-Start:    $remote_fs $syslog $network
+# Required-Stop:     $remote_fs $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the infod daemon for information dessimination
+# Description:       The infod system uses gossip protocols to dessiminate
+#                    information among the cluster nodes                  
+### END INIT INFO
+
+
+
+#Don't delete the following line. Needed for RedHat compatibility !!!
+#daemon infod
+
+PATH=/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin
+
+[ -x /etc/init.d/functions ] && . /etc/init.d/functions
+
+# Reading the possible arguments from this file
+if test -f /etc/default/infod; then
+    . /etc/default/infod
+fi
+
+INFOD_IP=""
+
+
+stop_infod() {
+
+    if [ -e /var/run/infod.pid ] ; then
+        if [ -x /sbin/start-stop-daemon ]
+            then
+            start-stop-daemon --stop  --pidfile /var/run/infod.pid
+            RETVAL=$?
+        else
+            killproc infod 
+            RETVAL=$?
+        fi
+    else
+        RETVAL=0
+    fi
+    [ $RETVAL -eq 0 -a -d /var/lock/subsys ] && rm -f /var/lock/subsys/infod
+}
+
+start_infod() {
+    [ -d /var/lock/subsys ] && touch /var/lock/subsys/infod
+    
+    if [ -f /var/run/infod.pid ] ; then
+        echo "Error /var/run/infod.pid already exists ... infod might be running"
+        if [ -x /etc/init.d/functions ] ; then
+                failure
+        fi
+        RETVAL=1
+        return
+    fi
+
+
+
+    # Detecting IP to use in case the INFOD_NIC is not empty
+    if [ ! -z "$INFOD_NIC" ] ; then
+        /sbin/ifconfig $INFO_NIC 2>&1 > /dev/null
+        if [ ! $? ] ; then
+            echo "Failed detecting the IP of NIC=$INFOD_NIC"
+            echo "Do /sbin/ifconfig $INFOD_NIC and try to fix"
+            echo "Take a look at /etc/default/infod"
+            exit 1
+        fi
+        
+        IP=`/sbin/ifconfig $INFOD_NIC | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
+        echo "Detected IP=$IP to be used to identify this host"
+        INFOD_IP=" --myip $IP "
+    fi
+
+
+
+    if [ -x /sbin/start-stop-daemon ]
+	then
+        start-stop-daemon --start --pidfile /var/run/infod.pid --exec `which infod` -- $INFOD_ARGS $INFOD_IP
+        RETVAL=$?
+    else
+        daemon infod $INFOD_ARGS $INFOD_IP
+        RETVAL=$?
+    fi
+
+    # Wating for 5 seconds to see that infod is still there.
+    sleep 5
+    if [ ! -f /var/run/infod.pid ] ; then
+        echo "Error: file [/var/run/infod.pid] is missing ..."
+        echo "Check logs to indentify the problem"
+        RETVAL=1
+        return
+    fi
+
+    PID=`cat /var/run/infod.pid`
+    if [ -z "$PID" ] ; then
+        echo "Error: file /var/run/infod.pid is empty"
+        RETVAL=1
+        return
+    fi
+
+    kill -0 $PID
+    if [ ! $? ] ; then 
+        echo "Error: infod PID: $PID does not exists ....."
+        echo "       please check logs to detect the problem"
+        RETVAL=1
+        return
+    fi
+    [ $RETVAL -eq 0 -a -d /var/lock/subsys ] && touch /var/lock/subsys/infod
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	echo "Starting INFOD..."
+	start_infod 
+        ;;
+  stop)
+	echo "Stopping INFOD..."
+	stop_infod 
+        ;;
+  status)
+        if [ ! -f /var/run/infod.pid ] ; then
+            echo "There is no /var/run/infod.pid file ... infod is probably not running"
+            RETVAL=1
+        else 
+	    infod-ctl status
+        fi
+	RETVAL=$?
+	;;
+  restart)
+	echo "Restarting INFOD..."
+	stop_infod
+	sleep 2
+	start_infod 
+        ;;
+  reload)
+	echo "Reloading INFOD maps ..."
+        killall -HUP `cat /var/run/infod.pid`
+        ;;
+
+  force-reload)
+        echo "Reloading INFOD maps ..."
+        killall -HUP `cat /var/run/infod.pid`
+        ;;
+    
+  *)
+	echo "Usage: infod {start|stop|status|restart|reload}"
+	exit 1
+esac
+
+case $RETVAL in
+    *[1-9]*)
+          exit 1;;
+    *)   
+	  exit 0;;
+esac

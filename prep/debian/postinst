@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+echo "Running gossimon postinst 1:[$1] 2:[$2]"
+
+if [ "$1" = "configure" ]; then
+    update-rc.d infod defaults
+
+   
+
+fi

@@ -1,0 +1,10 @@
+/etc/gossimon/plugins-enabled
+
+This directory should contain all the configuration files
+for all the enabled modules. Each configuration file should end
+with .conf suffix. When infod/mmon starts the name of all the files
+ending with .conf are detected. For each such file the equivalent 
+.so file is loaded from /usr/share/gossimon/plugins.
+
+Usually the files in this directory will be soft links to files
+in the /etc/gossimon/plugins-abailable

@@ -1,0 +1,20 @@
+# Gossimon infod default settings
+
+# If this variable is set, then the IP address attached to this nic will be used
+# to indentifed the current node in the map of the cluster.
+# 
+# This option should be used in cases where several NICs are connected and 
+# "hostname -i" does not return the IP address you wish to idntify the host 
+# in the map.
+INFOD_NIC="lo"
+
+# Set this variable to pass arguments to the infod daemon
+# For example:
+# 1) to use on a non MOSIX system use: --provider linux
+# 2) To use another IP to bind to (rather than the default) --myip xx.yy.zz.ww
+# 3) To use another map file (beside the default /etc/mosix/userview.map) use
+#    --mapfile map-file-name
+#
+# Note: do not use the --myip option if INFOD_NIC (see above) is not empty
+#
+INFOD_ARGS=" "

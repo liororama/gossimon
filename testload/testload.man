@@ -1,0 +1,165 @@
+.\"/=========================================================================
+.\"  gossimon - Gossip based resource usage monitoring for Linux clusters
+.\"  Copyright 2003-2010 Amnon Barak
+.\"
+.\"  Distributed under the OSI-approved BSD License (the "License");
+.\"  see accompanying file Copyright.txt for details.
+.\"
+.\"  This software is distributed WITHOUT ANY WARRANTY; without even the
+.\"  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"  See the License for more information.
+.\"==========================================================================
+
+.TH testload "1" " 21 October 2010" "GOSSIMON" "GOSSIMON"
+.SH NAME 
+testload \- artificial load generator
+.SH SYNOPSIS
+.B testload [OPTIONS]
+.SH DESCRIPTION
+.B testload
+is a test program that generates artificial load and consumes memory for testing a Linux system.
+ 
+.SH OPTIONS
+.TP
+.B  -t, --time SEC
+Limit the running time to 
+.B SEC 
+seconds. Without this option
+.B testload
+will run for 1800 seconds (30 minutes). If 
+.B 0 
+is given then the run time will be infinite.
+.B testload 
+will receive an alarm after SEC seconds.
+.TP
+.B -l, --tlow SEC
+low limit for choosing the running time. This option is used together with the
+--thigh option to set the time range for 
+.B testload 
+.TP
+.B -h, --thigh SEC
+high limit for choosing the running time. This option is used together with the
+--tlow option to set the time range for 
+.B testload 
+.TP
+.B -m, --mem MB
+amount of memory to consume (in Megabytes).
+Without this option
+.Pa testload 
+will not consume a non significant amount of memory.
+.TP
+.B --random-mem
+Fill memory with a random pattern. When not use, memory is filled with
+the same byte-value.
+.TP
+.B --cpu UNITS
+number of times to iterate over an inner loop from 0 to 1,000,000.
+.TP 
+.B -f, --file=FILENAME 
+the file to use when performing I/O
+.TP
+.B --read[=SIZE]
+perform read system calls in size of SIZE kilobytes, if SIZE is not supplied the 
+default read size is 4Kb
+.B --write[=SIZE]
+perform write system calls in size of SIZE kilobytes, if SIZE is not supplied the
+default write size is 4Kb
+.TP
+.B --noiosyscall=NUM
+perform non-io system call like time NUM times.
+.TP
+.B --iosize=SIZE 
+total amount of data to read/write in megabytes.
+.TP
+.B --maxiosize=SIZE
+the maximum size accessible in the file given in megabytes. If the offset of the
+file go beyond this size the file pointer is rewind to the beginning.
+.TP
+.B --iotimes=NUM
+if this option is given the file is accessed NUM time, and at each time the number of 
+chunks accessed is given by the --iochunk option.
+.TP
+.B --iochunk=NUM
+the number of chunks to read at each I/O access (see the --iotimes option)
+
+.TP
+.B --chkpt-demo
+run a simple loop that prints the index value at each iteration.
+.TP
+.B --self-chkpt INDEX
+perform self checkpoint when the value of the loop index is equal to INDEX.
+.TP
+.B -v, --verbose
+run in verbose mode, producing debug-output.
+.TP
+.B -r, --report
+report runtime statistics at end of run.
+.TP
+.B --uid UID 
+set user identity to UID. This option is available only for root.
+.TP
+.B --sleep SEC
+sleep for 
+.B SEC
+seconds before starting
+.TP
+.B --help
+Show a short help screen.
+.SH EXAMPLES
+.TP
+.B testload -t 20
+runs testload for 20 seconds
+.TP 
+.B testload -l 10 -h 20
+runs testload for a random period of time between 10 and 20 seconds. 
+.TP
+.B testload -f /tmp/big --write 32 --iosize 20
+writes 20 megabytes to the file /tmp/big where each write system call is of size 32 Kb.
+.TP 
+.B testload -f /tmp/big --write 32 --iosize 20 --maxiosize 10
+same as the above example, except that the maximal file size is 10 megabytes. 
+In this case after reaching 10 megabytes the file offset will be rewind to the beginning of the 
+file.
+
+.SH AUTHOR  
+Written by Lior Amar
+
+.SH SEE ALSO
+.B mmon(1), infod-ctl(1), infod-client(1), infod(8), infod-best(1)
+
+.SH HISTORY
+.B testload
+is part of the GOSSIMON package
+
+
+.SH REPORTING BUGS
+Report infod bugs to gossimon-users@lists.sourceforge.net
+
+.SH COPYRIGHT
+.PP
+Copyright (c) 2010, Amnon Barak All rights reserved.
+
+.PP
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+.PP 
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+.PP 
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+.PP
+Neither the name of the Hebrew University of Jerusalem nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+.PP
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

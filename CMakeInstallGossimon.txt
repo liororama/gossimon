@@ -1,0 +1,157 @@
+#=============================================================================
+# gossimon - Gossip based resource usage monitoring for Linux clusters
+# Copyright 2010 Cluster Logic Ltd (www.clusterlogic.net)
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright-ClusterLogic.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
+############################################
+# Installing the library and include files #
+# in the lib and include directories which #
+# should be ../../lib and ../../include    #
+############################################
+
+# The following line is important for installation of full path files like
+# /etc/gossimon/infod.conf
+set (CPACK_SET_DESTDIR on)
+
+#set(CMAKE_INSTALL_PREFIX  /usr)
+message("INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
+
+
+install(
+  FILES Copyright.txt
+  DESTINATION share/doc/${PROJECT_NAME})
+
+install(
+  FILES Readme.txt
+  DESTINATION share/doc/${PROJECT_NAME})
+
+
+install(CODE "FILE(MAKE_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/info-plugins)")
+
+install(CODE "FILE(MAKE_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/display-plugins)")
+
+
+
+
+
+include (InstallRequiredSystemLibraries)
+
+set (CPACK_PACKAGE_NAME  "${PROJECT_NAME}")
+set (CPACK_PACKAGE_VENDOR "Cluster Logic Ltd")
+set (CPACK_PACKAGE_CONTACT "liororama@gmail.com")
+
+set (CPACK_RESOURCE_FILE_LICENSE   "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
+set (CPACK_PACKAGE_VERSION_MAJOR   "${GOSSIMON_VERSION_MAJOR}")
+set (CPACK_PACKAGE_VERSION_MINOR   "${GOSSIMON_VERSION_MINOR}")
+set (CPACK_PACKAGE_VERSION_PATCH   "${GOSSIMON_VERSION_PATCH}")
+
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY  "Gossimon is a gossip based distributed monitoring system for a cluster of Linux nodes") 
+
+set(CPACK_PACKAGE_DESCRIPTION "
+ Gossimon is a gossip based distributed monitoring system for a 
+ cluster of Linux nodes. Each node in the cluster periodically send 
+ information about itself and others to a randomly selected node. This 
+ way each node constantly receive information about cluster nodes. 
+ This information is locally maintained (constantly updated) by each 
+ node and can be used by various clients. 
+ .
+ The package contain: 
+ .
+ o infod - a daemon which is the daemon responsible for
+   collecting and sending information for other nodes.     
+ .
+ o mmon - a curses based monitoring client displaying the information 
+   about cluster nodes
+ .
+ o infod-client - a command line client outputing cluster information in 
+   XML format
+ .
+ .
+ This package is currently developed by:
+            ClusterLogic Ltd (www.clusterlogic.net)
+  ")
+
+set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.txt")
+
+set (CPACK_GENERATOR "TGZ;DEB;RPM")
+set (CPACK_SOURCE_GENERATOR "TGZ")
+#set (CPACK_SOURCE_IGNORE_FILES "/\\.svn/;\\.swp$;/\.\#/;/\#/;/\.*~/")
+set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/;.*\\\\.cmake;/CMakeFiles/;CMakeCache.txt;Makefile;Makefile.old;/prep/;\\\\.*~;${PROJECT_NAME}-.*-Source.*;${PROJECT_NAME}_.*rpm;${PROJECT_NAME}_.*deb;${PROJECT_NAME}_.*tar.gz;install_manifest.txt;/_CPack_Packages/;CHANGELOG")
+
+
+###########################################
+############ DEB package   ################
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+
+# Setting the architecture for the deb package
+IF(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
+ELSEIF(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i686")
+  SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
+ENDIF(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+
+# Setting the package file name
+string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
+find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+if(DPKG_PROGRAM)
+  execute_process(
+    COMMAND ${DPKG_PROGRAM} --print-architecture
+    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(CPACK_PACKAGE_FILE_NAME
+"${CPACK_PACKAGE_NAME_LOWERCASE}_${GOSSIMON_VERSION_MAJOR}.${GOSSIMON_VERSION_MINOR}.${GOSSIMON_VERSION_PATCH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
+
+else(DPKG_PROGRAM)
+  set(CPACK_PACKAGE_FILE_NAME
+"${CPACK_PACKAGE_NAME_LOWERCASE}_${GOSSIMON_VERSION_MAJOR}.${GOSSIMON_VERSION_MINOR}.${GOSSIMON_VERSION_PATCH}_${CMAKE_SYSTEM_NAME}")
+endif(DPKG_PROGRAM)
+
+# Dependencies
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libxml2, libglib2.0-0")
+
+# Section
+set(CPACK_DEBIAN_PACKAGE_SECTION "Network")
+
+# deb install/remove scripts
+list(APPEND control_files "${CMAKE_CURRENT_SOURCE_DIR}/prep/debian/postinst;")
+list(APPEND control_files "${CMAKE_CURRENT_SOURCE_DIR}/prep/debian/prerm;")
+list(APPEND control_files "${CMAKE_CURRENT_SOURCE_DIR}/prep/debian/postrm;")
+list(APPEND control_files "${CMAKE_CURRENT_SOURCE_DIR}/prep/debian/conffiles;")
+
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${control_files})
+
+
+###########################################
+############ RPM package   ################
+set (CPACK_RPM_PACKAGE_DEBUG 1)
+set (CPACK_RPM_PACKAGE_LICENSE "BSD")
+set (CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION})
+
+IF(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  SET(CPACK_RPM_PACKAGE_ARCHITECTURE  "x86_64")
+ELSEIF(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i686")
+  SET( CPACK_RPM_PACKAGE_ARCHITECTURE  "i386")
+ENDIF(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+
+#set (CPACK_RPM_PACKAGE_REQUIRES "libxml2")
+#SET(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
+
+
+set (CPACK_RPM_PRE_INSTALL_SCRIPT_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/prep/rpm/pre")
+set (CPACK_RPM_POST_INSTALL_SCRIPT_FILE   "${CMAKE_CURRENT_SOURCE_DIR}/prep/rpm/post")
+set (CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE  "${CMAKE_CURRENT_SOURCE_DIR}/prep/rpm/preun")
+set (CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/prep/rpm/postun")
+
+
+set (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_SOURCE_DIR}/prep/rpm/gossimon.spec.in")
+
+include (CPack)

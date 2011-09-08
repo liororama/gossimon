@@ -1,0 +1,105 @@
+.\"/=========================================================================
+.\"  gossimon - Gossip based resource usage monitoring for Linux clusters
+.\"  Copyright 2003-2010 Amnon Barak
+.\"
+.\"  Distributed under the OSI-approved BSD License (the "License");
+.\"  see accompanying file Copyright.txt for details.
+.\"
+.\"  This software is distributed WITHOUT ANY WARRANTY; without even the
+.\"  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"  See the License for more information.
+.\"==========================================================================
+
+.TH infod-best "1" "21 October 2010" "GOSSIMON" "GOSSIMON"
+.SH NAME
+.B infod-best
+selects the best nodes to run on
+.SH SYNOPSIS
+.B infod-best [-h host] [-m{MB}] [-p procs] [-v] [-d load-diff] 
+.SH DESCRIPTION
+.B infod-best
+selects the bests nodes to use according to the current state of infod's
+information vector. 
+.B infod-best also knows to select multiple nodes in case a parallel program
+(such as MPI) wishes to run.
+
+.SH OPTIONS
+.TP
+.B  -h, --server <host>
+Uses the given host as the information provider
+.TP
+.B -m{M}
+Select nodes that has at least M megabytes of free memory
+.TP
+.B -p{n} 
+Select n locations for running an n process parallel job
+.TP
+.B --machine host1,host2,...
+Select only nodes within the given list
+.TP
+.B --machine-file file-name
+Select only nodes listed in the given file (one node per line).
+.TP
+.B -d <load-diff>
+When choosing the best nodes, select a random node from all the nodes
+that has a load of at most load-diff units more than the lowest load
+node. This way the least loaded nodes will not be selected each time.
+The default is 5 load units where 100 load units represent a full CPU
+process on a standard computer.
+.TP 
+.B -v
+Print verbose information while running
+.TP
+.B --debug
+Prints debug information while running
+.TP
+.B --help
+Prints a short help screen
+
+.SH RESULTS
+On success,
+.Pa infod-best
+prints a space-separated list of the selected nodes.
+On failure, infod-best returns a non-zero exit-code.
+
+.SH AUTHOR
+Amar Lior
+
+.SH SEE ALSO
+.B mmon(1), infod-ctl(1), infod-client(1), infod(8)
+
+.SH HISTORY
+.B infod-best
+is part of the GOSSIMON package.
+
+.SH REPORTING BUGS
+Report infod bugs to gossimon-users@lists.sourceforge.net
+
+.SH COPYRIGHT
+.PP
+Copyright (c) 2010, Amnon Barak All rights reserved.
+
+.PP
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+.PP 
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+.PP 
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+.PP
+Neither the name of the Hebrew University of Jerusalem nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+.PP
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

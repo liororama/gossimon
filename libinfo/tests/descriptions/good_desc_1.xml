@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<local_info>
+        <base name="tmem"  type="unsigned long"  unit="4KB"/>
+        <base name="tswap" type="unsigned long"  unit="4KB"/>
+        <base name="fswap" type="unsigned long"  unit="4KB"/>
+        <base name="uptime" type="unsigned long" unit="Sec" />
+        <base name="disk_read_rate" type="unsigned int" unit="KByte/Sec" />
+        <base name="disk_write_rate" type="unsigned int" unit="KByte/Sec" />
+        <base name="net_rx_rate" type="unsigned int" unit="KByte/Sec" />
+        <base name="net_tx_rate" type="unsigned int" unit="KByte/Sec" />
+        <base name="tdisk" type="unsigned long" unit="4KB" />
+        <base name="fdisk" type="unsigned long" unit="4KB" />
+        <base name="locals"    type="int" />
+        <base name="guests"    type="int" />
+        <base name="maxguests" type="int" />
+        <base name="kernel_version" type="int" />
+        <base name="min_guest_dist" type="int" />
+        <base name="max_guest_dist" type="int" />
+        <base name="max_mig_dist" type="int" />
+        <base name="min_run_dist" type="int" />
+        <base name="mos_procs" type="int" />
+        <base name="ownerd_status" type="int" />
+        <base name="nfs_client_rpc_rate" type="unsigned long" unit="Ops/Sec" />
+        <base name="freepages" type="unsigned long"/>
+        <base name="totalpages" type="unsigned long"/>
+        <base name="load"  type="unsigned long"/>
+        <base name="speed" type="unsigned long"/>
+        <base name="not_used_1" type="unsigned long"/>
+        <base name="status" type="unsigned short"/>
+        <base name="level" type="unsigned short"/>
+        <base name="frozen" type="unsigned short"/>
+        <base name="util"   type="unsigned char"/>
+        <base name="ncpus" type="unsigned char"/>
+        <base name="not_used_2"  type="unsigned short"/>
+        <base name="token_level" type="unsigned short"/>
+</local_info>

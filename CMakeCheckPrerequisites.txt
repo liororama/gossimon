@@ -1,0 +1,83 @@
+#=============================================================================
+# gossimon - Gossip based resource usage monitoring for Linux clusters
+# Copyright 2010 Cluster Logic Ltd (www.clusterlogic.net)
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright-ClusterLogic.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
+message("  ")
+message("************** Checking required libraries/headers *****************")
+message("  ")
+
+INCLUDE(FindPkgConfig)
+
+#### Libxml2 development files and library
+find_package(LibXml2 REQUIRED)
+if( NOT LIBXML2_FOUND ) 
+  message(FATAL_ERROR "libxml2 is required (including headers): please install!!" )
+endif()
+
+#### glib2
+find_package(GTK2 REQUIRED)
+
+pkg_check_modules (GLIB2 glib-2.0)
+if( NOT GLIB2_FOUND ) 
+  message(FATAL_ERROR "libglib-2.0 (including headers) is required : please install!!")
+endif()
+
+#### Curses library
+#find_package(Curses REQUIRED)
+#if( NOT CURSES_FOUND ) 
+#  message(FATAL_ERROR "ncurses is required (including headers): please install !!")
+#endif()
+
+find_library(check_library check 
+  PATHS /usr/lib /usr/local/lib
+  DOC "'check' libcheck C unit testing framework")
+find_path(check_include check.h
+  /usr/include
+  /usr/local/include)
+
+set(check_FOUND TRUE)
+if (NOT check_library) 
+  set(check_FOUND FALSE)
+endif()
+if (NOT check_include) 
+  set(check_FOUND FALSE)
+endif()
+
+if ( NOT check_FOUND)
+  message(WARNING "\n\n****************************************\n'The check' unit testing framework for C is required for building tests\n  Please install if you wish to run make check1 \n****************************************\n\n")
+
+endif() 
+
+
+find_library(ncurses_library ncurses 
+  PATHS /usr/lib /usr/local/lib
+  DOC "'ncurses' librart")
+find_path(ncurses_include ncurses.h
+  /usr/include
+  /usr/local/include)
+
+set(ncurses_FOUND TRUE)
+if (NOT ncurses_library) 
+  set(ncurses_FOUND FALSE)
+endif()
+if (NOT ncurses_include) 
+  set(ncurses_FOUND FALSE)
+endif()
+
+if ( NOT ncurses_FOUND)
+  message(FATAL_ERROR "The ncurses library is required (including headers): please install !!")
+endif() 
+
+
+
+message("  ")
+message("************** Done finding dependancies *****************")
+message("  ")

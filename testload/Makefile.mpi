@@ -1,0 +1,55 @@
+##
+## Copyright (c) 2000 - 2004, Amnon BARAK (amnon@MOSIX.org).
+## All rights reserved.
+## This software is subject to the MOSIX SYSTEM SOFTWARE LICENSE AGREEMENT.
+##
+## THIS SOFTWARE IS PROVIDED IN ITS "AS IS" CONDITION, WITH NO WARRANTY
+## WHATSOEVER. NO LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING
+## FROM THE USE OF THIS SOFTWARE WILL BE ACCEPTED.
+##
+##
+## Author(s):  Amnon Shilo, Amar Lior
+##
+
+include ../Rules.make
+
+
+#CC          = /cs/mosna/lior/local/bin/mpicc
+#CCC         = /cs/mosna/lior/local/bin/mpicxx
+#CLINKER     = /cs/mosna/lior/local/bin/mpicc
+#CCLINKER    = /cs/mosna/lior/local/bin/mpicxx
+
+CC          = /cs/mosna/daviderukh/openmpi-install/bin/mpicc
+CCC         = /cs/mosna/daviderukh/openmpi-install/bin/mpicxx
+CLINKER     = /cs/mosna/daviderukh/openmpi-install/bin/mpicc
+CCLINKER    = /cs/mosna/daviderukh/openmpi-install/bin/mpicxx
+
+MAKE        = make --no-print-directory
+SHELL       = /bin/sh
+#
+
+
+CFLAGS  +=  $(GENINC) $(ECFLAGS) -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
+
+LDFLAGS +=    
+
+TL=test_load
+
+OTHERS = 
+
+LIBS = 
+
+all: testload-mpi 
+
+testload-mpi: test_load.c $(OTHERS)
+	$(CLINKER) -g $(CFLAGS) -DMPI_SUPPORT -o testload-mpi test_load.c $(OTHERS) $(LIBS)
+	\cp -f testload-mpi $(BIN_DIR)
+	\rm -f *.o
+
+clobber: clean
+
+clean: 
+	$(CLEANALL)
+	rm -f testload-mpi testload.o 
+	\rm -f $(BIN_DIR)/testload-mpi 
+

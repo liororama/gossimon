@@ -1,0 +1,211 @@
+.\"/=========================================================================
+.\"  gossimon - Gossip based resource usage monitoring for Linux clusters
+.\"  Copyright 2003-2010 Amnon Barak
+.\"
+.\"  Distributed under the OSI-approved BSD License (the "License");
+.\"  see accompanying file Copyright.txt for details.
+.\"
+.\"  This software is distributed WITHOUT ANY WARRANTY; without even the
+.\"  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"  See the License for more information.
+.\"==========================================================================
+
+.TH infod "8" "20 October 2010" "Gossimon" "Gossimon"
+.SH NAME
+.B infod
+Information Dissemination Daemon
+.SH SYNOPSIS
+.B infod [OPTIONS]
+.SH DESCRIPTION
+.B infod
+is an information dissemination daemon, that uses gossip algorithms to spread 
+information between a group of nodes (cluster). Each time unit (see the --timestep option) each infod collects fresh information about the local node. This local information and other recently updated information about other nodes is packed and sent to a randomly chosen node. Upon receiving of such a message, infod
+update a data structure called "information vector" with an entry about each member of the cluster. Each entry contains infomation about the state of resources on the corisponding node. The list of monitored resources and the unit used is specified on section MONITORED RESOURCES.
+
+The information collected by each infod can be accessed by various clients such as infod-client and mmon. When a client retrieve information from infod, there is no extra overhead. The request is served from the internal information vector of the accessed infod.
+
+.SH OPTIONS
+
+.TP
+.B  --allow-no-map
+Allow infod to start without a map. 
+
+
+.TP
+.B  --avgage AGE
+Set the desired expected age of the vector to AGE seconds. This option imply using a "fix" window type and gossip algorithm:  mindead or reg
+
+.TP
+.B  --avgmax AGE
+Set the desired expected maximal age of the vector to AGE seconds. This option imply using a "fix" window type and gossip algorithm:  mindead or reg
+
+.TP
+.B --debug 
+Run infod in debug mode, meaning infod will not become a daemon.
+
+.TP
+.B --debug-mode mode1,mode2,...
+Spceficy debug modes to use upon start (needs the --debug flag). This is an advanced option for developers. To get a list of available debug modes look at the file libutil/msx_error.c 
+
+.TP
+.B --clear
+When in debug mode this options tells infod to clear the screen after 
+each time unit passed. This way some debug printouts are easier to follow.
+
+.TP
+.B  --conf FILE 
+Use the provided configuration file instead of the deafult /etc/gossimon/infod.conf
+
+.TP
+.B --gossip-algo reg|mindead|pushpul
+Type of random node selection when chosing the next node to send information to. 
+.B reg:
+means choosing a node uniformly from all possible node.
+.B mindead: 
+(the default) means maintaining a list of inactive node and usually choosing a random node from within the active node. Only once in a while choosing a random node from all nodes.
+.B pushpull:
+Similar to mindead but also pulling information from the randomly selected node (comparing to only pushing information).
+
+.TP
+.B --help
+Print a short help message
+
+.TP
+.B --maptype [userview, mosix, mosixbinary]
+Selects which type of map to use for defining our world. 
+userview, means uses the userview map type of MOSIX (default).
+All the rest map types are currently not supported.
+
+.TP
+.B --mapfile file
+Set the path to the map file (default /etc/mosix/usersview.map)
+
+.TP
+.B --mapcmd cmd
+Build the map from the given command.
+
+.TP
+.B --myip IP-ADDRESS
+In cases where there are more than one IP address associated with this node
+this option tells infod that the local IP is the one given in this option.
+This way the infod will be able to locate this node in the given map file.
+It is also usefull in cases when the IP returned by 
+.I gethostbyname
+is not the IP you would like to use in the map (e.g. in cases where gethostbyname return the IP 127.0.0.1)
+
+.TP
+.B --port port-num
+Use port-num as the port for communication (advanced option)
+
+
+.TP
+.B  --provider [linux|mosix]
+Selects the information provider used by infod. linux, uses regular Linux
+information collection methods. mosix, uses information provided by the MOSIX 
+if it is installed.  
+
+.TP
+.B --timestep <value in milliseconds>
+The time step to use for the gossip algorithm. The value should be given in 
+milliseconds. 
+
+.TP
+.B --watch-fs path1,...
+Supply the information provider a list of file system to monitor.
+The provider will monitor the total capacity and current free space of 
+those file systems.
+
+.TP
+.B --win-type <fix|upto>
+Set the window type used. fix, means use a fixed window size (default). 
+The size of the window is determined by the --winparam flag.
+upto, means assemble a window where all the entries are less than a 
+given age. This maximal age is determined by the --winparam flag, where
+the value is expected to be in milliseconds.
+
+.TP
+.B --winparam value
+Set the window parameter. If fixed window is used the parameter is the size 
+of the window. If upto age window is used the value is the maximal age to
+allow each entry in the window have, where the value is in milliseconds
+
+
+
+.SH MAP FORMAT
+
+ Each line in the map file (default /etc/gossimon/infod.map) contains 3 elements:
+
+   1.   Convenient node number (1-65535)
+   2.   IP1 (or host-name, clearly identifiable by gethostbyname(3))
+   3.   Number of nodes in range (the last must not exceed 65535)
+
+ Example:
+ ----- file start here -------- 
+ # line beginning with # are comment lines
+ 1 mos1 10
+ ----- end of map example -----
+
+ The above example define a cluster with 10 nodes the first is mos1 and 
+ there are 10 consecutive nodes. It is assumed that the IPs of mos1,mos2,.. are consecutive (e.g. mos1=192.168.1.10, mos2=192.168.1.11, mos3=192.168.1.12...)
+
+.SH USAGE EXAMPLE:
+ /sbin/infod --mapfile /etc/gossimon/infod.map --watch-fs /scartch 
+ 
+ The above command will run the infod daemon with a mapfile located at
+ /etc/gossimon/infod.map and it will monitor the usage of the 
+ filesystem /scratch
+
+.SH FILES
+.I /etc/gossimon/infod.conf
+.RS
+This is the configuration file of infod. Contains definitions that control the behavior of infod such as the timestep, provider type, etc.
+
+.RE
+.I /etc/gossimon/infod.map
+.RS
+The default cluster map file. The nodes of the cluster are defined within this file
+.RE
+.PP
+
+
+.SH SEE ALSO
+.B infod-ctl(1), infod-client(1), infod-best(1), mmon(1)
+
+.SH AUTHOR 
+Initially written by Lior Amar and Ilan Peer. Developemnt since 2006 was mainly done by Lior Amar. 
+
+.SH REPORTING BUGS
+Report infod bugs to gossimon-users@lists.sourceforge.net
+
+.SH HISTORY
+.B infod
+Is an information dissemination daemon. It is part of the gossimon package 
+
+.SH COPYRIGHT
+.PP
+Copyright (c) 2010, Amnon Barak All rights reserved.
+
+.PP
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+.PP 
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+.PP 
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+.PP
+Neither the name of the Hebrew University of Jerusalem nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+.PP
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

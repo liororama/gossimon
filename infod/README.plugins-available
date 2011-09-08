@@ -1,0 +1,10 @@
+/etc/gossimon/plugins-available README
+
+This directory should contain the available plugins config files.
+When you wish to enable a plugin (e.g. sample-plugin, just create a 
+softlink from the ../plugins-enabled/sample-plugin.conf point the 
+the file located in this direcory.
+Assuming you are currently in gossimon/plugins-available
+ln -s sample.conf ../plugins-enabled/
+
+

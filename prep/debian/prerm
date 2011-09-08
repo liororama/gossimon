@@ -1,0 +1,16 @@
+#!/bin/sh
+# prerm script for gossimon
+#
+
+set -e 
+
+echo "Running gossimon prerm 1:[ $1 ] 2:[ $2]"
+
+if [ "$1" = "upgrade" -o "$1" = "remove" ] ; then
+
+    if which invoke-rc.d >/dev/null 2>&1; then
+        invoke-rc.d infod stop
+    else
+        /etc/init.d/infod stop
+    fi
+fi

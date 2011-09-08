@@ -1,0 +1,138 @@
+.\"/=========================================================================
+.\"  gossimon - Gossip based resource usage monitoring for Linux clusters
+.\"  Copyright 2003-2010 Amnon Barak
+.\"
+.\"  Distributed under the OSI-approved BSD License (the "License");
+.\"  see accompanying file Copyright.txt for details.
+.\"
+.\"  This software is distributed WITHOUT ANY WARRANTY; without even the
+.\"  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.\"  See the License for more information.
+.\"==========================================================================
+
+.TH infod-ctl "1" "21 October 2010" "GOSSIMON" "GOSSIMON"
+.SH NAME
+.B infod-ctl
+- controlling infod online behaviour
+.SH SYNOPSIS
+.B infod-ctl <command>
+.SH DESCRIPTION
+.B infod-ctl
+connects to the infod daemon running on the localhost and can setup its 
+parameters and perform queries about its status. 
+Only root can connect to the infod using
+.B infod-ctl.
+
+.SH COMMANDS
+.TP
+.B  status 
+Show infod status information.
+.TP
+.B debug 
+Set the infod debug level.
+.TP 
+.B gossip <number>
+Set the gossip algorithm used by infod to algorithm represented by the number
+supplied.
+.TP
+.B fixwin <size>
+Tells infod to use a fixed window size of size <size>
+.TP 
+.B uptoage <age>
+Tells infod to include in the window only entries which are up to age <age> 
+old. <age> is in milliseconds units.
+
+.TP
+.B avgage <sample num>
+Start average age measurement of <sample num> samples. Once the measurement
+starts, the 
+.B status
+command will display the results of the measurement. 
+
+
+.TP
+.B no-avgage
+Stop the average age measurement.
+
+.TP
+.B infomsgs
+Starts measuring the number of info messages sent and received by infod.
+
+.TP
+.B no-infomsgs
+Stop info messages measurements.
+
+.TP
+.B sendtime <sample num>
+Start measuring the average send time.
+
+.TP
+.B no-sendtime
+Stop measuring the average send time.
+
+.TP
+.B dlc
+Clear the death log.
+
+.TP
+.B dlp
+Print the death log.
+
+.SH RESULTS
+On success,
+.B infod-ctl
+prints the output of the selected operation.
+On error, 
+.B infod-ctl 
+returns a non-zero exit code.
+
+.SH EXAMPLE
+
+.RS
+infod-ctl status
+.RE
+
+The above command will connect to the local infod and will print some 
+status information about it.
+
+.SH AUTHOR
+Amar Lior 
+
+.SH SEE ALSO
+.B infod(1), mmon(1), infod-client(1), infod-best(1)
+
+.SH HISTORY
+.B infod-ctl
+is part of the GOSSIMON package
+
+.SH REPORTING BUGS
+Report infod bugs to gossimon-users@lists.sourceforge.net
+
+.SH COPYRIGHT
+.PP
+Copyright (c) 2010, Amnon Barak All rights reserved.
+
+.PP
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+.PP 
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+.PP 
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+.PP
+Neither the name of the Hebrew University of Jerusalem nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+.PP
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

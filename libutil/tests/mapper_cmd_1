@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cat mapper_file_1

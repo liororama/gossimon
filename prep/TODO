@@ -1,0 +1,16 @@
+# Tasks to do in infod....
+
+Fixes to be done in 1.8.9:
+
+* Fix infod-best to use the /etc/gossimon directory
+* Document the 12000 and turn off the 16000 ports.
+* Allow those ports to be configurable
+* Display a message on nodes having a different signature
+* Calculate the signature only for the non velen items so addition of plugins will
+  continue to work....
+
+* Fi problem with number of cpus > 9 in mmon
+* Side window selecting node dialog: read the input closer to the label
+* Display names of node (or ips) on dead nodes
+* Many problems with the mmon --win options and also problem with the save file causing SEGFAULT when there is a save file ...
+

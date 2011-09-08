@@ -1,0 +1,208 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+sub build_machine_list;
+sub get_machine_list;
+
+my $MOSBIN="/cs/mosix/sbin";
+my $MOSCTL= "$MOSBIN/mosctl";
+my $MOSRUN= "$MOSBIN/mosrun";
+my $TESTLOAD= "$MOSBIN/test_load";
+my $DAEMONIZE= "$MOSBIN/daemonize";
+my $RUNMANY= "$MOSBIN/run_many";
+my $RUNMANY_PIPED= "$MOSBIN/run_many_direct_piped";
+my $out_dir = "/cs/phd/lior/lab/og/disconn_test";
+
+
+my $ca = "mos100";
+my $cb = "cmos-01..20";
+my $cc = "bmos-01..14";
+my $time_node="mos100";
+
+my @ca = get_machine_list($ca);
+my @cb = get_machine_list($cb);
+my @cc = get_machine_list($cc);
+
+my $ca_size = @ca;
+my $ca_ncpu = 1;
+my $cb_size = @cb;
+my $cb_ncpu = 2;
+my $cc_size = @cc;
+my $cc_ncpu = 1;
+
+
+my $reserve_num = 1;
+my $mem_size = 6;
+my $per_node_proc = 4; # Should be the value of max guests
+my $ca_processes = ($cb_size - $reserve_num) * $per_node_proc;
+my $cc_processes = $cc_size * $cc_ncpu + ($cb_size - $reserve_num) * $cb_ncpu;
+
+print "==================================\n";
+print "CA        : @ca\n";
+print "CB        : @cb\n";
+print "CC        : @cc\n";
+print "\n";
+print "Reserve   : $reserve_num\n";
+print "Mem       : $mem_size\n";
+print "CC Proc   : $cc_processes\n";
+print "==================================\n";
+print "\nPress any key to continue ...\n";
+<STDIN>;
+
+my @ca_pes = get_cluster_pes("ca", \@ca);
+my @cb_pes = get_cluster_pes("cb", \@cb);
+my @cc_pes = get_cluster_pes("cc", \@cc);
+
+print "Running processes of ca in cb ($per_node_proc) (except for one node)\n";
+my @tmp_pes = @cb_pes;
+pop @tmp_pes;
+for (my $i=0 ; $i< $ca_processes ; $i++)
+{
+    my $hn = $ca[$i % $ca_size];
+    my $pe = $tmp_pes[$i % ($cb_size-1)];
+    if(($i % 10) == 0) {
+	`rsh $hn /etc/init.d/inetd restart`;
+    }
+    
+    print "Running $i from $hn on $pe\n";
+    `rsh $hn $DAEMONIZE $MOSRUN -L -G -$pe  $TESTLOAD -m $mem_size --onmig-report --uid 1297 -o $out_dir/$i.out`;
+}
+
+# in Cluster C we run enough processes on each node that at least one of them
+# should move to a node in B so be will be compleately taken by C instead of a
+# #
+
+print "\nPress any key to run processes in cc >>\n";
+<STDIN>;
+my $start_time = `rsh $time_node date`;
+print "Start Time $start_time\n";
+
+print "Running processes of cc \n";
+for (my $i=0 ; $i< $cc_processes; $i++)
+{
+    my $hn = $cc[$i % $cc_size];
+    #if(($i % 10) == 0) {
+    #`rsh $hn /etc/init.d/inetd restart`;
+    #}
+    
+    print "Running cc $i on $hn\n";
+    `rsh $hn $DAEMONIZE $MOSRUN  -G  $TESTLOAD -m $mem_size `;
+}
+
+
+print "\nPress any key to kill all processes\n";
+<STDIN>;
+for my $n (@ca) {
+    
+    `rsh $n killall mosrun`;
+}
+for my $n (@cc) {
+    
+    `rsh $n killall mosrun`;
+}
+
+
+
+
+#print "/cs/moslnx/bin/cluster_for --verbose $owner_cluster $DAEMONIZE $MOSCTL gblock";
+#`/cs/moslnx/bin/cluster_for --verbose  $owner_cluster $DAEMONIZE $MOSCTL gblock`;
+#`/cs/moslnx/bin/cluster_for --verbose  $owner_cluster $DAEMONIZE $MOSCTL gblock`;
+#`/cs/moslnx/bin/cluster_for --verbose  $owner_cluster $DAEMONIZE $MOSCTL gblock`;
+
+
+sub get_cluster_pes {
+    my $cluste_name = shift;
+    my $node_list = shift;
+    
+    # Getting all the owner cluster node id
+    print "Obtaining pes of all machines  ";
+    my $hn = $node_list->[0];
+    my @pes;
+    `rsh $hn /etc/init.d/inetd restart`;
+    foreach my $n (@$node_list) {
+	my $pe = `rsh $hn $MOSCTL whois $n`;
+	chomp($pe);
+	print ".";
+	push @pes, $pe;
+    }
+    print "Done\n";
+    return @pes;
+}
+
+#-------------------------------------------------------------------------
+# Building a list of machines from a given range  
+# mos1...2
+#
+sub build_machine_list 
+{
+    my $range;
+    my $list = shift;
+    my @range_list = split /\,/ , $list;
+    my @list = ();
+    my $i;
+	
+    foreach $range( @range_list ) {
+	if( $range =~ /^(.*)\.\.(.*)$/ ) {
+	    my $first_machine = $1;
+	    my $until = $2;
+	    $first_machine =~ /^(.*\D)(\d+)$/ or
+		die "`$first_machine' doesn't end with a digit!\n";
+	    my $name = $1;
+	    my $from = $2;
+	    for $i( $from..$until ) {
+		push @list , "$name$i";
+	    }
+	} else {
+	    push @list , $range ;
+	}
+    }
+
+    return @list;
+}
+
+#--------------------------------------------------------------------------
+# This function is use by add and remove machine scripts 
+# to parse this list of the machine
+#
+sub get_machine_list 
+{
+    my $list = shift;
+    my @two_lists = split /\^/ , $list;
+    my $machine;
+	
+    @two_lists <= 2 or
+	die "`!' might appear only once inside machine list!\n";
+    my @temp_list = build_machine_list( $two_lists[0] );
+    my %del_list = ();
+    if( defined $two_lists[1] ) {
+	foreach $machine( build_machine_list( $two_lists[1] ) ) {
+	    $del_list{$machine} = 1;
+	}
+    }
+    my %list = ();
+    foreach $machine( @temp_list ) {
+	$list{$machine} = 1 if not defined $del_list{$machine};
+    }
+    my @l = keys %list;
+    return sort_machine_names( \@l);
+}
+# bmos-01 cmos-05 mos1 mos2 mos218 bmos-05;
+sub sort_machine_names {
+    my $list = shift;
+
+    my %word = ();
+    my %num = ();
+
+    for my $n (@$list) {
+	$n =~ /^(\D+)\d*$/;
+	$word{$n} = $1;
+	if($n =~ /^\D*(\d+)$/) {
+	    $num{$n} = $1;
+	}
+	else {$num{$n} = 0};
+    }
+    
+    my @new = sort { $word{$a} cmp $word{$b} || $num{$a} <=> $num{$b}} @$list;  
+    return @new;
+}

@@ -1,0 +1,56 @@
+Installation instruction for the HUJI-contrib package:
+------------------------------------------------------
+
+Infod:
+------
+
+1. Copy "infod" and "infod-ctl", to /sbin.
+   (if you are not permitted to add programs to /sbin, place them in
+    /usr/sbin or /usr/local/sbin)
+
+2. Copy "infod-client", "infod-best" and "mmon" to /bin.
+   (if you are not permitted to add programs to /bin, place them in
+    /usr/bin or /usr/local/bin)
+   
+   2.1  Copy the file mmon.cfg.example either to your home directory
+        under the name .mmon.cfg or to /etc/mosix/mmon.cfg. In the first
+        case the mmon definitions will be private and in the second case
+        the definitions will be global to all users. In any case the 
+        presence of a private file override global definitions.     
+
+
+3. Add code to automatically start "infod" to a startup-script
+   in "/etc/init.d" (either to an existing script, or add a new one).
+   You may use the supplied infod.init script (change its name to 
+   /etc/init.d/infod). You can edit the file to make it suitable to your 
+   installation. Especially note the INFOD_ARGS variable that let you 
+   pass arguments to the infod daemon
+
+4. Make sure that the file "/etc/mosix/userview.map" contains the list
+   of nodes you wish infod the monitor. Alternately, you can create
+   a different file with the list of nodes you want infod to monitor: 
+   this requires passing the option "--mapfile <file-name>" to infod.
+
+   Example how to run infod:  
+
+     /sbin/infod --maptype userview --mapfile /etc/userview.map
+
+   Useview map file example:
+   ----------------- Example start --------------------------------
+   # A comment
+   # The following line defines a cluster with 25 nodes with consecutive
+   # IP addresses. The first node is # mos1 which gets id 1; the second
+   # is mos2 with id 2, etc.
+   1 mos1 25
+   ----------------------------------------------------------------
+
+5. Start infod in all the nodes in your cluster.
+
+6. To view the status of your cluster, either run "mmon" in one of the
+   cluster nodes, or "mmon -h <node-name>" from outside the cluster.
+
+
+
+Testload:
+---------
+Copy "testload", and "repeat-bg" to any desired location in your PATH.

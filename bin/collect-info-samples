@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Collecting infod-client xml samples
+HOST=localhost
+SAMPLES_NUM=100
+DIR="/tmp/gossimon-samples"
+DIRARC="/tmp/gossimon-samples.tgz"
+SLEEP_TIME=5
+
+if [ ! -d $DIR ] ; then
+    echo "Directory $DIR does not exists .. creating"
+    mkdir $DIR
+    if [ ! -d $DIR ] ; then
+        echo "FAILED creating $DIR"
+        exit 1;
+    fi
+fi
+
+
+I=0
+while [ $I -lt $SAMPLES_NUM ] ; do
+    echo "Collecting sample $I"
+    (( I++ ))
+    FILE_NAME="$DIR/sample.$I"
+    infod-client -h $HOST > $FILE_NAME
+    sleep $SLEEP_TIME;
+done
+
+echo "Archiving samples to: $DIRARC"
+tar cvfz $DIRARC $DIR
