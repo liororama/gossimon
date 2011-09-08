@@ -631,6 +631,155 @@ void displayShowTitle(mmon_display_t *display) {
           wc_off(display->graph, &(pConfigurator->Colors._multicluster));
 }
 
+void display_cluster_id(mon_disp_prop_t* display, int draw)
+//Displays a cluster id line, in which each cluster has it's own 
+//latin capital letter (A, B, C...). 
+//iff draw is 1 the line is (re)printed. otherwise only erased.
+{
+    int index, offset; //temp var
+    void* temp_p; //temp pointer
+
+    //delete a single line of numbering
+    move(display->max_row - display->bottom_spacing + 1,
+            display->min_col + display->left_spacing - 1);
+    for (offset = display->min_col + display->left_spacing;
+            offset <= display->max_col; offset++)
+        printw(" ");
+
+    if ((display->displayed > 0) && (display->data_count > 0) && (draw)) {
+        //move to position
+        move(display->max_row - display->bottom_spacing + 1,
+                display->min_col + display->left_spacing + 1);
+
+        offset = 0;
+        c_on(&(pConfigurator->Colors._horizNodeName));
+        for (index = 0; index < display->displayed / (display->legend).legend_count; index++) {
+            //points to the currently displayed node
+            temp_p = display->display_data[index * (display->legend).legend_count];
+
+            //left space
+            for (offset = 0;
+                    offset < (display->legend).legend_count - 1 -
+                    ((display->legend).legend_count - 1) / 2;
+                    offset++)
+                printw(" ");
+
+            //the cluster id (should be A-Z or 0)
+            offset++;
+            printw("%c", (char)
+                    scalar_div_x(dm_getIdByName("cluster-id"),
+                    (void*) ((long) temp_p + get_pos(dm_getIdByName("cluster-id"))), 1));
+
+            //right space
+            for (; offset < (display->legend).legend_count; offset++)
+                printw(" ");
+        }
+        c_off(&(pConfigurator->Colors._horizNodeName));
+    }
+}
+
+void show_legend_side_win(mon_disp_prop_t* display)
+//draws the legend on the left (in wlegend)
+//note that the legend also asserts expert editing mode
+{
+    int index;
+    legend_node_t* lgd_ptr;
+
+    if (display->side_win_type != SIDE_WIN_LEGEND)
+        //not to be displayed
+        return;
+
+    if (dbg_flg) fprintf(dbg_fp, "LEGEND.\n");
+
+    if (display->wlegend != NULL)
+        delwin(display->wlegend);
+
+    //creating the window:
+    display->wlegend = newwin(display->max_row - display->min_row - 1,
+            display->lgdw, display->min_row,
+            display->min_col);
+
+    //printing the contents:
+    mvwprintw(display->wlegend, 1, 1, "Legend: ");
+    index = 1;
+    lgd_ptr = (display->legend).head;
+    while (lgd_ptr != NULL) {
+        if (lgd_ptr == (display->legend).curr_ptr)
+            wattron(display->wlegend, A_REVERSE);
+        mvwprintw(display->wlegend, index + 1, 1, "%i)", index);
+        if (lgd_ptr == (display->legend).curr_ptr)
+            wattroff(display->wlegend, A_REVERSE);
+        print_str(display->wlegend, &(pConfigurator->Colors._statusNodeName),
+                index + 1, 4, infoModulesArr[lgd_ptr->data_type]->md_title,
+                infoModulesArr[lgd_ptr->data_type]->md_titlength, 0);
+        index++;
+        lgd_ptr = lgd_ptr->next;
+    }
+
+    if (lgd_ptr == (display->legend).curr_ptr) {
+        wattron(display->wlegend, A_REVERSE);
+        mvwprintw(display->wlegend, index + 1, 1, "%i)", index);
+        wattroff(display->wlegend, A_REVERSE);
+    }
+
+    wborder(display->wlegend, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE,
+            ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+
+    mvwprintw(display->wlegend,
+            display->max_row - display->min_row - 2, 1,
+            " z - toggle, x - close");
+
+    wrefresh(display->wlegend);
+}
+
+void show_statistics_side_win(mon_disp_prop_t* display)
+//draws the statistics on the left (in wlegend)
+{
+    int index;
+    double avg;
+    legend_node_t* lgd_ptr;
+
+    if (display->side_win_type != SIDE_WIN_STATS)
+        //not to be displayed
+        return;
+
+    if (dbg_flg) fprintf(dbg_fp, "STATS.\n");
+
+    if (display->wlegend != NULL)
+        delwin(display->wlegend);
+
+    //creating window:
+    display->wlegend = newwin(display->max_row - display->min_row - 1,
+            display->lgdw, display->min_row,
+            display->min_col);
+
+    //printing the contents:
+    mvwprintw(display->wlegend, 1, 1, "Statistics: ");
+    index = 1;
+    lgd_ptr = (display->legend).head;
+    while (lgd_ptr != NULL) {
+        avg = avg_by_item(display, lgd_ptr->data_type);
+        if (avg >= 0) {
+            mvwprintw(display->wlegend, index + 1, 1,
+                    "%i) ", index);
+            print_str(display->wlegend, &(pConfigurator->Colors._statusNodeName),
+                    index + 1, 4, infoModulesArr[lgd_ptr->data_type]->md_title,
+                    infoModulesArr[lgd_ptr->data_type]->md_titlength, 0);
+            wprintw(display->wlegend, " AVG: %.2f", avg);
+
+            index++;
+        }
+        lgd_ptr = lgd_ptr->next;
+    }
+
+    wborder(display->wlegend, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE,
+            ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+    mvwprintw(display->wlegend,
+            display->max_row - display->min_row - 2, 1,
+            " z - toggle, x - close");
+
+    wrefresh(display->wlegend);
+}
 
 
 void displayDrawNumbering(mon_disp_prop_t* display, int draw)
@@ -775,14 +924,14 @@ void displayRedrawGraph(mon_disp_prop_t* display)
 
     // Allocate available space for the vertical display type title
     if ((lgd_ptr != NULL) && (!(display->show_help))) {
-        title = (char*) (mon_map[lgd_ptr->data_type]->md_title);
+        title = (char*) (infoModulesArr[lgd_ptr->data_type]->md_title);
         display_rtr(stdscr, &(pConfigurator->Colors._chartColor),
                 display->min_row + (display->max_row - display->min_row
                 - display->bottom_spacing
-                + mon_map[lgd_ptr->data_type]->md_titlength) / 2,
+                + infoModulesArr[lgd_ptr->data_type]->md_titlength) / 2,
                 display->min_col + display->left_spacing - LSPACE,
-                (char*) (mon_map[lgd_ptr->data_type]->md_title),
-                mon_map[lgd_ptr->data_type]->md_titlength, 0);
+                (char*) (infoModulesArr[lgd_ptr->data_type]->md_title),
+                infoModulesArr[lgd_ptr->data_type]->md_titlength, 0);
     }
 
     // Print the new (if needed):
@@ -814,19 +963,19 @@ void displayRedrawGraph(mon_disp_prop_t* display)
             c_on(&(pConfigurator->Colors._stringMB));
             mvprintw(display->min_row,
                     display->left_spacing - LSPACE + 1,
-                    mon_map[lgd_ptr->data_type]->md_format,
+                    infoModulesArr[lgd_ptr->data_type]->md_format,
                     display->last_max);
             mvprintw(display->min_row + width / 2,
                     display->left_spacing - LSPACE + 1,
-                    mon_map[lgd_ptr->data_type]->md_format,
+                    infoModulesArr[lgd_ptr->data_type]->md_format,
                     display->last_max / 2);
             mvprintw(display->min_row + width / 4,
                     display->left_spacing - LSPACE + 1,
-                    mon_map[lgd_ptr->data_type]->md_format,
+                    infoModulesArr[lgd_ptr->data_type]->md_format,
                     display->last_max * 3 / 4);
             mvprintw(display->min_row + (width * 3) / 4,
                     display->left_spacing - LSPACE + 1,
-                    mon_map[lgd_ptr->data_type]->md_format,
+                    infoModulesArr[lgd_ptr->data_type]->md_format,
                     display->last_max / 4);
             c_off(&(pConfigurator->Colors._stringMB));
 

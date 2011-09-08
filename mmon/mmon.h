@@ -198,6 +198,10 @@ void display_bar (WINDOW* target, int base_row, int col, int total,
 /*                        ColorDescriptor *errorColor); */
 /*      //draws 2 bars - both max and actual values. */
 
+//get_max is declared here, to be use to determine highest speed displayed.
+int isScalar(int item);
+void display_item(int item, WINDOW* graph, void* source,
+        int base_row, int min_row, int col, const double max, int width);
 
 extern Configurator* pConfigurator;
 
@@ -213,6 +217,9 @@ extern Configurator* pConfigurator;
 
 
 #include "display.h"
+double get_max(mon_disp_prop_t* display, int item);
+double avg_by_item(mon_disp_prop_t* display, int item);
+void show_manual(mon_disp_prop_t* display);
 
 void init_clusters_list(mon_disp_prop_t* display);
 void toggle_disp_type(mon_disp_prop_t* display, int item, int action);
@@ -247,6 +254,7 @@ extern int    exiting;
 extern int    max_key; 
 extern int  **key_map; 
 
+extern mon_display_module_t** infoModulesArr; 
 
 #define MAX_START_WIN      (10)
 #define MAX_CONF_FILE_LEN 1024 //maximal length
@@ -266,6 +274,7 @@ typedef struct mmon_data {
   
   mon_hosts_t      hostList;
 
+  
 } mmon_data_t;
 
 int saveCurrentWindows(mmon_data_t *md);

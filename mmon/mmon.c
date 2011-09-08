@@ -46,10 +46,8 @@ char *info_desc = NULL;
 variable_map_t *info_mapping = NULL;
 
 //Quick reference maps:
-// These three maps are inited at the begining of the mmon, and
-// surve as a directory for the display types:
-mon_display_module_t** mon_map; //points to the mon_display_module_t struct of the item.
-
+ mon_display_module_t** infoModulesArr; 
+ 
 
 int* pos_map; //holds the relative position of the item in a block.
 int** key_map; //holds key bindings of all display types: each cell is an array
@@ -386,8 +384,6 @@ void new_user(mon_disp_prop_t* display)
     get_nodes_to_display(display);
 }
 
-double get_max(mon_disp_prop_t* display, int item);
-//get_max is declared here, to be use to determine highest speed displayed.
 
 void new_yardstick(mon_disp_prop_t* display)
 //Opens a new yardstick dialogue:
@@ -467,19 +463,19 @@ int get_raw_pos(mon_disp_prop_t* display, int index)
 int canRev(int item)
 //The function returns 1 iff the reverse boolean is asserted
 {
-    return mon_map[item]->md_canrev;
+    return infoModulesArr[item]->md_canrev;
 }
 
 int isScalar(int item)
 //The function returns 1 iff item is scalar (scalar bool. asserted)
 {
-    return mon_map[item]->md_iscalar;
+    return infoModulesArr[item]->md_iscalar;
 }
 
 int get_length(int item)
 //Returns the required length for a parameter
 {
-    return mon_map[item]->md_length_func();
+    return infoModulesArr[item]->md_length_func();
 }
 
 void new_item(int item, mmon_info_mapping_t* iMap,
@@ -488,7 +484,7 @@ void new_item(int item, mmon_info_mapping_t* iMap,
 //translates it to the requested (presentable) data,
 //and stores it in the dest address
 {
-    mon_map[item]->md_new_func(iMap, source, dest, setup);
+    infoModulesArr[item]->md_new_func(iMap, source, dest, setup);
 }
 
 void del_item(int item, void* address)
@@ -497,7 +493,7 @@ void del_item(int item, void* address)
 //memory space - in which case to free the raw_data array would
 //cause the loss of the pointer and thus a memory leak.
 {
-    mon_map[item]->md_del_func(address);
+    infoModulesArr[item]->md_del_func(address);
 }
 
 void display_item(int item, WINDOW* graph, void* source,
@@ -507,7 +503,7 @@ void display_item(int item, WINDOW* graph, void* source,
 //The bar belongs to colomn "col".
 //The maximal value is the one pointed by max (obtained by "get_max").
 {
-    mon_map[item]->md_disp_func(graph, pConfigurator, source,
+    infoModulesArr[item]->md_disp_func(graph, pConfigurator, source,
             base_row, min_row, col, max, width);
 }
 
@@ -515,7 +511,7 @@ char** display_help(int item)
 //The function returns a char**, similar to help_str,
 //describing the display type of the invoked function.
 {
-    return mon_map[item]->md_help_func();
+    return infoModulesArr[item]->md_help_func();
 }
 
 int get_text_info_byName(char *name, void *nodeDataPtr, char *buff, int *len, int width)
@@ -527,8 +523,8 @@ int get_text_info_byName(char *name, void *nodeDataPtr, char *buff, int *len, in
     if (item < 0)
         return -1;
 
-    if (mon_map[item]->md_text_info_func) {
-        int size = mon_map[item]->md_text_info_func(nodeDataPtr + pos, buff, len, width);
+    if (infoModulesArr[item]->md_text_info_func) {
+        int size = infoModulesArr[item]->md_text_info_func(nodeDataPtr + pos, buff, len, width);
         return size;
     }
     return 0;
@@ -541,7 +537,7 @@ double scalar_div_x(int item, const void* address, double x)
 // (x==0) case to contain more options.
 {
     if (isScalar(item))
-        return mon_map[item]->md_scalar_func(address, x);
+        return infoModulesArr[item]->md_scalar_func(address, x);
     return 1.0; //errorous
 }
 
@@ -953,7 +949,7 @@ int get_nodes_to_display(mon_disp_prop_t* display)
         //determine total block length
         display->block_length = 0;
         for (index = 0; index < infoDisplayModuleNum; index++)
-            display->block_length += mon_map[index]->md_length_func();
+            display->block_length += infoModulesArr[index]->md_length_func();
 
         //allocating data array memory
         if (infod_data->num > 0) {
@@ -1118,7 +1114,7 @@ void show_manual(mon_disp_prop_t* display)
             while ((man_str[index]) &&
                     (long_index < display->max_row
                     - display->min_row - display->bottom_spacing)) {
-                wprintw(display->graph, " %c - %s\n", mon_map[type_index]->md_key, man_str[index]);
+                wprintw(display->graph, " %c - %s\n", infoModulesArr[type_index]->md_key, man_str[index]);
                 index++; //next line
                 long_index++; //increment total count
             }
@@ -1241,155 +1237,6 @@ void display_totals(mon_disp_prop_t* display, int draw)
     free(totals_str);
 }
 
-void display_cluster_id(mon_disp_prop_t* display, int draw)
-//Displays a cluster id line, in which each cluster has it's own 
-//latin capital letter (A, B, C...). 
-//iff draw is 1 the line is (re)printed. otherwise only erased.
-{
-    int index, offset; //temp var
-    void* temp_p; //temp pointer
-
-    //delete a single line of numbering
-    move(display->max_row - display->bottom_spacing + 1,
-            display->min_col + display->left_spacing - 1);
-    for (offset = display->min_col + display->left_spacing;
-            offset <= display->max_col; offset++)
-        printw(" ");
-
-    if ((display->displayed > 0) && (display->data_count > 0) && (draw)) {
-        //move to position
-        move(display->max_row - display->bottom_spacing + 1,
-                display->min_col + display->left_spacing + 1);
-
-        offset = 0;
-        c_on(&(pConfigurator->Colors._horizNodeName));
-        for (index = 0; index < display->displayed / (display->legend).legend_count; index++) {
-            //points to the currently displayed node
-            temp_p = display->display_data[index * (display->legend).legend_count];
-
-            //left space
-            for (offset = 0;
-                    offset < (display->legend).legend_count - 1 -
-                    ((display->legend).legend_count - 1) / 2;
-                    offset++)
-                printw(" ");
-
-            //the cluster id (should be A-Z or 0)
-            offset++;
-            printw("%c", (char)
-                    scalar_div_x(dm_getIdByName("cluster-id"),
-                    (void*) ((long) temp_p + get_pos(dm_getIdByName("cluster-id"))), 1));
-
-            //right space
-            for (; offset < (display->legend).legend_count; offset++)
-                printw(" ");
-        }
-        c_off(&(pConfigurator->Colors._horizNodeName));
-    }
-}
-
-void show_legend_side_win(mon_disp_prop_t* display)
-//draws the legend on the left (in wlegend)
-//note that the legend also asserts expert editing mode
-{
-    int index;
-    legend_node_t* lgd_ptr;
-
-    if (display->side_win_type != SIDE_WIN_LEGEND)
-        //not to be displayed
-        return;
-
-    if (dbg_flg) fprintf(dbg_fp, "LEGEND.\n");
-
-    if (display->wlegend != NULL)
-        delwin(display->wlegend);
-
-    //creating the window:
-    display->wlegend = newwin(display->max_row - display->min_row - 1,
-            display->lgdw, display->min_row,
-            display->min_col);
-
-    //printing the contents:
-    mvwprintw(display->wlegend, 1, 1, "Legend: ");
-    index = 1;
-    lgd_ptr = (display->legend).head;
-    while (lgd_ptr != NULL) {
-        if (lgd_ptr == (display->legend).curr_ptr)
-            wattron(display->wlegend, A_REVERSE);
-        mvwprintw(display->wlegend, index + 1, 1, "%i)", index);
-        if (lgd_ptr == (display->legend).curr_ptr)
-            wattroff(display->wlegend, A_REVERSE);
-        print_str(display->wlegend, &(pConfigurator->Colors._statusNodeName),
-                index + 1, 4, mon_map[lgd_ptr->data_type]->md_title,
-                mon_map[lgd_ptr->data_type]->md_titlength, 0);
-        index++;
-        lgd_ptr = lgd_ptr->next;
-    }
-
-    if (lgd_ptr == (display->legend).curr_ptr) {
-        wattron(display->wlegend, A_REVERSE);
-        mvwprintw(display->wlegend, index + 1, 1, "%i)", index);
-        wattroff(display->wlegend, A_REVERSE);
-    }
-
-    wborder(display->wlegend, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE,
-            ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
-
-    mvwprintw(display->wlegend,
-            display->max_row - display->min_row - 2, 1,
-            " z - toggle, x - close");
-
-    wrefresh(display->wlegend);
-}
-
-void show_statistics_side_win(mon_disp_prop_t* display)
-//draws the statistics on the left (in wlegend)
-{
-    int index;
-    double avg;
-    legend_node_t* lgd_ptr;
-
-    if (display->side_win_type != SIDE_WIN_STATS)
-        //not to be displayed
-        return;
-
-    if (dbg_flg) fprintf(dbg_fp, "STATS.\n");
-
-    if (display->wlegend != NULL)
-        delwin(display->wlegend);
-
-    //creating window:
-    display->wlegend = newwin(display->max_row - display->min_row - 1,
-            display->lgdw, display->min_row,
-            display->min_col);
-
-    //printing the contents:
-    mvwprintw(display->wlegend, 1, 1, "Statistics: ");
-    index = 1;
-    lgd_ptr = (display->legend).head;
-    while (lgd_ptr != NULL) {
-        avg = avg_by_item(display, lgd_ptr->data_type);
-        if (avg >= 0) {
-            mvwprintw(display->wlegend, index + 1, 1,
-                    "%i) ", index);
-            print_str(display->wlegend, &(pConfigurator->Colors._statusNodeName),
-                    index + 1, 4, mon_map[lgd_ptr->data_type]->md_title,
-                    mon_map[lgd_ptr->data_type]->md_titlength, 0);
-            wprintw(display->wlegend, " AVG: %.2f", avg);
-
-            index++;
-        }
-        lgd_ptr = lgd_ptr->next;
-    }
-
-    wborder(display->wlegend, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE,
-            ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
-    mvwprintw(display->wlegend,
-            display->max_row - display->min_row - 2, 1,
-            " z - toggle, x - close");
-
-    wrefresh(display->wlegend);
-}
 
 
 
@@ -1641,9 +1488,9 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
 
 
     //mon_map init (explained above)
-    mon_map = (mon_display_module_t**) malloc((infoDisplayModuleNum + 1) * sizeof (mon_display_module_t*));
+    infoModulesArr = (mon_display_module_t**) malloc((infoDisplayModuleNum + 1) * sizeof (mon_display_module_t*));
     for (index = 0; index < infoDisplayModuleNum; index++) {
-        mon_map[index] = &(mon_displays[index]);
+        infoModulesArr[index] = &(mon_displays[index]);
     }
 
     //pos_map init (explained above)
@@ -1651,15 +1498,15 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     index2 = 0;
     for (index = 0; index < infoDisplayModuleNum; index++) {
         pos_map[index] = index2;
-        index2 += mon_map[index]->md_length_func();
+        index2 += infoModulesArr[index]->md_length_func();
     }
 
     //key_map init (explained above)
-    max_key = mon_map[0]->md_key;
+    max_key = infoModulesArr[0]->md_key;
     //first - finding the highest key value
     for (index = 0; index < infoDisplayModuleNum; index++)
-        if (mon_map[index]->md_key > max_key)
-            max_key = mon_map[index]->md_key;
+        if (infoModulesArr[index]->md_key > max_key)
+            max_key = infoModulesArr[index]->md_key;
     key_map = (int**) malloc((max_key + 1) * sizeof (int*));
 
     for (index = 0; index <= max_key; index++)
@@ -1671,7 +1518,7 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
         key_count = 0;
 
         for (index3 = 0; index3 < infoDisplayModuleNum; index3++)
-            if (mon_map[index3]->md_key == index) {
+            if (infoModulesArr[index3]->md_key == index) {
                 key_map[index] =
                         (int*) realloc(key_map[index],
                         (key_count + 2) * sizeof (int));
@@ -1708,7 +1555,7 @@ void mmon_free()
         free(info_desc);
     if (info_mapping)
         destroy_info_mapping(info_mapping);
-    free(mon_map);
+    free(infoModulesArr);
     free(pos_map);
     for (int index = 0; index <= max_key; index++)
         free(key_map[index]);
