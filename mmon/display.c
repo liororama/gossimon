@@ -899,16 +899,110 @@ void displayDrawNumbering(mon_disp_prop_t* display, int draw)
     }
 }
 
-//this function redraws only the graph and max values
+void displayDrawVerticalTitle(mon_disp_prop_t *display)
+{
+    legend_node_t* lgd_ptr; //for iterating the legend list
+    lgd_ptr = (display->legend).head;
+    
+    char *title = (char*) (infoModulesArr[lgd_ptr->data_type]->md_title);
+    display_rtr(stdscr, &(pConfigurator->Colors._chartColor),
+            display->min_row + (display->max_row - display->min_row
+            - display->bottom_spacing
+            + infoModulesArr[lgd_ptr->data_type]->md_titlength) / 2,
+            display->min_col + display->left_spacing - LSPACE,
+            (char*) (infoModulesArr[lgd_ptr->data_type]->md_title),
+            infoModulesArr[lgd_ptr->data_type]->md_titlength, 0);
+}
 
+
+void displayManageMax(mon_disp_prop_t *display)
+{
+    double max; //holds the max value
+    int max_type; //holds type of max
+    legend_node_t *lgd_ptr = (display->legend).head;
+  
+    // Manage max =====================================
+    max = get_max(display, lgd_ptr->data_type);
+    max_type = lgd_ptr->data_type;
+
+    if ((max < 1.0) && ((max_type == dm_getIdByName("load")) || (max_type == dm_getIdByName("f+l"))))
+        max = 1.0;
+
+    // The time to change the max has come!
+    if ((display->max_counter >= max_val_reset_timeout) ||
+            (max > display->last_max) ||
+            (display->last_max == -1) ||
+            (display->last_max_type != max_type)) {
+        display->last_max = max;
+        display->last_max_type = max_type;
+        display->max_counter = 0;
+    } else {
+        // Increment waiting time
+        display->max_counter++;
+    }
+}
+
+
+void displayDrawYAxisValues(mmon_display_t *display) 
+{
+    legend_node_t *lgd_ptr = (display->legend).head;
+
+    // Displays Y axis valus (if scalar)
+    if ((isScalar(lgd_ptr->data_type)) &&
+            !(display->show_help)) {
+        int width = display->max_row - display->min_row - display->bottom_spacing;
+        c_on(&(pConfigurator->Colors._stringMB));
+        mvprintw(display->min_row,
+                display->left_spacing - LSPACE + 1,
+                infoModulesArr[lgd_ptr->data_type]->md_format,
+                display->last_max);
+        mvprintw(display->min_row + width / 2,
+                display->left_spacing - LSPACE + 1,
+                infoModulesArr[lgd_ptr->data_type]->md_format,
+                display->last_max / 2);
+        mvprintw(display->min_row + width / 4,
+                display->left_spacing - LSPACE + 1,
+                infoModulesArr[lgd_ptr->data_type]->md_format,
+                display->last_max * 3 / 4);
+        mvprintw(display->min_row + (width * 3) / 4,
+                display->left_spacing - LSPACE + 1,
+                infoModulesArr[lgd_ptr->data_type]->md_format,
+                display->last_max / 4);
+        c_off(&(pConfigurator->Colors._stringMB));
+
+        mlog_bn_db("disp", "MAX %f\n", display->last_max);
+    }
+
+}
+
+void displayDrawBorder(mon_disp_prop_t *display)
+{
+    // If the first displayed item belongs to first machine in data
+    if ((display->displayed == 0) ||
+            ((long) (display->display_data[0]) - (long) display->raw_data < display->block_length)) {
+        // If the last displayed item belongs to the last machine in data
+        if ((display->displayed == 0) ||
+                ((long) (display->display_data[display->displayed - 1]) - (long) display->raw_data
+                > (display->data_count - 2) * display->block_length)) {
+            wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LLCORNER, ' ');
+        } else {
+            wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LLCORNER, ACS_RARROW);
+        }
+    } else if ((long) (display->display_data[display->displayed - 1]) - (long) display->raw_data
+            > (display->data_count - 2) * display->block_length)
+        wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LARROW, ' ');
+    else
+        wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LARROW, ACS_RARROW);
+
+}
+
+// Redraws only the graph and max values
 void displayRedrawGraph(mon_disp_prop_t* display)
 {
     int index; //temp var for loops
     legend_node_t* lgd_ptr; //for iterating the legend list
-    double max; //holds the max value
     int max_type; //holds type of max
 
-    char* title;
 
     if (dbg_flg) fprintf(dbg_fp, "Graph redrawn.\n");
 
@@ -921,68 +1015,21 @@ void displayRedrawGraph(mon_disp_prop_t* display)
 
     // Display bottom numbering - if needed
     displayDrawNumbering(display, (lgd_ptr != NULL));
-
-    // Allocate available space for the vertical display type title
+    
+    // Vertical Title
     if ((lgd_ptr != NULL) && (!(display->show_help))) {
-        title = (char*) (infoModulesArr[lgd_ptr->data_type]->md_title);
-        display_rtr(stdscr, &(pConfigurator->Colors._chartColor),
-                display->min_row + (display->max_row - display->min_row
-                - display->bottom_spacing
-                + infoModulesArr[lgd_ptr->data_type]->md_titlength) / 2,
-                display->min_col + display->left_spacing - LSPACE,
-                (char*) (infoModulesArr[lgd_ptr->data_type]->md_title),
-                infoModulesArr[lgd_ptr->data_type]->md_titlength, 0);
+        displayDrawVerticalTitle(display);
     }
 
     // Print the new (if needed):
     if ((lgd_ptr != NULL) && (display->displayed > 0) && (display->raw_data != NULL)) {
-        max = get_max(display, lgd_ptr->data_type);
+        
+        displayManageMax(display);
         max_type = lgd_ptr->data_type;
 
-        if ((max < 1.0) && ((max_type == dm_getIdByName("load")) || (max_type == dm_getIdByName("f+l"))))
-            max = 1.0;
-
-        // The time to change the max has come!
-        if ((display->max_counter >= max_val_reset_timeout) ||
-                (max > display->last_max) ||
-                (display->last_max == -1) ||
-                (display->last_max_type != max_type)) {
-            display->last_max = max;
-            display->last_max_type = max_type;
-            display->max_counter = 0;
-        } else {
-            // Increment waiting time
-            display->max_counter++;
-        }
-
-
-        // Displays left axis valus (if scalar)
-        if ((isScalar(lgd_ptr->data_type)) &&
-                !(display->show_help)) {
-            int width = display->max_row - display->min_row - display->bottom_spacing;
-            c_on(&(pConfigurator->Colors._stringMB));
-            mvprintw(display->min_row,
-                    display->left_spacing - LSPACE + 1,
-                    infoModulesArr[lgd_ptr->data_type]->md_format,
-                    display->last_max);
-            mvprintw(display->min_row + width / 2,
-                    display->left_spacing - LSPACE + 1,
-                    infoModulesArr[lgd_ptr->data_type]->md_format,
-                    display->last_max / 2);
-            mvprintw(display->min_row + width / 4,
-                    display->left_spacing - LSPACE + 1,
-                    infoModulesArr[lgd_ptr->data_type]->md_format,
-                    display->last_max * 3 / 4);
-            mvprintw(display->min_row + (width * 3) / 4,
-                    display->left_spacing - LSPACE + 1,
-                    infoModulesArr[lgd_ptr->data_type]->md_format,
-                    display->last_max / 4);
-            c_off(&(pConfigurator->Colors._stringMB));
-
-            mlog_bn_db("disp", "MAX %f\n", display->last_max);
-        }
-
-
+        displayDrawYAxisValues(display);
+        
+        //=========================================================
         // ACTUAL GRPAHS: Displaying the bars on the graph by using the module functions
         // COULD BE IMPROVED (FINDING MAX)
         lgd_ptr = (display->legend).head;
@@ -1038,34 +1085,22 @@ void displayRedrawGraph(mon_disp_prop_t* display)
         }
     }
 
+    //================================= Displaying the AXIS ============================
     // Displaying  graph axis
     if (*curr_display == display) {
         //only the chosen graph has colored axis
         wc_on(display->graph, &(pConfigurator->Colors._chartColor));
     }
 
-    // If the first displayed item belongs to first machine in data
-    if ((display->displayed == 0) ||
-            ((long) (display->display_data[0]) - (long) display->raw_data < display->block_length)) {
-        // If the last displayed item belongs to the last machine in data
-        if ((display->displayed == 0) ||
-                ((long) (display->display_data[display->displayed - 1]) - (long) display->raw_data
-                > (display->data_count - 2) * display->block_length)) {
-            wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LLCORNER, ' ');
-        } else {
-            wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LLCORNER, ACS_RARROW);
-        }
-    } else
-        if ((long) (display->display_data[display->displayed - 1]) - (long) display->raw_data
-            > (display->data_count - 2) * display->block_length)
-        wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LARROW, ' ');
-    else
-        wborder(display->graph, ACS_VLINE, ' ', ' ', ACS_HLINE, ACS_UARROW, ' ', ACS_LARROW, ACS_RARROW);
-
+    displayDrawBorder(display);
+    
+    
     // Only the chosen graph has colored axis
     if (*curr_display == display)
         wc_off(display->graph, &(pConfigurator->Colors._chartColor));
 
+    //============================= From here below it is ok ============================
+    
     // Show the cluster id 
     if (display->show_cluster)
         display_cluster_id(display, 1);
@@ -1076,6 +1111,17 @@ void displayRedrawGraph(mon_disp_prop_t* display)
             display->min_col + display->left_spacing,
             "D");
 
+}
+
+void displayShowHelp(mon_disp_prop_t *display)
+{
+    //erase previous graph content
+    werase(display->graph);
+    //remove bottom numbering
+    displayDrawNumbering(display, 0);
+    //remove cluster line
+    display_cluster_id(display, 0);
+    show_manual(display);
 }
 
 void displayRedraw(mon_disp_prop_t* display)
@@ -1242,15 +1288,9 @@ void displayRedraw(mon_disp_prop_t* display)
 
     //now, if the "show_help" flag is 1, we display the help in the graph window.
     //otherwise - we display the graph as usual.
-    if (display->show_help) {
-        //erase previous graph content
-        werase(display->graph);
-        //remove bottom numbering
-        displayDrawNumbering(display, 0);
-        //remove cluster line
-        display_cluster_id(display, 0);
-        show_manual(display);
-    } else
+    if (display->show_help) 
+        displayShowHelp(display);        
+    else
         displayRedrawGraph(display); //everything related to the graph
 
 
