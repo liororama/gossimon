@@ -677,12 +677,12 @@ double kernel_version_scalar_div_x (const void* item, double x)
   return (double)(*((int*)item)) / x;
 }
 
-void kernel_version_update_info_desc(void *d, variable_map_t *info_mapping)
+void kernel_version_update_info_desc(void *d, variable_map_t *glob_info_var_mapping)
 {
     mon_display_module_t *md = (mon_display_module_t *) d;
 
     kernel_version_md_info = md;
-    md->md_info_var_map = get_var_desc(info_mapping, ITEM_KERNEL_RELEASE_NAME);
+    md->md_info_var_map = get_var_desc(glob_info_var_mapping, ITEM_KERNEL_RELEASE_NAME);
     return;
 }
 

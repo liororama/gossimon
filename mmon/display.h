@@ -27,7 +27,7 @@ typedef struct legend_list
 {
   struct legend_node*  head; //pointer to first
   struct legend_node*  curr_ptr; //pointer to current type (NULL if at end)
-  int                  legend_count; //amount of types in legend
+  int                  legend_size; //amount of types in legend
 } legend_list_t;
 
 typedef enum SideWindowType {
@@ -81,8 +81,8 @@ typedef struct mon_disp_prop
   //"legend" is a linked list, which stores the format of display for each
   //machine, where every node in the list holds a display type, representing
   //a singlee colomn in the graph.
-  void        **display_data;
-  int           displayed;
+  void        **displayed_nodes_data;
+  int           displayed_nodes_num;
   int           selected_node;   // The selected node number
   legend_list_t legend;
 
@@ -114,7 +114,7 @@ typedef struct mon_disp_prop
   int           bottom_spacing;  //for graph position
 
   int           recount;         //wheather there is a need to recount the displayed or not
-  int           need_dest;       //wheather threr is a need to find a new destination
+  int           need_dest;       //wheather there is a need to find a new destination
   int           help_start;      //notes where to start the help str printout
   
   float         sspeed;

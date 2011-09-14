@@ -172,9 +172,9 @@ void parse_cmd(mmon_data_t *md, int pressed)
                 }
                 else {
                     //use new host:
-                    free(display->display_data);
-                    display->display_data = NULL;
-                    display->displayed = 0;
+                    free(display->displayed_nodes_data);
+                    display->displayed_nodes_data = NULL;
+                    display->displayed_nodes_num = 0;
 
                     if (display->data_count > 0) {
                         displayFreeData(display);
@@ -210,9 +210,9 @@ void parse_cmd(mmon_data_t *md, int pressed)
                 }
                 else {
                     //use new host:
-                    free(display->display_data);
-                    display->display_data = NULL;
-                    display->displayed = 0;
+                    free(display->displayed_nodes_data);
+                    display->displayed_nodes_data = NULL;
+                    display->displayed_nodes_num = 0;
 
                     if (display->data_count > 0) {
                         displayFreeData(display);
@@ -229,13 +229,13 @@ void parse_cmd(mmon_data_t *md, int pressed)
             break;
 
         case KEY_LEFT: //move left
-            if (display->displayed == 0)
+            if (display->displayed_nodes_num == 0)
                 break;
             move_left(display);
             break;
 
         case KEY_RIGHT: //move right
-            if (display->displayed == 0)
+            if (display->displayed_nodes_num == 0)
                 break;
             move_right(display);
             break;
@@ -251,7 +251,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
             else //in graph display
             {
                 for (index = 0;
-                        index < display->displayed / (display->legend).legend_count;
+                        index < display->displayed_nodes_num / (display->legend).legend_size;
                         index++)
                     move_left(display);
             }
@@ -268,7 +268,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
             else //in graph display
             {
                 for (index = 0;
-                        index < display->displayed / (display->legend).legend_count;
+                        index < display->displayed_nodes_num / (display->legend).legend_size;
                         index++)
                     move_right(display);
             }
@@ -366,30 +366,30 @@ void parse_cmd(mmon_data_t *md, int pressed)
             //first - check if addition is available
             index = 0;
             while ((index < MAX_SPLIT_SCREENS) &&
-                    (split_screen[index] != NULL))
+                    (glob_displaysArr[index] != NULL))
                 index++;
             if (index == MAX_SPLIT_SCREENS)
                 break;
 
-            split_screen[index] =
+            glob_displaysArr[index] =
                     (mon_disp_prop_t*) malloc(sizeof (mon_disp_prop_t));
-            displayInit(split_screen[index]);
-            curr_display = &(split_screen[index]);
+            displayInit(glob_displaysArr[index]);
+            curr_display = &(glob_displaysArr[index]);
             break;
 
         case 'e':
             //e - delete the current screen
-            if (split_screen[1] != NULL)
+            if (glob_displaysArr[1] != NULL)
                 terminate();
             break;
 
         case 9: //TAB - cycle through screens
-            if (curr_display == &(split_screen[MAX_SPLIT_SCREENS - 1]))
-                curr_display = &(split_screen[0]);
+            if (curr_display == &(glob_displaysArr[MAX_SPLIT_SCREENS - 1]))
+                curr_display = &(glob_displaysArr[0]);
             else
                 curr_display++;
             if (*curr_display == NULL)
-                curr_display = &(split_screen[0]);
+                curr_display = &(glob_displaysArr[0]);
             break;
 
         case 't': //toggle bottom status bar
@@ -448,7 +448,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
                     (*(key_map[pressed]) != -1)) {
                 index = 0;
                 if (!display->wlegend) {//if in basic mode
-                    while ((display->legend).legend_count > 0) //display types to erase
+                    while ((display->legend).legend_size > 0) //display types to erase
                     {
                         lgd_ptr = (display->legend).head;
                         while (lgd_ptr->next != NULL)

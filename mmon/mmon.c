@@ -39,11 +39,11 @@ int exiting = 0;
 
 // The mapping structure. It is initialized when description is read from infod
 // for the first time
-mmon_info_mapping_t info_map;
+mmon_info_mapping_t glob_info_map;
 
 // Mapping variables
-char *info_desc = NULL;
-variable_map_t *info_mapping = NULL;
+char *glob_info_desc = NULL;
+variable_map_t *glob_info_var_mapping = NULL;
 
 //Quick reference maps:
  mon_display_module_t** infoModulesArr; 
@@ -116,7 +116,7 @@ FILE *dbg_fp;
 //      space for the border of the window. 
 
 //DISPLAYS (for split screen mode)
-mon_disp_prop_t** split_screen; //array of screens on display. 
+mon_disp_prop_t** glob_displaysArr; //array of screens on display.
 mon_disp_prop_t** curr_display = NULL; //pointer to selected screen.
 
 
@@ -138,6 +138,8 @@ void display_totals(mon_disp_prop_t* display, int draw);
 // Free mmon global memory
 void mmon_free();
 // Exit mmon
+int mmon_redraw(mmon_display_t *display);
+
 
 int setStartWindows(mmon_data_t *md);
 int loadCurrentWindows(mmon_data_t *md);
@@ -301,11 +303,11 @@ void new_host(mon_disp_prop_t* display, char* request)
     delwin(display->dest);
 
     //now, to free all alocated memory for the new data:
-    if (display->display_data) {
-        free(display->display_data);
-        display->display_data = NULL;
+    if (display->displayed_nodes_data) {
+        free(display->displayed_nodes_data);
+        display->displayed_nodes_data = NULL;
     }
-    display->displayed = 0;
+    display->displayed_nodes_num = 0;
 
     if (display->raw_data) {
         if (display->data_count > 0)
@@ -320,7 +322,7 @@ void new_host(mon_disp_prop_t* display, char* request)
 
     //to apply the changes:
     display->recount = 1;
-    get_nodes_to_display(display);
+    mmon_redraw(display);
 }
 
 void new_user(mon_disp_prop_t* display)
@@ -381,7 +383,7 @@ void new_user(mon_disp_prop_t* display)
 
     //to apply the changes:
     display->recount = 1;
-    get_nodes_to_display(display);
+    mmon_redraw(display);
 }
 
 
@@ -436,7 +438,7 @@ void new_yardstick(mon_disp_prop_t* display)
     //iterated while choice input is invalid (not 1-3)
 
     delwin(display->dest); //delete the window
-    get_nodes_to_display(display); //apply changes
+    mmon_redraw(display); //apply changes
 }
 
 /****************************************************************************
@@ -456,7 +458,7 @@ int get_raw_pos(mon_disp_prop_t* display, int index)
 //Returns the relative position of the indexed
 //item of the display array, in the raw data array
 {
-    return (((long) (display->display_data[index]) - (long) display->raw_data)
+    return (((long) (display->displayed_nodes_data[index]) - (long) display->raw_data)
             / display->block_length);
 }
 
@@ -549,7 +551,7 @@ double get_max(mon_disp_prop_t* display, int item)
     legend_node_t* lgd_ptr = (display->legend).head;
     //we get to this point only if the legend isn't empty...
     //so lgd_ptr isn't NULL. and displayed != 0.
-    if (!(isScalar(item)) || (display->displayed <= 0))
+    if (!(isScalar(item)) || (display->displayed_nodes_num <= 0))
         //there is no max... (irrelevant)
         return 0;
 
@@ -557,19 +559,19 @@ double get_max(mon_disp_prop_t* display, int item)
         index++;
         temp = scalar_div_x
                 (item,
-                (void*) ((long) display->display_data[index] + get_pos(item)), 1);
+                (void*) ((long) display->displayed_nodes_data[index] + get_pos(item)), 1);
     } while ((!(display->life_arr[get_raw_pos(display, index)])) &&
-            (index < display->displayed - 1));
+            (index < display->displayed_nodes_num - 1));
     //find first node alive to compare to
 
-    if ((index == display->displayed - 1) &&
+    if ((index == display->displayed_nodes_num - 1) &&
             (!(display->life_arr[get_raw_pos(display, index)]))) {
         //no living nodes found
         if (dbg_flg) fprintf(dbg_fp, "All nodes are down.");
         return 0;
     }
 
-    for (index = 0; index < display->displayed;
+    for (index = 0; index < display->displayed_nodes_num;
             index++, lgd_ptr = lgd_ptr->next)
         //going over the display data array and the legend at the same time
     {
@@ -580,11 +582,11 @@ double get_max(mon_disp_prop_t* display, int item)
                 (display->life_arr[get_raw_pos(display, index)])) //alive
                 || (item == dm_getIdByName("num"))) && //or we're looking for the number...
                 (scalar_div_x(item,
-                (void*) ((long) display->display_data[index]
+                (void*) ((long) display->displayed_nodes_data[index]
                 + get_pos(item)), 1) > temp)) //larger then max
             temp =
                 scalar_div_x(item,
-                (void*) ((long) display->display_data[index]
+                (void*) ((long) display->displayed_nodes_data[index]
                 + get_pos(item)),
                 1);
         //replace max
@@ -647,7 +649,7 @@ void toggle_disp_type(mon_disp_prop_t* display, int item, int action)
         lgd_ptr->data_type = item;
         lgd_ptr->next = NULL;
         (display->legend).head = lgd_ptr;
-        (display->legend).legend_count = 1;
+        (display->legend).legend_size = 1;
         (display->legend).curr_ptr = lgd_ptr;
         if (dbg_flg) fprintf(dbg_fp, "Added as single\n");
         return;
@@ -665,7 +667,7 @@ void toggle_disp_type(mon_disp_prop_t* display, int item, int action)
             free_ptr = (display->legend).head;
             (display->legend).head = (display->legend).head->next;
             free(free_ptr);
-            (display->legend).legend_count--;
+            (display->legend).legend_size--;
             (display->legend).curr_ptr = NULL;
             if (dbg_flg) fprintf(dbg_fp, "Removed from head\n");
         } else
@@ -676,7 +678,7 @@ void toggle_disp_type(mon_disp_prop_t* display, int item, int action)
                 free_ptr = free_ptr->next;
             free_ptr->next = NULL;
             free(lgd_ptr);
-            (display->legend).legend_count--;
+            (display->legend).legend_size--;
             (display->legend).curr_ptr = NULL;
             if (dbg_flg) fprintf(dbg_fp, "Popped from end\n");
         }
@@ -686,7 +688,7 @@ void toggle_disp_type(mon_disp_prop_t* display, int item, int action)
         lgd_ptr->next = (legend_node_t*) malloc(sizeof (legend_node_t));
         (lgd_ptr->next)->data_type = item;
         (lgd_ptr->next)->next = NULL;
-        (display->legend).legend_count++;
+        (display->legend).legend_size++;
         (display->legend).curr_ptr = lgd_ptr->next;
         if (dbg_flg) fprintf(dbg_fp, "Added at end\n");
     }
@@ -710,107 +712,107 @@ int get_infod_description(mon_disp_prop_t* display, int forceReload)
 //Getting infod description and parsing it creating the mapping structure
 {
     forceReload = forceReload || display->recount;
-    if (!forceReload && info_desc && info_mapping)
+    if (!forceReload && glob_info_desc && glob_info_var_mapping)
         return 1;
 
     if (dbg_flg) fprintf(dbg_fp, "getting infod description...(%s : %i) \n",
             display->mosix_host, host_port);
 
     if (forceReload) {
-        if (info_desc) {
-            free(info_desc);
-            info_desc = NULL;
+        if (glob_info_desc) {
+            free(glob_info_desc);
+            glob_info_desc = NULL;
         }
-        if (info_mapping) {
-            destroy_info_mapping(info_mapping);
-            info_mapping = NULL;
+        if (glob_info_var_mapping) {
+            destroy_info_mapping(glob_info_var_mapping);
+            glob_info_var_mapping = NULL;
         }
     }
 
 
-    if (!info_desc) {
-        info_desc = infolib_info_description(display->mosix_host, host_port);
-        if (!info_desc) {
+    if (!glob_info_desc) {
+        glob_info_desc = infolib_info_description(display->mosix_host, host_port);
+        if (!glob_info_desc) {
             if (dbg_flg) fprintf(dbg_fp, "Failed getting description\n");
             return 1;
         }
 
-        if (!(info_mapping = create_info_mapping(info_desc))) {
+        if (!(glob_info_var_mapping = create_info_mapping(glob_info_desc))) {
             if (dbg_flg) fprintf(dbg_fp, "Failed creating info mapping\n");
-            free(info_desc);
-            info_desc = NULL;
-            info_mapping = NULL;
+            free(glob_info_desc);
+            glob_info_desc = NULL;
+            glob_info_var_mapping = NULL;
             return 0;
         }
-        if (dbg_flg) fprintf(dbg_fp, "description \n%s\n", info_desc);
+        if (dbg_flg) fprintf(dbg_fp, "description \n%s\n", glob_info_desc);
     }
 
     if (dbg_flg) fprintf(dbg_fp, "got description.\n");
 
 
     // Regular MOSIX node information
-    info_map.tmem = get_var_desc(info_mapping, ITEM_TMEM_NAME);
-    info_map.tswap = get_var_desc(info_mapping, ITEM_TSWAP_NAME);
-    info_map.fswap = get_var_desc(info_mapping, ITEM_FSWAP_NAME);
-    info_map.tdisk = get_var_desc(info_mapping, ITEM_TDISK_NAME);
-    info_map.fdisk = get_var_desc(info_mapping, ITEM_FDISK_NAME);
-    info_map.uptime = get_var_desc(info_mapping, ITEM_UPTIME_NAME);
-    info_map.disk_read_rate =
-            get_var_desc(info_mapping, ITEM_DISK_READ_RATE);
-    info_map.disk_write_rate =
-            get_var_desc(info_mapping, ITEM_DISK_WRITE_RATE);
-    info_map.net_rx_rate =
-            get_var_desc(info_mapping, ITEM_NET_RX_RATE);
-    info_map.net_tx_rate =
-            get_var_desc(info_mapping, ITEM_NET_TX_RATE);
-    info_map.nfs_client_rpc_rate =
-            get_var_desc(info_mapping, ITEM_NFS_CLIENT_RPC_RATE);
+    glob_info_map.tmem = get_var_desc(glob_info_var_mapping, ITEM_TMEM_NAME);
+    glob_info_map.tswap = get_var_desc(glob_info_var_mapping, ITEM_TSWAP_NAME);
+    glob_info_map.fswap = get_var_desc(glob_info_var_mapping, ITEM_FSWAP_NAME);
+    glob_info_map.tdisk = get_var_desc(glob_info_var_mapping, ITEM_TDISK_NAME);
+    glob_info_map.fdisk = get_var_desc(glob_info_var_mapping, ITEM_FDISK_NAME);
+    glob_info_map.uptime = get_var_desc(glob_info_var_mapping, ITEM_UPTIME_NAME);
+    glob_info_map.disk_read_rate =
+            get_var_desc(glob_info_var_mapping, ITEM_DISK_READ_RATE);
+    glob_info_map.disk_write_rate =
+            get_var_desc(glob_info_var_mapping, ITEM_DISK_WRITE_RATE);
+    glob_info_map.net_rx_rate =
+            get_var_desc(glob_info_var_mapping, ITEM_NET_RX_RATE);
+    glob_info_map.net_tx_rate =
+            get_var_desc(glob_info_var_mapping, ITEM_NET_TX_RATE);
+    glob_info_map.nfs_client_rpc_rate =
+            get_var_desc(glob_info_var_mapping, ITEM_NFS_CLIENT_RPC_RATE);
 
 
-    info_map.speed = get_var_desc(info_mapping, ITEM_SPEED_NAME);
-    info_map.iospeed = get_var_desc(info_mapping, ITEM_IOSPEED_NAME);
-    info_map.ntopology = get_var_desc(info_mapping, ITEM_NTOPOLOGY_NAME);
-    info_map.ncpus = get_var_desc(info_mapping, ITEM_NCPUS_NAME);
-    info_map.frozen = get_var_desc(info_mapping, ITEM_FROZEN_NAME);
-    info_map.priority = get_var_desc(info_mapping, ITEM_PRIO_NAME);
-    info_map.load = get_var_desc(info_mapping, ITEM_LOAD_NAME);
-    info_map.export_load = get_var_desc(info_mapping, ITEM_ELOAD_NAME);
-    info_map.util = get_var_desc(info_mapping, ITEM_UTIL_NAME);
-    info_map.iowait = get_var_desc(info_mapping, ITEM_IOWAIT_NAME);
+    glob_info_map.speed = get_var_desc(glob_info_var_mapping, ITEM_SPEED_NAME);
+    glob_info_map.iospeed = get_var_desc(glob_info_var_mapping, ITEM_IOSPEED_NAME);
+    glob_info_map.ntopology = get_var_desc(glob_info_var_mapping, ITEM_NTOPOLOGY_NAME);
+    glob_info_map.ncpus = get_var_desc(glob_info_var_mapping, ITEM_NCPUS_NAME);
+    glob_info_map.frozen = get_var_desc(glob_info_var_mapping, ITEM_FROZEN_NAME);
+    glob_info_map.priority = get_var_desc(glob_info_var_mapping, ITEM_PRIO_NAME);
+    glob_info_map.load = get_var_desc(glob_info_var_mapping, ITEM_LOAD_NAME);
+    glob_info_map.export_load = get_var_desc(glob_info_var_mapping, ITEM_ELOAD_NAME);
+    glob_info_map.util = get_var_desc(glob_info_var_mapping, ITEM_UTIL_NAME);
+    glob_info_map.iowait = get_var_desc(glob_info_var_mapping, ITEM_IOWAIT_NAME);
 
-    info_map.status = get_var_desc(info_mapping, ITEM_STATUS_NAME);
-    info_map.freepages = get_var_desc(info_mapping, ITEM_FREEPAGES_NAME);
-    info_map.token_level = get_var_desc(info_mapping, ITEM_TOKEN_LEVEL_NAME);
+    glob_info_map.status = get_var_desc(glob_info_var_mapping, ITEM_STATUS_NAME);
+    glob_info_map.freepages = get_var_desc(glob_info_var_mapping, ITEM_FREEPAGES_NAME);
+    glob_info_map.token_level = get_var_desc(glob_info_var_mapping, ITEM_TOKEN_LEVEL_NAME);
 
     // Grid + Reserve information
-    info_map.locals = get_var_desc(info_mapping, ITEM_LOCALS_PROC_NAME);
-    info_map.guests = get_var_desc(info_mapping, ITEM_GUESTS_PROC_NAME);
-    info_map.maxguests = get_var_desc(info_mapping, ITEM_MAXGUESTS_NAME);
-    info_map.mosix_version =
-            get_var_desc(info_mapping, ITEM_MOSIX_VERSION_NAME);
-    info_map.min_guest_dist =
-            get_var_desc(info_mapping, ITEM_MIN_GUEST_DIST_NAME);
-    info_map.max_guest_dist =
-            get_var_desc(info_mapping, ITEM_MAX_GUEST_DIST_NAME);
-    info_map.max_mig_dist =
-            get_var_desc(info_mapping, ITEM_MAX_MIG_DIST_NAME);
-    info_map.min_run_dist =
-            get_var_desc(info_mapping, ITEM_MIN_RUN_DIST_NAME);
-    info_map.mos_procs =
-            get_var_desc(info_mapping, ITEM_MOS_PROCS_NAME);
-    info_map.ownerd_status =
-            get_var_desc(info_mapping, ITEM_OWNERD_STATUS_NAME);
+    glob_info_map.locals = get_var_desc(glob_info_var_mapping, ITEM_LOCALS_PROC_NAME);
+    glob_info_map.guests = get_var_desc(glob_info_var_mapping, ITEM_GUESTS_PROC_NAME);
+    glob_info_map.maxguests = get_var_desc(glob_info_var_mapping, ITEM_MAXGUESTS_NAME);
+    glob_info_map.mosix_version =
+            get_var_desc(glob_info_var_mapping, ITEM_MOSIX_VERSION_NAME);
+    glob_info_map.min_guest_dist =
+            get_var_desc(glob_info_var_mapping, ITEM_MIN_GUEST_DIST_NAME);
+    glob_info_map.max_guest_dist =
+            get_var_desc(glob_info_var_mapping, ITEM_MAX_GUEST_DIST_NAME);
+    glob_info_map.max_mig_dist =
+            get_var_desc(glob_info_var_mapping, ITEM_MAX_MIG_DIST_NAME);
+    glob_info_map.min_run_dist =
+            get_var_desc(glob_info_var_mapping, ITEM_MIN_RUN_DIST_NAME);
+    glob_info_map.mos_procs =
+            get_var_desc(glob_info_var_mapping, ITEM_MOS_PROCS_NAME);
+    glob_info_map.ownerd_status =
+            get_var_desc(glob_info_var_mapping, ITEM_OWNERD_STATUS_NAME);
 
     // vlen String
-    info_map.usedby = get_var_desc(info_mapping, ITEM_USEDBY_NAME);
-    info_map.freeze_info = get_var_desc(info_mapping, ITEM_FREEZE_INFO_NAME);
-    info_map.proc_watch = get_var_desc(info_mapping, ITEM_PROC_WATCH_NAME);
-    info_map.cluster_id = get_var_desc(info_mapping, ITEM_CID_CRC_NAME);
-    info_map.infod_debug = get_var_desc(info_mapping, ITEM_INFOD_DEBUG_NAME);
-    info_map.eco_info = get_var_desc(info_mapping, ITEM_ECONOMY_STAT_NAME);
-    info_map.jmig = get_var_desc(info_mapping, ITEM_JMIGRATE_NAME);
+    glob_info_map.usedby = get_var_desc(glob_info_var_mapping, ITEM_USEDBY_NAME);
+    glob_info_map.freeze_info = get_var_desc(glob_info_var_mapping, ITEM_FREEZE_INFO_NAME);
+    glob_info_map.proc_watch = get_var_desc(glob_info_var_mapping, ITEM_PROC_WATCH_NAME);
+    glob_info_map.cluster_id = get_var_desc(glob_info_var_mapping, ITEM_CID_CRC_NAME);
+    glob_info_map.infod_debug = get_var_desc(glob_info_var_mapping, ITEM_INFOD_DEBUG_NAME);
+    glob_info_map.eco_info = get_var_desc(glob_info_var_mapping, ITEM_ECONOMY_STAT_NAME);
+    glob_info_map.jmig = get_var_desc(glob_info_var_mapping, ITEM_JMIGRATE_NAME);
 
-    displayModule_updateInfoDescription(info_mapping);
+    displayModule_updateInfoDescription(glob_info_var_mapping);
 
     return 1;
 }
@@ -874,13 +876,14 @@ int get_nodes_to_display(mon_disp_prop_t* display)
 //Here, the data is obtained from the host(s).
 //If the "get_all" is 1, then all avalable data (and not just what is
 //currently displayed) is loaded to the raw_data array.
+
 {
     idata_t *infod_data = NULL;
-    idata_entry_t *cur = NULL;
+    idata_entry_t *curInfoEntry = NULL;
     idata_iter_t *iter = NULL;
     void* temp; //temp place-holder for numbers
 
-    int i, j, type; //temp vars
+    int i, j; //temp vars
     struct sigaction act;
     struct itimerval timeout;
 
@@ -944,6 +947,7 @@ int get_nodes_to_display(mon_disp_prop_t* display)
     }
 
 
+    // Calculating the memory size for each node and allocating memory
     if (display->raw_data == NULL) {
         //DATA INIT
         //determine total block length
@@ -966,10 +970,10 @@ int get_nodes_to_display(mon_disp_prop_t* display)
 
     for (i = 0; i < infod_data->num; i++) {
         //first loop only to insert MACHINE NUMBERS
-        if (!(cur = idata_iter_next(iter)))
+        if (!(curInfoEntry = idata_iter_next(iter)))
             break;
 
-        new_item(dm_getIdByName("num"), &info_map, cur,
+        new_item(dm_getIdByName("num"), &glob_info_map, curInfoEntry,
                 (void*) ((long) display->raw_data + display->block_length * i +
                 get_pos(dm_getIdByName("num"))), &current_set);
     }
@@ -979,29 +983,28 @@ int get_nodes_to_display(mon_disp_prop_t* display)
     if (dbg_flg) fprintf(dbg_fp, "Data count : %i.\n", display->data_count);
     idata_iter_done(iter);
 
-    //sort and display
+    // Sort the raw_data array by number
     qsort(display->raw_data,
             display->data_count,
             display->block_length,
             &compare_num);
 
     temp = (char*) malloc(display->block_length);
-    //temp will use now as a place-holder for numbers.
-    //each new number will be put in temp,
-    //and then compared with others to find the correct index.
+    // temp will use now as a place-holder for numbers.
+    // each new number will be put in temp,
+    // and then compared with others to find the correct index.
 
     if (!(iter = idata_iter_init(infod_data))) {
         free(infod_data);
         return 0;
     }
-
-    for (i = 0; i < infod_data->num; i++) {
-        //second loop, to put values in correct order
-        if (!(cur = idata_iter_next(iter)))
+    // Second loop, to put values in correct order
+    for (i = 0 ; i < infod_data->num ; i++) {
+        if (!(curInfoEntry = idata_iter_next(iter)))
             break;
 
-        //place desired number in temp
-        new_item(dm_getIdByName("num"), &info_map, cur, (void*) ((long) temp + get_pos(dm_getIdByName("num"))), &current_set);
+        // Place desired number in temp
+        new_item(dm_getIdByName("num"), &glob_info_map, curInfoEntry, (void*) ((long) temp + get_pos(dm_getIdByName("num"))), &current_set);
         j = 0;
         while ((compare_num(temp, (void*) ((long) display->raw_data + display->block_length * j)) != 0) &&
                 (j < display->data_count))
@@ -1010,27 +1013,24 @@ int get_nodes_to_display(mon_disp_prop_t* display)
             return 0;
 
 
-        // checking if the node is valid:
-        display->life_arr[j] =
-                ((cur->valid != 0) &&
-                (cur->data->hdr.status & INFOD_ALIVE));
+        // Checking if the node is valid:
+        display->life_arr[j] = ((curInfoEntry->valid != 0) &&
+                               (curInfoEntry->data->hdr.status & INFOD_ALIVE));
 
 
-        // Filling the data into the apropriate mos_info entry
-        // This should be the only place where specific data is
-        // accessed
+        // Filling the data into the apropriate entry. This should be the only
+        // place where specific data is accessed
         if (display->life_arr[j]) {
-            type = 0;
-            while (type < infoDisplayModuleNum) {
-                new_item(type, &info_map, cur,
+            for(int dispModule = 0 ; dispModule < infoDisplayModuleNum; dispModule++)
+            {
+                new_item(dispModule, &glob_info_map, curInfoEntry,
                         (void*) ((long) display->raw_data + display->block_length * j +
-                        get_pos(type)), &current_set);
-                type++;
+                        get_pos(dispModule)), &current_set);
             }
         } else {
+            // Extracting the status for a dead node
             if (dbg_flg) fprintf(dbg_fp, "#%i is DEAD!\n", j);
-            //some things are extracted even if the node is dead...
-            new_item(dm_getIdByName("infod-status"), &info_map, cur,
+            new_item(dm_getIdByName("infod-status"), &glob_info_map, curInfoEntry,
                     (void*) ((long) display->raw_data + display->block_length * j +
                     get_pos(dm_getIdByName("infod-status"))), &current_set);
         }
@@ -1040,10 +1040,10 @@ int get_nodes_to_display(mon_disp_prop_t* display)
     free(infod_data);
     free(temp);
     if (dbg_flg) fprintf(dbg_fp, "Data retrieved.\n");
-    displayRedraw(display);
-
+   
     return 1;
 }
+
 
 int get_str_length(char** man_str)
 //this function recieves a null truncated array of strings,
@@ -1263,17 +1263,14 @@ void move_left(mon_disp_prop_t* display)
             (display->show_dead)))
         //if we have more room to move left...
     {
-        for (index = display->displayed - 1;
-                index >= (display->legend).legend_count; index--) {
-            display->display_data[index] =
-                    display->display_data[index -
-                    (display->legend).legend_count]; //offset*
+        for (index = display->displayed_nodes_num - 1; index >= (display->legend).legend_size; index--) {
+            display->displayed_nodes_data[index] =
+                    display->displayed_nodes_data[index - (display->legend).legend_size]; //offset*
         }
 
-        for (index = 0; index < (display->legend).legend_count; index++)
-            display->display_data[index] =
-                (void*) ((long) display->display_data[index] -
-                offset * display->block_length);
+        for (index = 0; index < (display->legend).legend_size; index++)
+            display->displayed_nodes_data[index] =
+                (void*) ((long) display->displayed_nodes_data[index] - offset * display->block_length);
 
         displayRedrawGraph(display);
     }
@@ -1284,27 +1281,26 @@ void move_right(mon_disp_prop_t* display)
 {
     int index, offset = 1;
     while ((1 - display->show_dead) &&
-            (get_raw_pos(display, display->displayed - 1) + offset < display->data_count) &&
-            (1 - display->life_arr[get_raw_pos(display, display->displayed - 1) + offset]))
+            (get_raw_pos(display, display->displayed_nodes_num - 1) + offset < display->data_count) &&
+            (1 - display->life_arr[get_raw_pos(display, display->displayed_nodes_num - 1) + offset]))
         offset++; //offset is anyway >=1, or else we don't move
+
     if (dbg_flg) fprintf(dbg_fp, "Left shift. offset = %i\n", offset);
 
-    if ((get_raw_pos(display, display->displayed - 1) + offset < display->data_count) &&
-            ((display->life_arr[get_raw_pos(display, display->displayed - 1) + offset]) ||
+    if ((get_raw_pos(display, display->displayed_nodes_num - 1) + offset < display->data_count) &&
+            ((display->life_arr[get_raw_pos(display, display->displayed_nodes_num - 1) + offset]) ||
             (display->show_dead)))
         //if we have more room to move right...
     {
-        for (index = 0;
-                index < display->displayed -
-                (display->legend).legend_count; index++) {
-            display->display_data[index] =
-                    display->display_data[index +
-                    (display->legend).legend_count]; //offset*
+        for (index = 0; index < display->displayed_nodes_num - (display->legend).legend_size; index++)
+        {
+            display->displayed_nodes_data[index] =
+                    display->displayed_nodes_data[index + (display->legend).legend_size]; //offset*
         }
 
-        for (; index < display->displayed; index++)
-            display->display_data[index] =
-                (void*) ((long) display->display_data[index] +
+        for (; index < display->displayed_nodes_num; index++)
+            display->displayed_nodes_data[index] =
+                (void*) ((long) display->displayed_nodes_data[index] +
                 offset * display->block_length);
 
         displayRedrawGraph(display);
@@ -1384,16 +1380,16 @@ void loadConfigFile(mmon_data_t *md)
     terminate();
 }
 
-void size_recalculate(int redraw)
 //In the event of a change in the screen size or amount of displays,
 //this function recalculates the positions of all displays.
 //The new screens are redrawn only if redraw is asserted.
+void size_recalculate(int redraw)
 {
     int index; //temp var for loops
 
     int total = 0;
     while ((total < MAX_SPLIT_SCREENS) &&
-            (split_screen[total]))
+            (glob_displaysArr[total]))
         total++;
     //now total holds the amount of active displays
 
@@ -1401,6 +1397,7 @@ void size_recalculate(int redraw)
     clear();
     refresh();
 
+    // TODO move this copyright drawing from here to another method
     //COPYRIGHTS (string length is 40)
     c_on(&(pConfigurator->Colors._copyrightsCaption));
     mvprintw(0, (COLS - 64) / 2,
@@ -1409,23 +1406,23 @@ void size_recalculate(int redraw)
 
     for (index = 0; index < total; index++) {
         //divides the screen equaly to all displays
-        split_screen[index]->max_row = (index + 1) * (LINES - 1) / total + 1;
-        split_screen[index]->max_col = COLS;
-        split_screen[index]->min_row = index * (LINES - 1) / total + 1;
-        split_screen[index]->min_col = 0;
+        glob_displaysArr[index]->max_row = (index + 1) * (LINES - 1) / total + 1;
+        glob_displaysArr[index]->max_col = COLS;
+        glob_displaysArr[index]->min_row = index * (LINES - 1) / total + 1;
+        glob_displaysArr[index]->min_col = 0;
 
         //document the new sizes
         if (dbg_flg)
             fprintf(dbg_fp, "Disp %i : <(%i,%i) , (%i,%i)> \n",
                 index,
-                split_screen[index]->min_row,
-                split_screen[index]->min_col,
-                split_screen[index]->max_row,
-                split_screen[index]->max_col);
+                glob_displaysArr[index]->min_row,
+                glob_displaysArr[index]->min_col,
+                glob_displaysArr[index]->max_row,
+                glob_displaysArr[index]->max_col);
 
         //apply the changes to the screen (if needed)
         if (redraw)
-            get_nodes_to_display(split_screen[index]);
+            mmon_redraw(glob_displaysArr[index]);
     }
 }
 
@@ -1445,15 +1442,15 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     mlog_registerModule("disp", "Display section", "disp");
     mlog_registerModule("side", "Side window", "side");
 
-    split_screen =
+    glob_displaysArr =
             (mon_disp_prop_t**) malloc(MAX_SPLIT_SCREENS * sizeof (mon_disp_prop_t*));
-    md->displayArr = split_screen;
-    for (curr_display = &(split_screen[0]);
-            curr_display <= &(split_screen[MAX_SPLIT_SCREENS - 1]);
+    md->displayArr = glob_displaysArr;
+    for (curr_display = &(glob_displaysArr[0]);
+            curr_display <= &(glob_displaysArr[MAX_SPLIT_SCREENS - 1]);
             curr_display++)
         *curr_display = NULL;
 
-    split_screen[0] = (mon_disp_prop_t*) malloc(sizeof (mon_disp_prop_t));
+    glob_displaysArr[0] = (mon_disp_prop_t*) malloc(sizeof (mon_disp_prop_t));
     curr_display = NULL;
 
     // First registering the internal modules
@@ -1461,11 +1458,11 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     displayModule_registerStandardModules();
 
     // Initializing the first display (after loading internal display modules)
-    displayInit(split_screen[0]);
-    curr_display = &(split_screen[0]);
+    displayInit(glob_displaysArr[0]);
+    curr_display = &(glob_displaysArr[0]);
 
     // Parsing command line and setting options on the first display
-    parseCommandLine(md, argc, argv, split_screen[0]);
+    parseCommandLine(md, argc, argv, glob_displaysArr[0]);
 
 
     //ncurses init
@@ -1551,16 +1548,16 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
 
 void mmon_free()
 {
-    if (info_desc)
-        free(info_desc);
-    if (info_mapping)
-        destroy_info_mapping(info_mapping);
+    if (glob_info_desc)
+        free(glob_info_desc);
+    if (glob_info_var_mapping)
+        destroy_info_mapping(glob_info_var_mapping);
     free(infoModulesArr);
     free(pos_map);
     for (int index = 0; index <= max_key; index++)
         free(key_map[index]);
     free(key_map);
-    free(split_screen);
+    free(glob_displaysArr);
 }
 
 void mmon_exit(int status)
@@ -1583,18 +1580,18 @@ void delete_curr_display()
 
     // Searching for the position of the current display
     while ((index < MAX_SPLIT_SCREENS) &&
-            (split_screen[index] != display))
+            (glob_displaysArr[index] != display))
         index++;
 
     if (index > 0)
-        curr_display = &(split_screen[index - 1]);
+        curr_display = &(glob_displaysArr[index - 1]);
 
     // Deleting the current display
     while (index + 1 < MAX_SPLIT_SCREENS) {
-        split_screen[index] = split_screen[index + 1];
+        glob_displaysArr[index] = glob_displaysArr[index + 1];
         index++;
     }
-    split_screen[index] = NULL; //another vacant slot created
+    glob_displaysArr[index] = NULL; //another vacant slot created
     displayFree(display);
 }
 //terminates the current display
@@ -1606,7 +1603,7 @@ void terminate()
 
     if (!p_usage)
         delete_curr_display();
-    if (split_screen[0])
+    if (glob_displaysArr[0])
         screenLeft = 1;
 
 
@@ -1704,6 +1701,15 @@ int loadCurrentWindows(mmon_data_t * md)
     return setStartWindows(md);
 }
 
+int mmon_redraw(mmon_display_t *display) {
+    int res;
+    res = get_nodes_to_display(display);
+    if(res) {
+        displayRedraw(display);
+
+    }
+    return res;
+}
 int main(int argc, char** argv)
 {
     mmon_data_t mmonData;
@@ -1715,13 +1721,13 @@ int main(int argc, char** argv)
 
     res = 1;
     for (index = 0; index < MAX_SPLIT_SCREENS; index++)
-        res = res && get_nodes_to_display(split_screen[index]);
+        res = res && mmon_redraw(glob_displaysArr[index]);
 
     mvprintw(LINES - 1, 0, ""); //move to LRCORNER
     refresh();
 
 
-    while (res && (split_screen[0])) {
+    while (res && (glob_displaysArr[0])) {
         //update exity monitor
         if (exiting > 0)
             exiting--;
@@ -1732,7 +1738,7 @@ int main(int argc, char** argv)
             parse_cmd(&mmonData, pressed);
         }
         for (index = 0; index < MAX_SPLIT_SCREENS; index++)
-            res = res && get_nodes_to_display(split_screen[index]);
+            res = res && mmon_redraw(glob_displaysArr[index]);
         mvprintw(LINES - 1, 0, ""); //move to LRCORNER
         refresh();
     }

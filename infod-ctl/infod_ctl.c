@@ -53,8 +53,8 @@ char glob_res_buff[GLOB_RES_BUFF_SIZE];
 char glob_arg_buff[GLOB_ARG_BUFF_SIZE];
 
 // Infod and Mapping variables
-char *info_desc = NULL;
-variable_map_t *info_mapping = NULL;
+char *glob_info_desc = NULL;
+variable_map_t *glob_info_var_mapping = NULL;
 
 char localhost_str[] = "localhost";
 char *mosix_host = NULL;

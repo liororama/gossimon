@@ -243,7 +243,7 @@ int get_nodes_to_display (mon_disp_prop_t* display);
 //recalculates positions of active displays.
 
 extern mon_disp_prop_t** curr_display; //pointer to selected screen.
-extern mon_disp_prop_t** split_screen; //array of screens on display. 
+extern mon_disp_prop_t** glob_displaysArr; //array of screens on display.
 
 
 extern int    dbg_flg;

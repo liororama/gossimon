@@ -171,28 +171,28 @@ int parseCommandLine(mmon_data_t *md, int argc, char **argv, mon_disp_prop_t *pr
 
         case 'm':
             //overrun previous display
-            if ((prop->legend).legend_count > 0)
+            if ((prop->legend).legend_size > 0)
                 toggle_disp_type(prop, ((prop->legend).head)->data_type, 0);
             toggle_disp_type(prop, dm_getIdByName("mem"), 1);
             break;
 
         case 's':
             //overrun previous display
-            if ((prop->legend).legend_count > 0)
+            if ((prop->legend).legend_size > 0)
                 toggle_disp_type(prop, ((prop->legend).head)->data_type, 0);
             toggle_disp_type(prop, dm_getIdByName("speed"), 1);
             break;
 
         case 'l':
             //overrun previous display
-            if ((prop->legend).legend_count > 0)
+            if ((prop->legend).legend_size > 0)
                 toggle_disp_type(prop, ((prop->legend).head)->data_type, 0);
             toggle_disp_type(prop, dm_getIdByName("load"), 1);
             break;
 
         case 'u':
             //overrun previous display
-            if ((prop->legend).legend_count > 0)
+            if ((prop->legend).legend_size > 0)
                 toggle_disp_type(prop, ((prop->legend).head)->data_type, 0);
             toggle_disp_type(prop, dm_getIdByName("util"), 1);
             break;
