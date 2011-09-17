@@ -55,7 +55,7 @@ typedef struct mon_disp_prop
   //managed by the display module (like the load, or utilization module).
   
   void       *raw_data;
-  int         data_count;   //number of monitored machines
+  int         nodes_count;   //number of monitored machines
   int         block_length; //memory alocated for every single block (a block per
                             //machine)
   int        *life_arr;    //1 states corresponding machine is alive (0 for dead).
@@ -81,8 +81,8 @@ typedef struct mon_disp_prop
   //"legend" is a linked list, which stores the format of display for each
   //machine, where every node in the list holds a display type, representing
   //a singlee colomn in the graph.
-  void        **displayed_nodes_data;
-  int           displayed_nodes_num;
+  void        **displayed_bars_data;
+  int           displayed_bar_num;
   int           selected_node;   // The selected node number
   legend_list_t legend;
 

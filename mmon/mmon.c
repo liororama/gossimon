@@ -303,19 +303,19 @@ void new_host(mon_disp_prop_t* display, char* request)
     delwin(display->dest);
 
     //now, to free all alocated memory for the new data:
-    if (display->displayed_nodes_data) {
-        free(display->displayed_nodes_data);
-        display->displayed_nodes_data = NULL;
+    if (display->displayed_bars_data) {
+        free(display->displayed_bars_data);
+        display->displayed_bars_data = NULL;
     }
-    display->displayed_nodes_num = 0;
+    display->displayed_bar_num = 0;
 
     if (display->raw_data) {
-        if (display->data_count > 0)
+        if (display->nodes_count > 0)
             displayFreeData(display);
     }
 
 
-    display->data_count = 0;
+    display->nodes_count = 0;
     display->need_dest = 0;
 
     init_clusters_list(display); //set new hosts
@@ -458,7 +458,7 @@ int get_raw_pos(mon_disp_prop_t* display, int index)
 //Returns the relative position of the indexed
 //item of the display array, in the raw data array
 {
-    return (((long) (display->displayed_nodes_data[index]) - (long) display->raw_data)
+    return (((long) (display->displayed_bars_data[index]) - (long) display->raw_data)
             / display->block_length);
 }
 
@@ -551,7 +551,7 @@ double get_max(mon_disp_prop_t* display, int item)
     legend_node_t* lgd_ptr = (display->legend).head;
     //we get to this point only if the legend isn't empty...
     //so lgd_ptr isn't NULL. and displayed != 0.
-    if (!(isScalar(item)) || (display->displayed_nodes_num <= 0))
+    if (!(isScalar(item)) || (display->displayed_bar_num <= 0))
         //there is no max... (irrelevant)
         return 0;
 
@@ -559,19 +559,19 @@ double get_max(mon_disp_prop_t* display, int item)
         index++;
         temp = scalar_div_x
                 (item,
-                (void*) ((long) display->displayed_nodes_data[index] + get_pos(item)), 1);
+                (void*) ((long) display->displayed_bars_data[index] + get_pos(item)), 1);
     } while ((!(display->life_arr[get_raw_pos(display, index)])) &&
-            (index < display->displayed_nodes_num - 1));
+            (index < display->displayed_bar_num - 1));
     //find first node alive to compare to
 
-    if ((index == display->displayed_nodes_num - 1) &&
+    if ((index == display->displayed_bar_num - 1) &&
             (!(display->life_arr[get_raw_pos(display, index)]))) {
         //no living nodes found
         if (dbg_flg) fprintf(dbg_fp, "All nodes are down.");
         return 0;
     }
 
-    for (index = 0; index < display->displayed_nodes_num;
+    for (index = 0; index < display->displayed_bar_num;
             index++, lgd_ptr = lgd_ptr->next)
         //going over the display data array and the legend at the same time
     {
@@ -582,11 +582,11 @@ double get_max(mon_disp_prop_t* display, int item)
                 (display->life_arr[get_raw_pos(display, index)])) //alive
                 || (item == dm_getIdByName("num"))) && //or we're looking for the number...
                 (scalar_div_x(item,
-                (void*) ((long) display->displayed_nodes_data[index]
+                (void*) ((long) display->displayed_bars_data[index]
                 + get_pos(item)), 1) > temp)) //larger then max
             temp =
                 scalar_div_x(item,
-                (void*) ((long) display->displayed_nodes_data[index]
+                (void*) ((long) display->displayed_bars_data[index]
                 + get_pos(item)),
                 1);
         //replace max
@@ -604,7 +604,7 @@ double avg_by_item(mon_disp_prop_t* display, int item)
     if (!(isScalar(item)))
         return -1; //order irrelevant
 
-    for (index = 0; index < display->data_count; index++)
+    for (index = 0; index < display->nodes_count; index++)
         if (display->life_arr[index]) {
             sum +=
                     scalar_div_x(item,
@@ -979,13 +979,13 @@ int get_nodes_to_display(mon_disp_prop_t* display)
     }
 
 
-    display->data_count = infod_data->num;
-    if (dbg_flg) fprintf(dbg_fp, "Data count : %i.\n", display->data_count);
+    display->nodes_count = infod_data->num;
+    if (dbg_flg) fprintf(dbg_fp, "Data count : %i.\n", display->nodes_count);
     idata_iter_done(iter);
 
     // Sort the raw_data array by number
     qsort(display->raw_data,
-            display->data_count,
+            display->nodes_count,
             display->block_length,
             &compare_num);
 
@@ -1007,7 +1007,7 @@ int get_nodes_to_display(mon_disp_prop_t* display)
         new_item(dm_getIdByName("num"), &glob_info_map, curInfoEntry, (void*) ((long) temp + get_pos(dm_getIdByName("num"))), &current_set);
         j = 0;
         while ((compare_num(temp, (void*) ((long) display->raw_data + display->block_length * j)) != 0) &&
-                (j < display->data_count))
+                (j < display->nodes_count))
             j++;
         if (j == infod_data->num)
             return 0;
@@ -1263,14 +1263,14 @@ void move_left(mon_disp_prop_t* display)
             (display->show_dead)))
         //if we have more room to move left...
     {
-        for (index = display->displayed_nodes_num - 1; index >= (display->legend).legend_size; index--) {
-            display->displayed_nodes_data[index] =
-                    display->displayed_nodes_data[index - (display->legend).legend_size]; //offset*
+        for (index = display->displayed_bar_num - 1; index >= (display->legend).legend_size; index--) {
+            display->displayed_bars_data[index] =
+                    display->displayed_bars_data[index - (display->legend).legend_size]; //offset*
         }
 
         for (index = 0; index < (display->legend).legend_size; index++)
-            display->displayed_nodes_data[index] =
-                (void*) ((long) display->displayed_nodes_data[index] - offset * display->block_length);
+            display->displayed_bars_data[index] =
+                (void*) ((long) display->displayed_bars_data[index] - offset * display->block_length);
 
         displayRedrawGraph(display);
     }
@@ -1281,26 +1281,26 @@ void move_right(mon_disp_prop_t* display)
 {
     int index, offset = 1;
     while ((1 - display->show_dead) &&
-            (get_raw_pos(display, display->displayed_nodes_num - 1) + offset < display->data_count) &&
-            (1 - display->life_arr[get_raw_pos(display, display->displayed_nodes_num - 1) + offset]))
+            (get_raw_pos(display, display->displayed_bar_num - 1) + offset < display->nodes_count) &&
+            (1 - display->life_arr[get_raw_pos(display, display->displayed_bar_num - 1) + offset]))
         offset++; //offset is anyway >=1, or else we don't move
 
     if (dbg_flg) fprintf(dbg_fp, "Left shift. offset = %i\n", offset);
 
-    if ((get_raw_pos(display, display->displayed_nodes_num - 1) + offset < display->data_count) &&
-            ((display->life_arr[get_raw_pos(display, display->displayed_nodes_num - 1) + offset]) ||
+    if ((get_raw_pos(display, display->displayed_bar_num - 1) + offset < display->nodes_count) &&
+            ((display->life_arr[get_raw_pos(display, display->displayed_bar_num - 1) + offset]) ||
             (display->show_dead)))
         //if we have more room to move right...
     {
-        for (index = 0; index < display->displayed_nodes_num - (display->legend).legend_size; index++)
+        for (index = 0; index < display->displayed_bar_num - (display->legend).legend_size; index++)
         {
-            display->displayed_nodes_data[index] =
-                    display->displayed_nodes_data[index + (display->legend).legend_size]; //offset*
+            display->displayed_bars_data[index] =
+                    display->displayed_bars_data[index + (display->legend).legend_size]; //offset*
         }
 
-        for (; index < display->displayed_nodes_num; index++)
-            display->displayed_nodes_data[index] =
-                (void*) ((long) display->displayed_nodes_data[index] +
+        for (; index < display->displayed_bar_num; index++)
+            display->displayed_bars_data[index] =
+                (void*) ((long) display->displayed_bars_data[index] +
                 offset * display->block_length);
 
         displayRedrawGraph(display);

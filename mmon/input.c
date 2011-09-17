@@ -172,11 +172,11 @@ void parse_cmd(mmon_data_t *md, int pressed)
                 }
                 else {
                     //use new host:
-                    free(display->displayed_nodes_data);
-                    display->displayed_nodes_data = NULL;
-                    display->displayed_nodes_num = 0;
+                    free(display->displayed_bars_data);
+                    display->displayed_bars_data = NULL;
+                    display->displayed_bar_num = 0;
 
-                    if (display->data_count > 0) {
+                    if (display->nodes_count > 0) {
                         displayFreeData(display);
                         free(display->life_arr);
                     }
@@ -210,11 +210,11 @@ void parse_cmd(mmon_data_t *md, int pressed)
                 }
                 else {
                     //use new host:
-                    free(display->displayed_nodes_data);
-                    display->displayed_nodes_data = NULL;
-                    display->displayed_nodes_num = 0;
+                    free(display->displayed_bars_data);
+                    display->displayed_bars_data = NULL;
+                    display->displayed_bar_num = 0;
 
-                    if (display->data_count > 0) {
+                    if (display->nodes_count > 0) {
                         displayFreeData(display);
                         free(display->life_arr);
                     }
@@ -229,13 +229,13 @@ void parse_cmd(mmon_data_t *md, int pressed)
             break;
 
         case KEY_LEFT: //move left
-            if (display->displayed_nodes_num == 0)
+            if (display->displayed_bar_num == 0)
                 break;
             move_left(display);
             break;
 
         case KEY_RIGHT: //move right
-            if (display->displayed_nodes_num == 0)
+            if (display->displayed_bar_num == 0)
                 break;
             move_right(display);
             break;
@@ -251,7 +251,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
             else //in graph display
             {
                 for (index = 0;
-                        index < display->displayed_nodes_num / (display->legend).legend_size;
+                        index < display->displayed_bar_num / (display->legend).legend_size;
                         index++)
                     move_left(display);
             }
@@ -268,7 +268,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
             else //in graph display
             {
                 for (index = 0;
-                        index < display->displayed_nodes_num / (display->legend).legend_size;
+                        index < display->displayed_bar_num / (display->legend).legend_size;
                         index++)
                     move_right(display);
             }
