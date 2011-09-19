@@ -34,6 +34,7 @@ endforeach()
 
 set(MMON_SOURCES mmon.c
   mmonCommandLine.c
+  infoMethods.c
   cluster_list.c
   cluster_id.c
   ConfigurationManager.c 

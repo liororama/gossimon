@@ -277,6 +277,14 @@ typedef struct mmon_data {
   
 } mmon_data_t;
 
+extern mmon_info_mapping_t glob_info_map;
+extern char *glob_info_desc;
+extern variable_map_t *glob_info_var_mapping;
+extern unsigned short glob_host_port;
+
+void display_totals(mon_disp_prop_t* display, int draw);
+
+
 int saveCurrentWindows(mmon_data_t *md);
 void mmon_exit(int status);
 void new_yardstick(mon_disp_prop_t* display);
@@ -313,6 +321,17 @@ void move_left (mon_disp_prop_t* display);
 void move_right (mon_disp_prop_t* display);
 void new_host(mon_disp_prop_t* display, char* request);
 void new_user(mon_disp_prop_t* display);
+
+// Data module
+int canRev(int item);
+int isScalar(int item);
+int get_length(int item);
+void new_item(int item, mmon_info_mapping_t* iMap,
+        void* source, void* dest, settings_t* setup);
+void del_item(int item, void* address);
+void display_item(int item, WINDOW* graph, void* source,
+        int base_row, int min_row, int col, const double max, int width);
+
 int get_raw_pos (mon_disp_prop_t* display, int index);
 
 char** display_help (int item);
