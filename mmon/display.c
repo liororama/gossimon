@@ -885,6 +885,7 @@ void displayDrawNumbering(mon_disp_prop_t* display, int draw)
                     int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
                     sprintf(title, "%i", nodeNum);
 
+                    mlog_bn_dg("disp", "Node %d\n", nodeNum);
                     display_rtr(stdscr, &(pConfigurator->Colors._vertNodeName),
                             display->max_row - display->bottom_spacing
                             + index2 + display->show_cluster, //row

@@ -35,7 +35,7 @@ Configurator* pConfigurator = NULL; //for color configuration structure
 // the q button doesn't exit the program right away, but rather alows the user
 // to abort the exit request. To confirm the exit you must push q twice.
 // This int is a counter for the exit message to last on the status line.
-int exiting = 0;
+int glob_exiting = 0;
 
 // The mapping structure. It is initialized when description is read from infod
 // for the first time
@@ -836,7 +836,7 @@ void display_totals(mon_disp_prop_t* display, int draw)
             index++;
         }
 
-        if (exiting > 0)
+        if (glob_exiting > 0)
             sprintf(totals_str,
                 "    Exit mmon2? (press 'q' to confirm)");
         else {
@@ -1085,6 +1085,8 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     mlog_registerModule("plugins", "Plugins management", "plugins");
     mlog_registerModule("mmon", "General mmon sections", "mmon");
     mlog_registerModule("disp", "Display section", "disp");
+    mlog_registerModule("info", "Info methods", "info");
+
     mlog_registerModule("side", "Side window", "side");
 
     glob_displaysArr =
@@ -1347,6 +1349,8 @@ int loadCurrentWindows(mmon_data_t * md)
 }
 
 int mmon_redraw(mmon_display_t *display) {
+    if(!display)
+        return 0;
     int res;
     res = get_nodes_to_display(display);
     if(res) {
@@ -1363,10 +1367,14 @@ int main(int argc, char** argv)
     mmon_setDefaults(&mmonData);
 
     mmon_init(&mmonData, argc, argv); //All initialization
+    mlog_bn_info("mmon", "After Init \n");
 
     res = 1;
-    for (index = 0; index < MAX_SPLIT_SCREENS; index++)
+    for (index = 0; index < MAX_SPLIT_SCREENS; index++) {
+        if(!glob_displaysArr[index]) continue;
         res = res && mmon_redraw(glob_displaysArr[index]);
+    }
+    mlog_bn_info("mmon", "After First redraw: res = %d \n", res);
 
     mvprintw(LINES - 1, 0, ""); //move to LRCORNER
     refresh();
@@ -1374,18 +1382,27 @@ int main(int argc, char** argv)
 
     while (res && (glob_displaysArr[0])) {
         //update exity monitor
-        if (exiting > 0)
-            exiting--;
+        if (glob_exiting > 0)
+            glob_exiting--;
 
         sleep_or_input(1);
         if (is_input()) {
             int pressed = my_getch();
             parse_cmd(&mmonData, pressed);
         }
-        for (index = 0; index < MAX_SPLIT_SCREENS; index++)
+
+        // TODO fix this to use break instead of continue.
+        for (index = 0; index < MAX_SPLIT_SCREENS; index++) {
+            if(!glob_displaysArr[index]) continue;
             res = res && mmon_redraw(glob_displaysArr[index]);
+            mlog_bn_info("mmon", "Display %p:  res = %d \n", glob_displaysArr[index], res);
+        }
+
         mvprintw(LINES - 1, 0, ""); //move to LRCORNER
         refresh();
     }
+
+    mlog_bn_info("mmon", "mmon done res = %d disp0 = %p \n", res, glob_displaysArr[0]);
+
     return 0;
 }

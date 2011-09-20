@@ -250,7 +250,7 @@ extern int    dbg_flg;
 extern int    dbg_flg2;
 extern FILE  *dbg_fp;
 
-extern int    exiting;
+extern int    glob_exiting;
 extern int    max_key; 
 extern int  **key_map; 
 

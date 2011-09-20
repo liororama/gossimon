@@ -428,10 +428,10 @@ void parse_cmd(mmon_data_t *md, int pressed)
             break;
 
         case 'q': // Display a confirmation message before exiting 
-            if (exiting > 0)
+            if (glob_exiting > 0)
                 mmon_exit(0);
             // Setting the timeout for the exit message
-            exiting = EXIT_TIMEOUT; //setting exit monitor "off"
+            glob_exiting = EXIT_TIMEOUT; //setting exit monitor "off"
             break;
 
         case 32:
