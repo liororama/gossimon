@@ -83,7 +83,10 @@ char *mh_current(mon_hosts_t *mh)
 {
 	if(!mh)
 		return NULL;
-	return mh->mh_list[mh->mh_curr];
+        if(mh->mh_curr >= mh->mh_nhost)
+            return NULL;
+        
+        return mh->mh_list[mh->mh_curr];
 }
 char *mh_next(mon_hosts_t *mh)
 {
@@ -92,9 +95,20 @@ char *mh_next(mon_hosts_t *mh)
 	if(!mh || mh->mh_nhost <= 0)
 		return NULL;
 
-	mh->mh_curr = (mh->mh_curr + 1) % mh->mh_nhost;
+        
+	mh->mh_curr = mh->mh_curr + 1;
+        if(mh->mh_curr >= mh->mh_nhost) {
+                mh->mh_curr = mh->mh_nhost;
+                return NULL;
+        }
+            
 	host = mh->mh_list[mh->mh_curr];
 	return host;
+}
+void mh_rewind(mon_hosts_t *mh) {
+    if(!mh)
+        return;
+    mh->mh_curr = 0;
 }
 
 int is_range(char *str)

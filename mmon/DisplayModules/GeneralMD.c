@@ -1313,36 +1313,37 @@ void mem_new_item (mmon_info_mapping_t* iMap, const void* source,
      }
 }
 
-void mem_del_item (void* address) { return; }
+void mem_del_item (void* address) { return;
+}
 
-void mem_display_item (WINDOW* graph, Configurator* pConfigurator, 
-                        const void* source, int base_row, 
-                        int min_row, int col, const double max, int width)
+void mem_display_item(WINDOW* graph, Configurator* pConfigurator,
+        const void* source, int base_row,
+        int min_row, int col, const double max, int width)
 {
-  float sourceVal = *((float*)source + 1);
-  float maxVal =  (float)max;
-  float sourceTotal = *((float*)source);
+    float sourceVal = *((float*) source + 1);
+    float maxVal = (float) max;
+    float sourceTotal = *((float*) source);
 
-  if (maxVal > 0) 
-    {
-      if (width == 1)
-        display_part_bar (graph, base_row, col, 
-                          //total
-                          ((base_row - min_row) * sourceTotal) / maxVal,
-                          pConfigurator->Appearance._memswapGraphChar, 
-                          &(pConfigurator->Colors._swapCaption), 0,
-                          //used
-                          ((base_row - min_row) * sourceVal) / maxVal,
-                          '|', &(pConfigurator->Colors._swapCaption), 0);
-      else
-        display_part_bar (graph, base_row, col, 
-                          //total
-                          ((base_row - min_row) * sourceTotal) / maxVal,
-                          pConfigurator->Appearance._memswapGraphChar, 
-                          &(pConfigurator->Colors._swapCaption), 0,
-                          //used
-                          ((base_row - min_row) * sourceVal) / maxVal,
-                          ' ', &(pConfigurator->Colors._swapCaption), 1);
+    if (maxVal > 0) {
+        if (width == 1) {
+            display_part_bar(graph, base_row, col,
+                    //total
+                    ((base_row - min_row) * sourceTotal) / maxVal,
+                    pConfigurator->Appearance._memswapGraphChar,
+                    &(pConfigurator->Colors._swapCaption), 0,
+                    //used
+                    ((base_row - min_row) * sourceVal) / maxVal,
+                    '|', &(pConfigurator->Colors._swapCaption), 0);
+        } else {
+            display_part_bar(graph, base_row, col,
+                    //total
+                    ((base_row - min_row) * sourceTotal) / maxVal,
+                    pConfigurator->Appearance._memswapGraphChar,
+                    &(pConfigurator->Colors._swapCaption), 0,
+                    //used
+                    ((base_row - min_row) * sourceVal) / maxVal,
+                    ' ', &(pConfigurator->Colors._swapCaption), 1);
+        }
     }
 }
 

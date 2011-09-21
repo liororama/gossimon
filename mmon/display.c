@@ -86,12 +86,17 @@ void displayInit (mmon_display_t* display)
   display->clist = (clusters_list_t*)malloc(sizeof(clusters_list_t));
   cl_init(display->clist);
 
+  // Nodes filter init
+  display->filter_nodes_by_name = 0;
+  display->nodes_to_display_hash = NULL;
+  
+  
   //if the window is not the first, it takes the destination
   //configuration from the current display 
-  if ((curr_display) && ((*curr_display)->last_host)) {
-       displaySetHost(display, (*curr_display)->last_host);
-       display->show_dead = (*curr_display)->show_dead;
-       display->wmode = (*curr_display)->wmode;
+  if ((glob_curr_display) && ((*glob_curr_display)->last_host)) {
+       displaySetHost(display, (*glob_curr_display)->last_host);
+       display->show_dead = (*glob_curr_display)->show_dead;
+       display->wmode = (*glob_curr_display)->wmode;
   }
 //    new_host(display, strdup((*curr_display)->last_host));
   else
@@ -102,7 +107,7 @@ void displayInit (mmon_display_t* display)
        mlog_bn_dg("disp", "Setting display to load\n");
        toggle_disp_type(display, dm_getIdByName("load"), 1); //default display
   }
-  if (curr_display)
+  if (glob_curr_display)
        size_recalculate(1); //recalculate sizes
   
   if (dbg_flg) fprintf(dbg_fp, "Screen init complete. \n");
@@ -153,6 +158,10 @@ void displayFree(mmon_display_t *display) {
        free(display->displayed_bars_data);
   displayLegendFree(display);
   
+  if(display->filter_nodes_by_name) {
+      g_hash_table_destroy(display->nodes_to_display_hash);
+  }
+  
   free(display);
 }
 
@@ -200,6 +209,27 @@ int displaySetHost(mmon_display_t *display, char *host) {
      init_clusters_list(display);
      return 1;
 }
+
+int displaySetNodesToDisplay(mon_disp_prop_t *display, mon_hosts_t *hostList) 
+{
+    display->filter_nodes_by_name = 1;
+    display->nodes_to_display_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    
+    // Just in case host list does not start at the begining
+    mh_rewind(hostList);
+    char *hostName;
+    
+    // Adding all hosts to the host list
+    while (hostName = mh_current(hostList)) {
+        char *tmpName = strdup(hostName);
+        char *tmpVal = strdup(hostName);
+        g_hash_table_insert(display->nodes_to_display_hash, tmpName, tmpVal);
+        
+        mh_next(hostList);
+    }
+        
+}
+
 
 int displayClearLegend(mmon_display_t *display) {
      legend_node_t* lgd_ptr; //to iterate the legend
@@ -269,41 +299,61 @@ int displaySetModeFromStr(mmon_display_t *display, char *modeStr) {
      return 1;
 }
 
+int displaySetNodesFromStr(mmon_display_t *display, char *nodesStr) 
+{
+    int res;
+    mon_hosts_t mh;
+      
+    mh_init(&mh);
+    res = mh_set(&mh, nodesStr);
+     if(!res) {
+          return 0;
+     }
+    displaySetNodesToDisplay(display, &mh);
+    return 1;
+}
 
 // "--startwin  win1:host=sorma-base win2:m host=sorma-base2:"
 // "--startwin  mode=w,d disp=mem,load,space,f+l host=sorma-base2
-int displayInitFromStr(mmon_display_t *display, char *initStr) {
-  
-     int    size = 50;
-     char  *args[50];
-     int    items;
-     items = split_str(initStr, args, size, " \t"); 
-     printf("Items: %d\n", items);
-     
-     for(int i=0 ; i < items ; i++) {
-          printf("Item: %s\n", args[i]);
-          
-          if(strncmp(args[i], "host=", 5) == 0) {
 
-               char *host = args[i]+5;
-               printf("Found host item: %s\n", host);
-               if(!displaySetHost(display, host))
-                    return 0;
-          } 
-          else if(strncmp(args[i], "disp=", 5) == 0) {
-               printf("Found host disp\n");
-               displayClearLegend(display);
-               if(!displaySetLegendFromStr(display, args[i] + 5))
-                    return 0;
-          }
-          else if(strncmp(args[i], "mode=", 5) == 0) {
-               printf("Found host mode\n");
-               if(!displaySetModeFromStr(display, args[i] + 5))
-                    return 0;
-          }
-     }
-     
-     return 1;
+int displayInitFromStr(mmon_display_t *display, char *initStr)
+{
+
+    int size = 50;
+    char *args[50];
+    int items;
+    items = split_str(initStr, args, size, " \t");
+    printf("Items: %d\n", items);
+
+    for (int i = 0; i < items; i++) {
+        printf("Item: %s\n", args[i]);
+
+        if (strncmp(args[i], "host=", 5) == 0) {
+
+            char *host = args[i] + 5;
+            printf("Found host item: %s\n", host);
+            if (!displaySetHost(display, host))
+                return 0;
+        }
+        else if (strncmp(args[i], "disp=", 5) == 0) {
+            printf("Found disp item\n");
+            displayClearLegend(display);
+            if (!displaySetLegendFromStr(display, args[i] + 5))
+                return 0;
+        } 
+        else if (strncmp(args[i], "nodes=", 6) == 0) {
+            printf("Found nodes item:\n");
+            if (!displaySetNodesFromStr(display, args[i] + 6))
+                return 0;
+        }
+        else if (strncmp(args[i], "mode=", 5) == 0) {
+            printf("Found host mode\n");
+            if (!displaySetModeFromStr(display, args[i] + 5))
+                return 0;
+        }
+    }
+
+    return 1;
 }
 
 int displayGetHostStr(mmon_display_t *display, char *str) 
@@ -604,7 +654,7 @@ void displayShowTitle(mmon_display_t *display) {
      int middleCol = (display->max_col - display->min_col - display->left_spacing) / 2; 
      
      //cluster name
-     if (*curr_display != display)
+     if (*glob_curr_display != display)
           //only the chosen graph has colored axis
           wc_on(display->graph, &(pConfigurator->Colors._chartColor));
      else
@@ -624,7 +674,7 @@ void displayShowTitle(mmon_display_t *display) {
           mvwprintw(display->graph, 0, middleCol - titleSize/2, titleBuff);
      }
      
-     if (*curr_display != display)
+     if (*glob_curr_display != display)
           //only the chosen graph has colored axis
           wc_off(display->graph, &(pConfigurator->Colors._chartColor));
      else
@@ -951,7 +1001,12 @@ void displayManageMax(mon_disp_prop_t *display)
     double max; //holds the max value
     int max_type; //holds type of max
     legend_node_t *lgd_ptr = (display->legend).head;
-  
+
+    int spaceItemId = dm_getIdByName("space");
+    while ((lgd_ptr != NULL) && (lgd_ptr->data_type == spaceItemId))
+        lgd_ptr = lgd_ptr->next;
+    
+    
     // Manage max =====================================
     max = get_max(display, lgd_ptr->data_type);
     max_type = lgd_ptr->data_type;
@@ -1041,7 +1096,8 @@ void displayRedrawGraph(mon_disp_prop_t* display)
 
     // Find the first non-space item in the legend (NULL if non-existant)
     lgd_ptr = (display->legend).head;
-    while ((lgd_ptr != NULL) && (lgd_ptr->data_type == dm_getIdByName("space")))
+    int spaceItemId = dm_getIdByName("space");
+    while ((lgd_ptr != NULL) && (lgd_ptr->data_type == spaceItemId))
         lgd_ptr = lgd_ptr->next;
 
     // Display bottom numbering - if needed
@@ -1071,7 +1127,7 @@ void displayRedrawGraph(mon_disp_prop_t* display)
             //if corresponding cell is alive...
             if (display->alive_arr[get_raw_pos(display, index)]) {
 
-                if (max_type == lgd_ptr->data_type)
+                if (max_type == lgd_ptr->data_type) {
                     display_item(lgd_ptr->data_type, //data type
                         display->graph, //target window
                         (void*) ((long) display->displayed_bars_data[index] + get_pos(lgd_ptr->data_type)),
@@ -1079,7 +1135,9 @@ void displayRedrawGraph(mon_disp_prop_t* display)
                         0, index + 1, //col index
                         display->last_max, //max value
                         display->wmode); //width mode
-                else
+                    mlog_bn_dy("disp", "max_type is data type\n");
+                }
+                else {
                     display_item(lgd_ptr->data_type, //data type
                         display->graph, //target window
                         (void*) ((long) display->displayed_bars_data[index] + get_pos(lgd_ptr->data_type)),
@@ -1087,8 +1145,10 @@ void displayRedrawGraph(mon_disp_prop_t* display)
                         0, index + 1, //col index
                         get_max(display, lgd_ptr->data_type), //max value
                         display->wmode); //width mode
+                    mlog_bn_dy("disp", "max_type is NOT data type\n");
+                }
             }
-                // The corisponding cell is dead
+            // The corresponding cell is dead
             else {
                 if (lgd_ptr->data_type != dm_getIdByName("space") &&
                         lgd_ptr->data_type != dm_getIdByName("seperator")) {
@@ -1118,7 +1178,7 @@ void displayRedrawGraph(mon_disp_prop_t* display)
 
     //================================= Displaying the AXIS ============================
     // Displaying  graph axis
-    if (*curr_display == display) {
+    if (*glob_curr_display == display) {
         //only the chosen graph has colored axis
         wc_on(display->graph, &(pConfigurator->Colors._chartColor));
     }
@@ -1127,7 +1187,7 @@ void displayRedrawGraph(mon_disp_prop_t* display)
     
     
     // Only the chosen graph has colored axis
-    if (*curr_display == display)
+    if (*glob_curr_display == display)
         wc_off(display->graph, &(pConfigurator->Colors._chartColor));
 
     //============================= From here below it is ok ============================

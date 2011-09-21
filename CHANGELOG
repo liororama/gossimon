@@ -1,5 +1,5 @@
 ------** Version: 1.8.13 By: Lior Date 8/9/2011 **-------
-* TODO - add mmon --nodes flag
+* add mmon --nodes flag to be able to view only selected nodes
 * TODO - add infodctl listing of modules
 * TODO - Indicate a dead node with bad description 
 

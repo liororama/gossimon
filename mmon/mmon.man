@@ -21,7 +21,7 @@ mmon - a cluster monitor for the MOSIX/Linux system. It is part of the gossimon 
 [\-v] [\-V] [\-w|\-W] [\-t|\-T] [\-d] [\-m] [\-s] [\-l] [\-u] 
 [\-h <\fIhost\fP>] [\-c <\fIhost list\fP>] [\-f <\fIfilename\fP>]
 [\-o <\fIstream|filename\fP>] [\-\-defaults|\-\-conf <\fIfilename\fP>] 
-
+[\-\-nodes nodeX..Y]
 .SH DESCRIPTION
 .PP
 The \fIMMON\fP is the MOSIX cluster/grid monitor, used for viewing various data,
@@ -92,10 +92,17 @@ Otherwise - The MMON will use the default Black&White setting.
 .B \-\-conf <\fIfilename\fP>
 Use customized color scheme defined in specified file.
 .TP 8
-
+.B \-\-nodes <\fInodeX..Y\fP>
+Only display nodes from nodeX until nodeY (e.g. c1..20,c30..40)
 
 .SH AUTHORS
 Alexander Margolin, Amnon Shiloh, Amar Lior, Ilan Peer, and Mordechai Guri
+
+.SH HISTORY
+MMON was developped originally by Amnon Shiloh for the MOSIX(TM) system. It was modified to 
+obtain data from the infod system by Ilan Peer and Lior Amar. Later on it was heavily changed by
+Alexander Margolin to support modular displays. Color support was added by Mordechai Guri.
+Since 2010 mmon is maintained by Lior Amar as part of the gossimon open source project.
 
 .SH SEE ALSO
 .B  infod(8), infod-client(1), infod-best(1), testload(1)

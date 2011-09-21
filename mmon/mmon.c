@@ -117,7 +117,7 @@ FILE *dbg_fp;
 
 //DISPLAYS (for split screen mode)
 mon_disp_prop_t** glob_displaysArr; //array of screens on display.
-mon_disp_prop_t** curr_display = NULL; //pointer to selected screen.
+mon_disp_prop_t** glob_curr_display = NULL; //pointer to selected screen.
 
 
 void init(mmon_data_t *md, int argc, char** argv);
@@ -554,8 +554,8 @@ double get_max(mon_disp_prop_t* display, int item)
     int itemNumId = dm_getIdByName("num");
     int itemPos = get_pos(item);
 
-    if(item = itemNumId)
-        mlog_bn_dg("mmon", "---- get max ---- item %d  numId %d\n", item, itemNumId);
+    //if(item = itemNumId)
+    //    mlog_bn_dg("mmon", "---- get max ---- item %d  numId %d\n", item, itemNumId);
 
     // Item is != num and there is no max... (irrelevant)
     if (!(item == itemNumId) && (!(isScalar(item)) || (display->displayed_bar_num <= 0)))
@@ -585,8 +585,8 @@ double get_max(mon_disp_prop_t* display, int item)
         }
     }
     
-    if(item == itemNumId)
-        mlog_bn_dg("mmon", "Temp %d \n", item, itemNumId);
+    //if(item == itemNumId)
+    //    mlog_bn_dg("mmon", "Temp %d \n", item, itemNumId);
 
     for (index = 0; index < display->displayed_bar_num;
             index++, lgd_ptr = lgd_ptr->next)
@@ -733,7 +733,7 @@ void show_manual(mon_disp_prop_t* display)
         return;
 
     //if in the selected screen - change color.
-    if (*curr_display == display)
+    if (*glob_curr_display == display)
         wc_on(display->graph, &(pConfigurator->Colors._chartColor));
 
     //limits check
@@ -811,7 +811,7 @@ void show_manual(mon_disp_prop_t* display)
             display->max_row - display->min_row - display->bottom_spacing, 2,
             "Press 'h' to return");
 
-    if (*curr_display == display)
+    if (*glob_curr_display == display)
         wc_off(display->graph, &(pConfigurator->Colors._chartColor));
 }
 
@@ -1028,13 +1028,13 @@ void loadConfigFile(mmon_data_t *md)
 
 
     if (dbg_flg2)
-        fprintf(dbg_fp, "Trying default color configuation...\n");
+        fprintf(dbg_fp, "Trying default color configuration...\n");
     if (loadConfig(&pConfigurator, NULL, 1)) //now color_mode has to be "1"
     {
         return;
     } else {
         if (dbg_flg2)
-            fprintf(dbg_fp, "Loading default color configuation - ERROR.\n");
+            fprintf(dbg_fp, "Loading default color configuration - ERROR.\n");
         terminate();
     }
     terminate();
@@ -1047,10 +1047,9 @@ void size_recalculate(int redraw)
 {
     int index; //temp var for loops
 
-    int total = 0;
-    while ((total < MAX_SPLIT_SCREENS) &&
-            (glob_displaysArr[total]))
-        total++;
+    int dispNum = 0;
+    while ((dispNum < MAX_SPLIT_SCREENS) && (glob_displaysArr[dispNum]))
+        dispNum++;
     //now total holds the amount of active displays
 
     //erase all screen content
@@ -1064,11 +1063,11 @@ void size_recalculate(int redraw)
             "  Mmon - The MOSIX %c Monitor 2011 [%s] : Supported by Cluster Logic Ltd  ", 174, MMON_VERSION);
     c_off(&(pConfigurator->Colors._copyrightsCaption));
 
-    for (index = 0; index < total; index++) {
+    for (index = 0; index < dispNum; index++) {
         //divides the screen equaly to all displays
-        glob_displaysArr[index]->max_row = (index + 1) * (LINES - 1) / total + 1;
+        glob_displaysArr[index]->max_row = (index + 1) * (LINES - 1) / dispNum + 1;
         glob_displaysArr[index]->max_col = COLS;
-        glob_displaysArr[index]->min_row = index * (LINES - 1) / total + 1;
+        glob_displaysArr[index]->min_row = index * (LINES - 1) / dispNum + 1;
         glob_displaysArr[index]->min_col = 0;
 
         //document the new sizes
@@ -1107,13 +1106,13 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     glob_displaysArr =
             (mon_disp_prop_t**) malloc(MAX_SPLIT_SCREENS * sizeof (mon_disp_prop_t*));
     md->displayArr = glob_displaysArr;
-    for (curr_display = &(glob_displaysArr[0]);
-            curr_display <= &(glob_displaysArr[MAX_SPLIT_SCREENS - 1]);
-            curr_display++)
-        *curr_display = NULL;
+    for (glob_curr_display = &(glob_displaysArr[0]);
+            glob_curr_display <= &(glob_displaysArr[MAX_SPLIT_SCREENS - 1]);
+            glob_curr_display++)
+        *glob_curr_display = NULL;
 
     glob_displaysArr[0] = (mon_disp_prop_t*) malloc(sizeof (mon_disp_prop_t));
-    curr_display = NULL;
+    glob_curr_display = NULL;
 
     // First registering the internal modules
     displayModule_init();
@@ -1121,7 +1120,7 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
 
     // Initializing the first display (after loading internal display modules)
     displayInit(glob_displaysArr[0]);
-    curr_display = &(glob_displaysArr[0]);
+    glob_curr_display = &(glob_displaysArr[0]);
 
     // Parsing command line and setting options on the first display
     parseCommandLine(md, argc, argv, glob_displaysArr[0]);
@@ -1237,7 +1236,7 @@ void delete_curr_display()
     mon_disp_prop_t *display;
     int index = 0;
 
-    display = *curr_display;
+    display = *glob_curr_display;
     if (dbg_flg) fprintf(dbg_fp, "Current display: %p\n", display);
 
     // Searching for the position of the current display
@@ -1246,7 +1245,7 @@ void delete_curr_display()
         index++;
 
     if (index > 0)
-        curr_display = &(glob_displaysArr[index - 1]);
+        glob_curr_display = &(glob_displaysArr[index - 1]);
 
     // Deleting the current display
     while (index + 1 < MAX_SPLIT_SCREENS) {
@@ -1261,7 +1260,7 @@ void delete_curr_display()
 void terminate()
 {
     int screenLeft = 0; //total screens left
-    int p_usage = (curr_display == NULL);
+    int p_usage = (glob_curr_display == NULL);
 
     if (!p_usage)
         delete_curr_display();
@@ -1309,19 +1308,26 @@ void mmon_setDefaults(mmon_data_t * md)
     }
 
     md->nodesArgStr = NULL;
+    md->filterNodesByName = 0;
+    
 }
 
 int setStartWindows(mmon_data_t * md)
 {
     for (int i = 0; md->startWinStrArr[i]; i++) {
-        if (dbg_flg2) fprintf(dbg_fp, "Setting %d display\n", i);
+        mlog_bn_dg("mmon", "---- Setting %d display ---- %s \n", i, md->startWinStrArr[i]);
         if (!md->displayArr[i]) {
+            mlog_bn_dg("mmon", "allocating and initializing display %d\n", i);
+        
             md->displayArr[i] = (mmon_display_t*) malloc(sizeof (mmon_display_t));
             displayInit(md->displayArr[i]);
+         
         }
         displayInitFromStr(md->displayArr[i], md->startWinStrArr[i]);
+        md->displayArr[i]->recount = 1;
     }
 
+    size_recalculate(1);
     return 1;
 }
 
@@ -1390,7 +1396,6 @@ int main(int argc, char** argv)
         res = res && mmon_redraw(glob_displaysArr[index]);
     }
     mlog_bn_info("mmon", "After First redraw: res = %d \n", res);
-
     mvprintw(LINES - 1, 0, ""); //move to LRCORNER
     refresh();
 

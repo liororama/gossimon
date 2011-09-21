@@ -139,7 +139,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
 {
     int index; //an integer for loops...
     int offset; //for handling the dead nodes (and other uses)
-    mon_disp_prop_t* display = *curr_display;
+    mon_disp_prop_t* display = *glob_curr_display;
     //int pressed; //save the pressed key for reference in key_map
     legend_node_t* lgd_ptr; //to iterate the legend
 
@@ -374,7 +374,9 @@ void parse_cmd(mmon_data_t *md, int pressed)
             glob_displaysArr[index] =
                     (mon_disp_prop_t*) malloc(sizeof (mon_disp_prop_t));
             displayInit(glob_displaysArr[index]);
-            curr_display = &(glob_displaysArr[index]);
+            if(md->filterNodesByName)
+                displaySetNodesToDisplay(glob_displaysArr[index], &md->hostList);
+            glob_curr_display = &(glob_displaysArr[index]);
             break;
 
         case 'e':
@@ -384,12 +386,12 @@ void parse_cmd(mmon_data_t *md, int pressed)
             break;
 
         case 9: //TAB - cycle through screens
-            if (curr_display == &(glob_displaysArr[MAX_SPLIT_SCREENS - 1]))
-                curr_display = &(glob_displaysArr[0]);
+            if (glob_curr_display == &(glob_displaysArr[MAX_SPLIT_SCREENS - 1]))
+                glob_curr_display = &(glob_displaysArr[0]);
             else
-                curr_display++;
-            if (*curr_display == NULL)
-                curr_display = &(glob_displaysArr[0]);
+                glob_curr_display++;
+            if (*glob_curr_display == NULL)
+                glob_curr_display = &(glob_displaysArr[0]);
             break;
 
         case 't': //toggle bottom status bar

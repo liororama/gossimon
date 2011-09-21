@@ -71,6 +71,8 @@ int parseCommandLine(mmon_data_t *md, int argc, char **argv, mon_disp_prop_t *pr
                       fprintf(stderr, "Error: nodes list is not in correct format\n");
                       exit(1);
                  }
+                 md->filterNodesByName = 1;
+                 displaySetNodesToDisplay(prop, &md->hostList);
             }
 
 

@@ -270,13 +270,30 @@ int allocate_display_raw_data_mem(mmon_display_t *display, int size)
     return 1;
 }
 
+// Adding the node to the raw arry : 
+// 1 the nodes was added
+// 0 the nodes was not added (filtered out)
 int set_raw_data_item(mmon_display_t *display, int index, idata_entry_t *curInfoEntry)
 {
 
     int validNode = ((curInfoEntry->valid != 0) &&  (curInfoEntry->data->hdr.status & INFOD_ALIVE));
     void *node_raw_ptr = (void *)((long)display->raw_data + display->block_length * index);
 
-    // Filling the data into the apropriate entry. This should be the only
+    // Filtering out nodes if display has a specific node-list to use
+    if(display->filter_nodes_by_name) {
+        char nodeName[256];
+        memcpy(nodeName, (curInfoEntry)->name, MACHINE_NAME_SZ);
+        nodeName[MACHINE_NAME_SZ-1] = '\0';
+        
+        if(!g_hash_table_lookup(display->nodes_to_display_hash, nodeName)) {
+            return 0;
+        }
+    }
+    
+    //mlog_bn_dg("info", "Adding node: %s\n", nodeName);
+    
+    
+    // Filling the data into the appropriate entry. This should be the only
     // place where specific data is accessed
     if (validNode) {
         for (int dispModule = 0; dispModule < infoDisplayModuleNum; dispModule++) {
@@ -301,17 +318,13 @@ int set_raw_data_item(mmon_display_t *display, int index, idata_entry_t *curInfo
 }
 
 
-// Obtaining infomration from infod and sotring in in the display structure
+// Obtaining information from infod and storing in in the display structure
 int get_nodes_to_display(mon_disp_prop_t* display)
 {
     idata_t *infod_data = NULL;
     idata_entry_t *curInfoEntry = NULL;
     idata_iter_t *iter = NULL;
     
-    int i, j; //temp vars
-    struct sigaction act;
-    struct itimerval timeout;
-
     if (display == NULL)
         return 1;
 
@@ -344,12 +357,15 @@ int get_nodes_to_display(mon_disp_prop_t* display)
 
     // Setting the data in the raw data array (ordered as received from infod)
     // Which means ordered by IP
-    for (i = 0; (curInfoEntry = idata_iter_next(iter)) ; i++) {
-        set_raw_data_item(display, i, curInfoEntry);
+    int raw_index = 0;
+    for (int i = 0; (curInfoEntry = idata_iter_next(iter)) ; i++) {
+        // raw_index is advanced only if set_raw_data_item returns 1; If the node is filtered out we get 0
+        if(set_raw_data_item(display, raw_index, curInfoEntry))
+            raw_index++;
     }
     idata_iter_done(iter);
 
-    display->nodes_count = infod_data->num;
+    display->nodes_count = raw_index;
     mlog_bn_db("info", "Data count : %d\n", display->nodes_count);
 
     // Sort the raw_data array by number

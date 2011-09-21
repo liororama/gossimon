@@ -14,6 +14,8 @@
 #ifndef __MMON_DISPLAY
 #define __MMON_DISPLAY
 
+#include <glib-2.0/glib.h>
+
 #include "DisplayModules.h"
 
 //LEGEND
@@ -122,8 +124,11 @@ typedef struct mon_disp_prop
   int           NAcounter;       //counts cycles of N\A data
   int           max_counter;     //counts cycles of unchanged max
   double        last_max;     //holds the previous max value (for max value delay)
-  int           last_max_type; 
-  //holds the type of the last max value
+  int           last_max_type;  //holds the type of the last max value
+  
+  int           filter_nodes_by_name;
+  GHashTable   *nodes_to_display_hash;
+  
   
 } mon_disp_prop_t;
 
@@ -131,12 +136,13 @@ typedef struct mon_disp_prop
 
 typedef mon_disp_prop_t mmon_display_t;
 
-extern mon_disp_prop_t** curr_display; //pointer to selected screen.
+extern mon_disp_prop_t** glob_curr_display; //pointer to selected screen.
 
 void displayInit (mon_disp_prop_t* display);
 void displayFree(mon_disp_prop_t *display);
 void displayFreeData(mon_disp_prop_t* display);
 int displaySetHost(mon_disp_prop_t *display, char *host);
+int displaySetNodesToDisplay(mon_disp_prop_t *display, mon_hosts_t *hostList);
 int displayInitFromStr(mon_disp_prop_t *display, char *initStr);
 int displaySaveToStr(mmon_display_t *display, char *buff, int size);
 void displayShowMsg(mmon_display_t *display, char *msg);

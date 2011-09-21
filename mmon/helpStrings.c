@@ -131,8 +131,10 @@ char* usage_str =
   "> mmon --win \"host=mos2 disp=mem,space,load mode=dead,wide\n"
   "       --win \"host=mos3 disp=swap,rio  mode=dead,wide\n"
   "\n"
-  " Note: press 'h' at any time to toggle help screen.\n";
- 
+  "> mmon --win \"nodes=r1..20\n"
+  "\n"
+  " Note: press 'h' at any time to toggle help screen.\n"
+  "\n\n";
 
 
 void printUsage(FILE *fp) {

@@ -46,6 +46,8 @@ int mh_add(mon_hosts_t *mh, char *hosts_str);
 // Getting the next host in the list
 char *mh_current(mon_hosts_t *mh);
 char *mh_next(mon_hosts_t *mh);	
+void mh_rewind(mon_hosts_t *mg);
+
 int mh_size(mon_hosts_t *mh);
 
 #endif /* __MOSIX_MMON_HOST_LIST */

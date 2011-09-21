@@ -242,7 +242,7 @@ int get_nodes_to_display (mon_disp_prop_t* display);
 
 //recalculates positions of active displays.
 
-extern mon_disp_prop_t** curr_display; //pointer to selected screen.
+extern mon_disp_prop_t** glob_curr_display; //pointer to selected screen.
 extern mon_disp_prop_t** glob_displaysArr; //array of screens on display.
 
 
@@ -272,6 +272,7 @@ typedef struct mmon_data {
   char             confFileName[MAX_CONF_FILE_LEN + 1]; //string of configuration file name
 
   char            *nodesArgStr;
+  int              filterNodesByName;
   mon_hosts_t      hostList;
 
   
