@@ -58,7 +58,7 @@ typedef struct mon_disp_prop
   int         nodes_count;   //number of monitored machines
   int         block_length; //memory alocated for every single block (a block per
                             //machine)
-  int        *life_arr;    //1 states corresponding machine is alive (0 for dead).
+  int        *alive_arr;    //1 states corresponding machine is alive (0 for dead).
   
   //A pointer to a cluster type, stating which one is in the data array.
   cluster_entry_t* cluster;

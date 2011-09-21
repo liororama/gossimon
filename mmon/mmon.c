@@ -547,29 +547,46 @@ double get_max(mon_disp_prop_t* display, int item)
 //returns value in a display for a specific type
 {
     double temp; //current maximum
-    int index = -1; //index over the display data array
     legend_node_t* lgd_ptr = (display->legend).head;
     //we get to this point only if the legend isn't empty...
     //so lgd_ptr isn't NULL. and displayed != 0.
-    if (!(isScalar(item)) || (display->displayed_bar_num <= 0))
-        //there is no max... (irrelevant)
+
+    int itemNumId = dm_getIdByName("num");
+    int itemPos = get_pos(item);
+
+    if(item = itemNumId)
+        mlog_bn_dg("mmon", "---- get max ---- item %d  numId %d\n", item, itemNumId);
+
+    // Item is != num and there is no max... (irrelevant)
+    if (!(item == itemNumId) && (!(isScalar(item)) || (display->displayed_bar_num <= 0)))
         return 0;
 
-    do {
-        index++;
-        temp = scalar_div_x
-                (item,
-                (void*) ((long) display->displayed_bars_data[index] + get_pos(item)), 1);
-    } while ((!(display->life_arr[get_raw_pos(display, index)])) &&
-            (index < display->displayed_bar_num - 1));
-    //find first node alive to compare to
+    // Find first node alive (or not) to compare to
+    int index = -1; //index over the display data array
 
-    if ((index == display->displayed_bar_num - 1) &&
-            (!(display->life_arr[get_raw_pos(display, index)]))) {
-        //no living nodes found
-        if (dbg_flg) fprintf(dbg_fp, "All nodes are down.");
-        return 0;
+    if(item == itemNumId) {
+        temp = scalar_div_x(item, (void*) ((long) display->displayed_bars_data[0] + itemPos), 1);
     }
+    else {
+        do {
+            index++;
+            temp = scalar_div_x
+                    (item,
+                    (void*) ((long) display->displayed_bars_data[index] + itemPos), 1);
+        } while ((!(display->alive_arr[get_raw_pos(display, index)])) &&
+                (index < display->displayed_bar_num - 1));
+
+    
+        if ((index == display->displayed_bar_num - 1) &&
+            (!(display->alive_arr[get_raw_pos(display, index)]))) {
+            //no living nodes found
+            if (dbg_flg) fprintf(dbg_fp, "All nodes are down.");
+            return 0;
+        }
+    }
+    
+    if(item == itemNumId)
+        mlog_bn_dg("mmon", "Temp %d \n", item, itemNumId);
 
     for (index = 0; index < display->displayed_bar_num;
             index++, lgd_ptr = lgd_ptr->next)
@@ -578,21 +595,19 @@ double get_max(mon_disp_prop_t* display, int item)
         if (lgd_ptr == NULL) //reset lgd_ptr...
             lgd_ptr = (display->legend).head;
 
-        if ((((lgd_ptr->data_type == item) && //same item
-                (display->life_arr[get_raw_pos(display, index)])) //alive
-                || (item == dm_getIdByName("num"))) && //or we're looking for the number...
-                (scalar_div_x(item,
-                (void*) ((long) display->displayed_bars_data[index]
-                + get_pos(item)), 1) > temp)) //larger then max
-            temp =
-                scalar_div_x(item,
-                (void*) ((long) display->displayed_bars_data[index]
-                + get_pos(item)),
-                1);
+        
+        if (item != itemNumId && lgd_ptr->data_type != item)  continue;  // Same item
+        if (!display->alive_arr[get_raw_pos(display, index)] && !(item == dm_getIdByName("num"))) continue;
+
+        double val = scalar_div_x(item,(void*) ((long) display->displayed_bars_data[index] + get_pos(item)), 1);
+        //mlog_bn_dg("mmon", "Val for max %.3f\n", val);
+        if (val > temp) temp = val;
         //replace max
     }
     return temp;
 }
+
+
 
 double avg_by_item(mon_disp_prop_t* display, int item)
 //This function calculates the averege value of the display
@@ -605,7 +620,7 @@ double avg_by_item(mon_disp_prop_t* display, int item)
         return -1; //order irrelevant
 
     for (index = 0; index < display->nodes_count; index++)
-        if (display->life_arr[index]) {
+        if (display->alive_arr[index]) {
             sum +=
                     scalar_div_x(item,
                     (void*) ((long) (display->raw_data)
@@ -898,13 +913,13 @@ void move_left(mon_disp_prop_t* display)
     //counting the offset: how far we jump (1 if dead are shown)
     while ((1 - display->show_dead) &&
             (get_raw_pos(display, 0) - offset >= 0) &&
-            (1 - display->life_arr[get_raw_pos(display, 0) - offset]))
+            (1 - display->alive_arr[get_raw_pos(display, 0) - offset]))
         offset++; //offset is anyway >=1, or else we don't move
 
     if (dbg_flg) fprintf(dbg_fp, "Right shift. offset = %i\n", offset);
 
     if ((get_raw_pos(display, 0) - offset >= 0) &&
-            ((display->life_arr[get_raw_pos(display, 0) - offset]) ||
+            ((display->alive_arr[get_raw_pos(display, 0) - offset]) ||
             (display->show_dead)))
         //if we have more room to move left...
     {
@@ -927,13 +942,13 @@ void move_right(mon_disp_prop_t* display)
     int index, offset = 1;
     while ((1 - display->show_dead) &&
             (get_raw_pos(display, display->displayed_bar_num - 1) + offset < display->nodes_count) &&
-            (1 - display->life_arr[get_raw_pos(display, display->displayed_bar_num - 1) + offset]))
+            (1 - display->alive_arr[get_raw_pos(display, display->displayed_bar_num - 1) + offset]))
         offset++; //offset is anyway >=1, or else we don't move
 
     if (dbg_flg) fprintf(dbg_fp, "Left shift. offset = %i\n", offset);
 
     if ((get_raw_pos(display, display->displayed_bar_num - 1) + offset < display->nodes_count) &&
-            ((display->life_arr[get_raw_pos(display, display->displayed_bar_num - 1) + offset]) ||
+            ((display->alive_arr[get_raw_pos(display, display->displayed_bar_num - 1) + offset]) ||
             (display->show_dead)))
         //if we have more room to move right...
     {

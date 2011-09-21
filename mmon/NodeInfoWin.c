@@ -103,7 +103,7 @@ void printSideWindowInfo(mon_disp_prop_t* display, int index) {
      int pos = get_pos(dm_getIdByName("name"));
      mlog_bn_db("side", "Pos: [%d]\n", pos);
 
-     if(!display->life_arr[index]) {
+     if(!display->alive_arr[index]) {
           mvwprintw(display->wlegend, line++, 0, "Node is inactive ");
           return;
      }

@@ -270,8 +270,8 @@ typedef struct mmon_data {
   char            *winSaveFile;
   char            *startWinStrArr[MAX_START_WIN];
   char             confFileName[MAX_CONF_FILE_LEN + 1]; //string of configuration file name
+
   char            *nodesArgStr;
-  
   mon_hosts_t      hostList;
 
   

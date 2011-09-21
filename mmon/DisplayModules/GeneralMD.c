@@ -507,9 +507,10 @@ void infod_status_display_item (WINDOW* graph, Configurator* pConfigurator,
   return;
 }
 
+// Just returning the status
 double infod_status_scalar_div_x (const void* item, double x)
 {
-  return ((double)*((int*)item)) / x;
+  return ((double)*((int*)item));
 }
 
 mon_display_module_t infod_status_mod_info = {

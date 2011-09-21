@@ -193,9 +193,8 @@ void sig_alarm_hndl(int sig)
 
 //In case we get sig alarm in the middle of the infolib library
 
-
+// Compares the number of two objects (the pointers point to instances in raw_data)
 int compare_num(const void* item1, const void* item2)
-//compares the number of two objects (the pointers point to instances in raw_data)
 {
     return (int) scalar_div_x(dm_getIdByName("num"), (void*) ((long) item1 + get_pos(dm_getIdByName("num"))), 0) -
             (int) scalar_div_x(dm_getIdByName("num"), (void*) ((long) item2 + get_pos(dm_getIdByName("num"))), 0);
@@ -251,7 +250,8 @@ int get_data_from_infod(mon_disp_prop_t* display, idata_t **infod_data_ptr)
     return 1;
 }
 
-int allocate_display_raw_data_mem(mmon_display_t *display, int size) {
+int allocate_display_raw_data_mem(mmon_display_t *display, int size)
+{
 
     display->block_length = 0;
 
@@ -262,33 +262,31 @@ int allocate_display_raw_data_mem(mmon_display_t *display, int size) {
     //allocating data array memory
     if (size > 0) {
         display->raw_data = calloc(size, display->block_length);
-        display->life_arr = (int*) malloc(sizeof (int) * size);
+        display->alive_arr = (int*) malloc(sizeof (int) * size);
     } else {
         display->raw_data = NULL;
-        display->life_arr = NULL;
+        display->alive_arr = NULL;
     }
     return 1;
 }
 
-int set_raw_data_item(mmon_display_t *display, int index, idata_entry_t *curInfoEntry) {
+int set_raw_data_item(mmon_display_t *display, int index, idata_entry_t *curInfoEntry)
+{
 
-    // Checking if the node is valid:
-    display->life_arr[index] = ((curInfoEntry->valid != 0) &&
-            (curInfoEntry->data->hdr.status & INFOD_ALIVE));
-
+    int validNode = ((curInfoEntry->valid != 0) &&  (curInfoEntry->data->hdr.status & INFOD_ALIVE));
     void *node_raw_ptr = (void *)((long)display->raw_data + display->block_length * index);
+
     // Filling the data into the apropriate entry. This should be the only
     // place where specific data is accessed
-    if (display->life_arr[index]) {
+    if (validNode) {
         for (int dispModule = 0; dispModule < infoDisplayModuleNum; dispModule++) {
             new_item(dispModule, &glob_info_map, curInfoEntry,
                     (void*) ((long) node_raw_ptr + get_pos(dispModule)),
                     &current_set);
         }
-    } else {
-        // Extracting the status for a dead node
-        if (dbg_flg) fprintf(dbg_fp, "#%i is DEAD!\n", index);
-
+    }
+    // TODO optimize the dm_gtIdByName for "num" "space" etc... 
+    else {
         // Adding the num info so the number of the nodes will be displayed
         new_item(dm_getIdByName("num"), &glob_info_map, curInfoEntry,
                 (void*) ((long) node_raw_ptr + get_pos(dm_getIdByName("num"))),
@@ -298,30 +296,21 @@ int set_raw_data_item(mmon_display_t *display, int index, idata_entry_t *curInfo
         new_item(dm_getIdByName("infod-status"), &glob_info_map, curInfoEntry,
                 (void*) ((long) node_raw_ptr + get_pos(dm_getIdByName("infod-status"))),
                 &current_set);
-
-
     }
     return 1;
 }
 
 
+// Obtaining infomration from infod and sotring in in the display structure
 int get_nodes_to_display(mon_disp_prop_t* display)
-//This is The heart of the mmon:
-//Here, the data is obtained from the host(s).
-//If the "get_all" is 1, then all avalable data (and not just what is
-//currently displayed) is loaded to the raw_data array.
-
 {
     idata_t *infod_data = NULL;
     idata_entry_t *curInfoEntry = NULL;
     idata_iter_t *iter = NULL;
-    //void* temp; //temp place-holder for numbers
-
+    
     int i, j; //temp vars
     struct sigaction act;
     struct itimerval timeout;
-
-    int index; //temp var for loops
 
     if (display == NULL)
         return 1;
@@ -340,11 +329,6 @@ int get_nodes_to_display(mon_disp_prop_t* display)
 
     display->last_host = display->mosix_host;
 
-    if (!(iter = idata_iter_init(infod_data))) {
-        free(infod_data);
-        return 0;
-    }
-
     // Calculating the memory size for each node and allocating memory
     if (display->raw_data == NULL) {
         allocate_display_raw_data_mem(display, infod_data->num);
@@ -353,46 +337,36 @@ int get_nodes_to_display(mon_disp_prop_t* display)
     //set needed info in the current_set
     set_settings(display, &current_set);
 
-    for (i = 0; i < infod_data->num; i++) {
-        //first loop only to insert MACHINE NUMBERS
-        if (!(curInfoEntry = idata_iter_next(iter)))
-            break;
-
-
-        set_raw_data_item(display, i, curInfoEntry);
-        //new_item(dm_getIdByName("num"), &glob_info_map, curInfoEntry,
-        //        (void*) ((long) display->raw_data + display->block_length * i +
-        //        get_pos(dm_getIdByName("num"))), &current_set);
+    if (!(iter = idata_iter_init(infod_data))) {
+        free(infod_data);
+        return 0;
     }
 
+    // Setting the data in the raw data array (ordered as received from infod)
+    // Which means ordered by IP
+    for (i = 0; (curInfoEntry = idata_iter_next(iter)) ; i++) {
+        set_raw_data_item(display, i, curInfoEntry);
+    }
+    idata_iter_done(iter);
 
     display->nodes_count = infod_data->num;
     mlog_bn_db("info", "Data count : %d\n", display->nodes_count);
 
-    idata_iter_done(iter);
-
     // Sort the raw_data array by number
     qsort(display->raw_data,
-            display->nodes_count,
-            display->block_length,
-            &compare_num);
+          display->nodes_count,
+          display->block_length,
+          &compare_num);
 
-    //temp = (char*) malloc(display->block_length);
-    // temp will use now as a place-holder for numbers.
-    // each new number will be put in temp,
-    // and then compared with others to find the correct index.
+    // Building the alive_arr
+   int infodStatusItemId = dm_getIdByName("infod-status");
 
-    //if (!(iter = idata_iter_init(infod_data))) {
-    //    free(infod_data);
-    //    return 0;
-    //}
-    // Second loop, to put values in correct order
-    //for (i = 0 ; i < infod_data->num ; i++) {
-    //    if (!(curInfoEntry = idata_iter_next(iter)))
-    //        break;
-
-    //    set_raw_data_item(display, curInfoEntry);
-    //}
+    for(int i=0 ; i < display->nodes_count ; i++) {
+        void *raw_status_ptr =
+            (void*) ( (long)(display->raw_data) + (i* display->block_length) + get_pos(infodStatusItemId));
+        int infod_status =  (int) scalar_div_x(infodStatusItemId, raw_status_ptr, 1);
+        display->alive_arr[i] = infod_status & INFOD_ALIVE;
+    }
 
     free(infod_data);
     //free(temp);

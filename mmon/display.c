@@ -42,7 +42,7 @@ void displayInit (mmon_display_t* display)
 
   display->displayed_bars_data = NULL;  //displayed data
   display->raw_data     = NULL;  //all available data for display
-  display->life_arr     = NULL;  //index of availability of nodes
+  display->alive_arr     = NULL;  //index of availability of nodes
   display->mosix_host   = NULL;  //host address char array
   display->last_host    = NULL;  //last successful host string
 
@@ -179,10 +179,10 @@ void displayFreeData(mmon_display_t* display)
           free(display->raw_data);
           display->raw_data = NULL;
      }
-     if (display->life_arr)
+     if (display->alive_arr)
      {    
-          free(display->life_arr);
-          display->life_arr = NULL;
+          free(display->alive_arr);
+          display->alive_arr = NULL;
      }
      
 }
@@ -781,13 +781,90 @@ void show_statistics_side_win(mon_disp_prop_t* display)
     wrefresh(display->wlegend);
 }
 
+void displayDrawNumberingHorizontal(mon_disp_prop_t *display, int max_width)
+{
+    int offset;
+    void *temp_p;
+    int index2;
 
+    offset = 0;
+    c_on(&(pConfigurator->Colors._horizNodeName));
+    for (int index = 0; index < display->displayed_bar_num / (display->legend).legend_size; index++) {
+        //points to the currently displayed node
+        temp_p = display->displayed_bars_data[index * (display->legend).legend_size];
+
+        //store the length of the number
+        index2 = scalar_div_x(dm_getIdByName("num"), (void*) ((long) temp_p + get_pos(dm_getIdByName("num"))), 1);
+
+        //left space
+        for (offset = 0;
+                offset < (display->legend).legend_size - index2 -
+                ((display->legend).legend_size - index2) / 2;
+                offset++)
+            printw(" ");
+
+        offset += index2;
+
+        //the number itself
+        int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
+        if (display->side_win_type == SIDE_WIN_NODE_INFO &&
+                nodeNum == display->selected_node)
+            attron(A_UNDERLINE);
+
+        printw("%i", nodeNum);
+
+        if (display->side_win_type == SIDE_WIN_NODE_INFO &&
+                nodeNum == display->selected_node)
+            attroff(A_UNDERLINE);
+
+        //right space
+        for (; offset < (display->legend).legend_size; offset++)
+            printw(" ");
+    }
+    c_off(&(pConfigurator->Colors._horizNodeName));
+}
+
+void displayDrawNumberingVertical(mon_disp_prop_t *display, int max_width)
+{
+    int index2;
+    char *title;
+    int offset;
+    void *temp_p;
+
+    //store the length of the number
+    index2 = (int) max_width;
+
+    title = (char*) malloc((index2 + 1) * sizeof (char));
+
+    for (int index = 0; index < display->displayed_bar_num / (display->legend).legend_size; index++) {
+        //points to the currently displayed node
+        temp_p = display->displayed_bars_data[index * (display->legend).legend_size];
+
+        //left space
+        offset = (display->legend).legend_size - 1 -
+                ((display->legend).legend_size - 1) / 2;
+
+        int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
+        sprintf(title, "%i", nodeNum);
+
+        //mlog_bn_dg("disp", "Node %d\n", nodeNum);
+        display_rtr(stdscr, &(pConfigurator->Colors._vertNodeName),
+                display->max_row - display->bottom_spacing
+                + index2 + display->show_cluster, //row
+                index * (display->legend).legend_size + offset
+                + display->left_spacing + 1, //col
+                title, strlen(title), 0);
+    }
+
+    free(title);
+}
+
+// Draw bottom numbering for the graph, iff the draw
+// int is 1 - otherwise only erases them
 void displayDrawNumbering(mon_disp_prop_t* display, int draw)
-//This function displayes bottom numbering for the graph, iff the draw
-//int is 1 - otherwise only erases them
 {
     int index, index2, offset;
-    double temp_max; //holds a temporary maximum
+    int max_width; //holds a temporary maximum
     void* temp_p;
     char* title;
 
@@ -799,103 +876,51 @@ void displayDrawNumbering(mon_disp_prop_t* display, int draw)
             offset <= display->max_col; offset++)
         printw(" ");
 
-    if ((display->displayed_bar_num > 0) && (display->nodes_count > 0)) {
-        //find the widest number in the list
-        temp_max = get_max(display, dm_getIdByName("num"));
+    if (!(display->displayed_bar_num > 0) || !(display->nodes_count > 0)) {
+        mlog_bn_dr("disp", "Nothing to display??\n");
+        return;
+    }
 
-        //remove other line if in vertical mode
-        if ((display->legend).legend_size < (int) temp_max + 1) {
-            index2 = 1;
-            while (index2 < (int) temp_max) {
-                move(display->max_row - display->bottom_spacing
-                        + display->show_cluster + 1 + index2,
-                        display->min_col + display->left_spacing - 1);
-                for (offset = display->min_col + display->left_spacing;
-                        offset <= display->max_col; offset++)
-                    printw(" ");
-                index2++;
-            }
+    // Find the widest (biggest) number in the list
+    double d = get_max(display, dm_getIdByName("num"));
+    max_width = (int) d;
+    mlog_bn_dg("disp", "max_width = %d %.3f\n", max_width, d);
+
+    //remove other lines if in vertical mode
+    if ((display->legend).legend_size <  max_width + 1) {
+        index2 = 1;
+        while (index2 <  max_width) {
+            int row = display->max_row - display->bottom_spacing + display->show_cluster + 1 + index2;
+            move(row , display->min_col + display->left_spacing - 1);
+            for (offset = display->min_col + display->left_spacing; offset <= display->max_col; offset++)
+                printw(" ");
+            
+            index2++;
         }
+    }
 
+    // Drawing the numbers
+    if (draw) 
+    {
+        // Move to position
+        move(display->max_row - display->bottom_spacing
+                + display->show_cluster + 1,
+                display->min_col + display->left_spacing + 1);
 
-        if (draw) //if there is data displayed...
+        //find the widest number in the list
+        //max_width = get_max(display, dm_getIdByName("num"));
+
+        //if all the numbers fit in horizontally...
+        mlog_bn_dg("disp", "Legend size %d max_width %d\n", (display->legend).legend_size, max_width);
+        if ((display->legend).legend_size >=  max_width + 1)
         {
-            //move to position
-            move(display->max_row - display->bottom_spacing
-                    + display->show_cluster + 1,
-                    display->min_col + display->left_spacing + 1);
-
-            //find the widest number in the list
-            temp_max = get_max(display, dm_getIdByName("num"));
-
-            if ((display->legend).legend_size >= (int) temp_max + 1)
-                //if all the numbers fit in horizontally...
-            {
-                offset = 0;
-                c_on(&(pConfigurator->Colors._horizNodeName));
-                for (index = 0; index < display->displayed_bar_num / (display->legend).legend_size; index++) {
-                    //points to the currently displayed node
-                    temp_p = display->displayed_bars_data[index * (display->legend).legend_size];
-
-                    //store the length of the number
-                    index2 = scalar_div_x(dm_getIdByName("num"), (void*) ((long) temp_p + get_pos(dm_getIdByName("num"))), 1);
-
-                    //left space
-                    for (offset = 0;
-                            offset < (display->legend).legend_size - index2 -
-                            ((display->legend).legend_size - index2) / 2;
-                            offset++)
-                        printw(" ");
-
-                    offset += index2;
-
-                    //the number itself
-                    int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
-                    if (display->side_win_type == SIDE_WIN_NODE_INFO &&
-                            nodeNum == display->selected_node)
-                        attron(A_UNDERLINE);
-
-                    printw("%i", nodeNum);
-
-                    if (display->side_win_type == SIDE_WIN_NODE_INFO &&
-                            nodeNum == display->selected_node)
-                        attroff(A_UNDERLINE);
-
-                    //right space
-                    for (; offset < (display->legend).legend_size; offset++)
-                        printw(" ");
-                }
-                c_off(&(pConfigurator->Colors._horizNodeName));
-            } else
-                //go to vertical mode!
-            {
-                //store the length of the number
-                index2 = (int) temp_max;
-
-                title = (char*) malloc((index2 + 1) * sizeof (char));
-
-                for (index = 0; index < display->displayed_bar_num / (display->legend).legend_size; index++) {
-                    //points to the currently displayed node
-                    temp_p = display->displayed_bars_data[index * (display->legend).legend_size];
-
-                    //left space
-                    offset = (display->legend).legend_size - 1 -
-                            ((display->legend).legend_size - 1) / 2;
-
-                    int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
-                    sprintf(title, "%i", nodeNum);
-
-                    mlog_bn_dg("disp", "Node %d\n", nodeNum);
-                    display_rtr(stdscr, &(pConfigurator->Colors._vertNodeName),
-                            display->max_row - display->bottom_spacing
-                            + index2 + display->show_cluster, //row
-                            index * (display->legend).legend_size + offset
-                            + display->left_spacing + 1, //col
-                            title, strlen(title), 0);
-                }
-
-                free(title);
-            }
+            mlog_bn_dg("disp", "Horizontal mode:\n\n");
+            displayDrawNumberingHorizontal(display, max_width);
+        }
+        //go to vertical mode!
+        else {
+            mlog_bn_dg("disp", "Vertical mode:\n\n");
+            displayDrawNumberingVertical(display, max_width);
         }
     }
 }
@@ -905,14 +930,19 @@ void displayDrawVerticalTitle(mon_disp_prop_t *display)
     legend_node_t* lgd_ptr; //for iterating the legend list
     lgd_ptr = (display->legend).head;
     
+    int spaceItemId = dm_getIdByName("space");
+    while(lgd_ptr != NULL && lgd_ptr->data_type == spaceItemId)
+        lgd_ptr = lgd_ptr->next;
+
     char *title = (char*) (infoModulesArr[lgd_ptr->data_type]->md_title);
+    int   titleLen = infoModulesArr[lgd_ptr->data_type]->md_titlength;
+    int row = display->min_row +
+              (display->max_row - display->min_row - display->bottom_spacing + titleLen) / 2;
+
     display_rtr(stdscr, &(pConfigurator->Colors._chartColor),
-            display->min_row + (display->max_row - display->min_row
-            - display->bottom_spacing
-            + infoModulesArr[lgd_ptr->data_type]->md_titlength) / 2,
-            display->min_col + display->left_spacing - LSPACE,
-            (char*) (infoModulesArr[lgd_ptr->data_type]->md_title),
-            infoModulesArr[lgd_ptr->data_type]->md_titlength, 0);
+                row,
+                display->min_col + display->left_spacing - LSPACE,
+                title, titleLen, 0);
 }
 
 
@@ -1039,7 +1069,7 @@ void displayRedrawGraph(mon_disp_prop_t* display)
         for (index = 0; index < display->displayed_bar_num; index++) {
 
             //if corresponding cell is alive...
-            if (display->life_arr[get_raw_pos(display, index)]) {
+            if (display->alive_arr[get_raw_pos(display, index)]) {
 
                 if (max_type == lgd_ptr->data_type)
                     display_item(lgd_ptr->data_type, //data type
@@ -1201,7 +1231,7 @@ void displayRedraw(mon_disp_prop_t* display)
         //count the dead:
         dead_count = 0;
         for (index = 0; index < display->nodes_count; index++)
-            dead_count += 1 - display->life_arr[index];
+            dead_count += 1 - display->alive_arr[index];
 
         //now, to init the display array:
         //(if the dead are hidden, less display space might be needed)
@@ -1235,7 +1265,7 @@ void displayRedraw(mon_disp_prop_t* display)
                 index * (display->legend).legend_size < display->displayed_bar_num;
                 index++) {
             while ((index + offset < display->nodes_count) &&
-                    (!((display->life_arr[index + offset]) || (display->show_dead))))
+                    (!((display->alive_arr[index + offset]) || (display->show_dead))))
                 offset++;
 
             if (index + offset < display->nodes_count)

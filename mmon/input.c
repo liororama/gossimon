@@ -178,7 +178,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
 
                     if (display->nodes_count > 0) {
                         displayFreeData(display);
-                        free(display->life_arr);
+                        free(display->alive_arr);
                     }
 
                     display->cluster = cl_prev(display->clist);
@@ -216,7 +216,7 @@ void parse_cmd(mmon_data_t *md, int pressed)
 
                     if (display->nodes_count > 0) {
                         displayFreeData(display);
-                        free(display->life_arr);
+                        free(display->alive_arr);
                     }
 
                     display->cluster = cl_next(display->clist);
