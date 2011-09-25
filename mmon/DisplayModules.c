@@ -219,8 +219,8 @@ int displayModule_detectExternalPlugins(PluginConfig_t *p)
 
     // Getting the modules from the plugins.names variable
     if (!getFilesInDir(GOSSIMON_ENABLED_PLUGINS_DIR, &arr, ".conf")) {
-        mlog_bn_error("plugins", "Error getting files in directory %s\n", GOSSIMON_ENABLED_PLUGINS_DIR);
-        return 0;
+         mlog_bn_error("plugins", "Error getting files in directory [%s]\n", GOSSIMON_ENABLED_PLUGINS_DIR);
+         return 0;
     }
     mlog_bn_info("plugins", "Found %d files in plugins-enabled dir\n", arr->len);
 

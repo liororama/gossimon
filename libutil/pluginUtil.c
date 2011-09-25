@@ -61,8 +61,10 @@ int getFilesInDir(char *dirName, GPtrArray **arr, char *filter)
     DIR *dirp;
     struct dirent *dp;
 
+
     len = strlen(dirName);
     if (!(dirp = opendir(dirName))) {
+      fprintf(stderr, "ERR %s %d\n", dirName, len);
         mlog_bn_dg("pim", "Error opening dir %s : %s\n", dirName, strerror(errno));
         return 0;
     }

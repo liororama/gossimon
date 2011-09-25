@@ -131,7 +131,7 @@ extern "C" {
     int mlog_addOutputSyslog(char *prefix, int options, int facility);
     
     // The color formatter shoud cat the color the output buffer and the input buffer
-    typedef int (*color_formatter_func_t) (color_t, char *, char *);
+  typedef int (*color_formatter_func_t) (color_t, char *, char *, ...);
     int mlog_registerColorFormatter(color_formatter_func_t colorFormatter);
 
 #ifdef	__cplusplus
