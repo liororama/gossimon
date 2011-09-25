@@ -1,7 +1,31 @@
 #!/bin/bash
 
+
 echo "Generating gossimon binary packages"
 make clean
 rm -f CMakeCache.txt
 /usr/local/bin/cmake -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
 make package
+
+echo 
+echo
+
+if  grep -q "CentOS" /etc/issue  ; then
+    echo "Fixes for rpm generation on centos (problem in cpack)"
+    ARC=`uname -m`
+    ORIG_RPM=`ls *_Linux.rpm`
+    if [ -e "$ORIG_RPM" ] ; then 
+        echo "Found [$ORIG_RPM]"
+        FIXED_RPM=${ORIG_RPM/_Linux.rpm/_$ARC.rpm}
+        echo "Fixed: [$FIXED_RPM]"
+        mv -f $ORIG_RPM $FIXED_RPM
+    else
+        echo "NO bad rpm found"
+    fi
+    
+fi
+
+exit 0
+
+
+
