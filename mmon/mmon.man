@@ -177,6 +177,7 @@ Alexander Margolin to support modular displays. Color support was added by Morde
 .TP
 Since 2010 mmon is developed maintained by Lior Amar as part of the gossimon open source project.
 
+
 .SH SEE ALSO
 .B  infod(8), infod-client(1), infod-best(1), testload(1)
 
