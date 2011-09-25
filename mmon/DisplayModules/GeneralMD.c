@@ -2347,7 +2347,7 @@ char** iowait_display_help ()
 void iowait_new_item (mmon_info_mapping_t* iMap, const void* source, 
                      void* dest, settings_t* setup)
 {
-  if (iMap->util)
+  if (iMap->iowait)
     *((unsigned char*)dest) = 
       *((unsigned char*)(((idata_entry_t*)source)->data->data 
                          + iMap->iowait->offset));

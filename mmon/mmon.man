@@ -13,7 +13,7 @@
 .TH MMON 1 "21 October 2010" "Version 2" "GOSSIMON"
 
 .SH NAME
-mmon - a cluster monitor for the MOSIX/Linux system. It is part of the gossimon package
+mmon - a cluster monitor for the gossimon system.
 
 
 .SH SYNOPSIS
@@ -24,8 +24,11 @@ mmon - a cluster monitor for the MOSIX/Linux system. It is part of the gossimon 
 [\-\-nodes nodeX..Y]
 .SH DESCRIPTION
 .PP
-The \fIMMON\fP is the MOSIX cluster/grid monitor, used for viewing various data,
-provided by the Infod client, for multiple clusters.
+\fIMMON\fP is a cluster monitor, used for viewing various real time data obtained
+by the infod daemon.
+\fIMMON\fP periodically connects to the infod daemon and retrieve information about cluster nodes.
+This information is displayed as a series of bars, by default 1 bar per node is displayed,
+but using the advanced mode it is possible to display several bars per node.
 .PP
 MMON uses a mutable color scheme, which may be loaded from a given file
 (must be of specific format). If no scheme specified - MMON will attempt
@@ -37,72 +40,142 @@ activated by pressing 'h' while running.
 
 
 .SH OPTIONS
-.l 
-The \fImmon\fP accepts the following options:
 .TP 8
-.B  \-V
+.B  -V
 Display in "super-vertical" mode - one space per node.
+
 .TP 8
-.B \-v
-Display in vertical mode - two space per node.
+.B -v
+Display in vertical mode - two spaces per node.
+
 .TP 8
-.B \-w,\-W
+.B -w,-W
 Display in wide mode - every node number fits horizontally.
+
 .TP 8 
-.B \-t, \-T
-Show bottom status bar, displaying various information.
+.B -t, -T
+Show bottom status bar, displaying various information (default).
+
 .TP 8
-.B \-d
+.B -d
 Show dead nodes as well as live (indicating type of death).
+
 .TP 8
-.B \-m
+.B -m
 Set initial display type to memory.
+
 .TP 8
-.B \-s
+.B -s
 Set initial display type to speed.
+
 .TP 8
-.B \-l
+.B -l
 Set initial display type to load.
+
 .TP 8
-.B \-u
+.B -u
 Set initial display type to Utilizability.
+
 .TP 8
-.B \-h <\fIhost\fP>
+.B -h <\fIhost\fP>
 Set given host to be the source of displayed information.
+
 .TP 8
-.B \-c <\fIhost list\fP>
+.B -c <\fIhost list\fP>
 Use multiple sources of information, given in a list format.
 For example: -c host1,cluster3,node8
-Each destination will be displayed seperatly.
+Each destination will be displayed separately.
 Selection using the Up/Down arrow keys. 
+
 .TP 8
-.B \-f <\fIfilename\fP>
+.B -f <\fIfilename\fP>
 Use multiple sources of information, given in a specified file.
 Each destination will be displayed seperatly.
 Selection using the Up/Down arrow keys.
+
 .TP 8
-.B \-o <\fIstream|filename\fP>
+.B -o <\fIstream|filename\fP>
 Output important (and unimportant) debugging information.
+
 .TP 8
-.B \-\-defaults
+.B --defaults
 Use default color scheme:
 If The default configuration file exists - MMON will use it.
 Otherwise - The MMON will use the default Black&White setting.
+
 .TP 8
-.B \-\-conf <\fIfilename\fP>
+.B --conf <\fIfilename\fP>
 Use customized color scheme defined in specified file.
+
 .TP 8
-.B \-\-nodes <\fInodeX..Y\fP>
+.B --nodes <\fInodeX..Y\fP>
 Only display nodes from nodeX until nodeY (e.g. c1..20,c30..40)
+
+.TP 8
+.B --win <\faWINDOW-DEFINITION\fP>
+This option instructs MMON to create a display according to the WINDOW-DEFINITION provided.
+See the WINDOW-DEFINITION section for more details.
+
+
+.SH WINDOW-DEFINITION
+Window definition is provided by several directives separated by spaces.
+
+
+.IP host=host-name
+Use the provided host-name for retrieving information.
+
+.IP disp=item1,item2,...,itemN
+Create a legend with the following items. For example disp=load,space,mem
+
+.IP mode=prop1,prop2...
+Set the display mode according to the given properties.
+Available properties include:
+.RS
+.TP
+.B d
+to display dead nodes
+
+.TP
+.B v
+to use vertical mode
+.B w 
+to use wide (horizontal names) mode
+.TP
+.B sv
+to use super vertical (no spaces) mode
+
+.RE
+
+.IP nodes=nodeX..Y
+Limit the display to the provided nodes in the given range. The range is explained using the
+following example :g1..50. The g1 define the first node; The .. part indicate it is a numeric range; and 50
+indicate the number of the last nodes. So the range is equal to g1,g2,...,g49,g50.
+Several ranges can be provided using comma separation (e.g. g1..25,g33..44)
+
+
+.SH EXAMPLES
+.TP
+.B mmon --win "mode=d host=g22" --win "mode=sv host=g55"
+
+Open 2 displays, the first showing dead nodes and using g22 as the information source,
+the second in super vertical mode using g55 as the information source.
+
+.TP
+.B mmon --win "node=g1..25" --win "node=g33..35 host=g1"
+
+Open 2 displays, the first showing nodes g1..25 and the second showing nodes g33..35.
+
+.RE
 
 .SH AUTHORS
 Alexander Margolin, Amnon Shiloh, Amar Lior, Ilan Peer, and Mordechai Guri
 
 .SH HISTORY
 MMON was developped originally by Amnon Shiloh for the MOSIX(TM) system. It was modified to 
-obtain data from the infod system by Ilan Peer and Lior Amar. Later on it was heavily changed by
+obtain data from the infod system by Ilan Peer and Lior Amar. Later on it was heavily modified by
 Alexander Margolin to support modular displays. Color support was added by Mordechai Guri.
-Since 2010 mmon is maintained by Lior Amar as part of the gossimon open source project.
+.TP
+Since 2010 mmon is developed maintained by Lior Amar as part of the gossimon open source project.
 
 .SH SEE ALSO
 .B  infod(8), infod-client(1), infod-best(1), testload(1)

@@ -1136,14 +1136,11 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     // Loading config file (and color definitons)
     loadConfigFile(md);
 
-
     // Initializing external display modules 
     if (pConfigurator->Plugins.pluginsNum == 0)
         displayModule_detectExternalPlugins(&pConfigurator->Plugins);
     displayModule_registerExternalPlugins(&pConfigurator->Plugins);
     displayModule_initModules();
-
-
 
     //mon_map init (explained above)
     infoModulesArr = (mon_display_module_t**) malloc((infoDisplayModuleNum + 1) * sizeof (mon_display_module_t*));
@@ -1190,7 +1187,6 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
             }
     }
 
-
     md->confFileName[0] = 0; //init configuration file name to <none>
 
     if (md->startWinFromCmdline) {
@@ -1204,7 +1200,7 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     current_set.uid = 65534; //init to nobody
     size_recalculate(1);
 
-    if (dbg_flg) fprintf(dbg_fp, "\nINIT COMPLETE.\n\n");
+    mlog_bn_dy("mmon", " ---- INIT COMPLETE -----\n\n");
 }
 
 void mmon_free()
@@ -1376,7 +1372,6 @@ int mmon_redraw(mmon_display_t *display) {
     res = get_nodes_to_display(display);
     if(res) {
         displayRedraw(display);
-
     }
     return res;
 }
@@ -1400,7 +1395,7 @@ int main(int argc, char** argv)
     refresh();
 
 
-    while (res && (glob_displaysArr[0])) {
+    while (glob_displaysArr[0]) {
         //update exity monitor
         if (glob_exiting > 0)
             glob_exiting--;
@@ -1421,8 +1416,10 @@ int main(int argc, char** argv)
         mvprintw(LINES - 1, 0, ""); //move to LRCORNER
         refresh();
     }
-
     mlog_bn_info("mmon", "mmon done res = %d disp0 = %p \n", res, glob_displaysArr[0]);
-
+    mmon_exit(res);
+    if(!res) {
+        fprintf(stderr, "Error - when tring to draw screen - probably infod is not there\n");
+    }
     return 0;
 }

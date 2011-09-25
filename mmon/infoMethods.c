@@ -236,7 +236,7 @@ int get_data_from_infod(mon_disp_prop_t* display, idata_t **infod_data_ptr)
     // Getting the information itself
     infod_data = infolib_all(display->mosix_host, glob_host_port);
     if (!infod_data) {
-        if (dbg_flg) fprintf(dbg_fp, "Error getting info\n");
+        mlog_bn_error("info", "Error getting information from infod\n");
         // Disable the sigalarm
         setitimer(ITIMER_VIRTUAL, NULL, NULL);
         return 0;
