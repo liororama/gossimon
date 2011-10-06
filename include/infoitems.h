@@ -84,6 +84,7 @@
 #define ITEM_NET_WATCH_NAME         "net-watch"
 #define ITEM_PROVIDER_TYPE_NAME     "provider-type"
 #define ITEM_TOP_USAGE_NAME         "top-usage"
+#define ITEM_TOP_NAME               "top"
 #define ITEM_KERNEL_RELEASE_NAME    "kernel-version"
 
 /****************************************************************************

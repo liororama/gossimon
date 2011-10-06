@@ -1,7 +1,9 @@
 ------** Version: 1.8.13 By: Lior Date 8/9/2011 **-------
-* add mmon --nodes flag to be able to view only selected nodes
+* Added mmon --nodes flag to be able to view only selected nodes
 * Few fixes to mmon man page
-* fixed a bug in iowait mmon display module
+* Fixed a bug in iowait mmon display module
+* Fixed a small bug with ModuleLogger crashing due to wrong prototype 
+  definition of sprintf_color in ColorPrint.h
 
 * TODO - add infodctl listing of modules
 * TODO - Indicate a dead node with bad description 

@@ -121,7 +121,7 @@ add_subdirectory(mmon)
 add_subdirectory(testload)
 add_subdirectory(infod)
 
-
+add_subdirectory(plugins/top)
 
 
 include("CMakeInstallGossimon.txt")
