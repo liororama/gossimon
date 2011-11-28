@@ -19,7 +19,7 @@ include_directories("../libgossip")
 include_directories("/usr/include/glib-2.0/")
 include_directories("/usr/lib/glib-2.0/include")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fPIC -Wall  -D__USE_GNU -D_GNU_SOURCE")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -fPIC -Wall  -D__USE_GNU -D_GNU_SOURCE")
 
 set(PLUGIN_NAME "top")
 set(PLUGIN_MAIN "${PLUGIN_NAME}_main")
@@ -27,11 +27,11 @@ set(PLUGIN_MAIN "${PLUGIN_NAME}_main")
 #set(pim_DIR InfoModules)
 #include_directories(${pim_DIR})
 
-set(plugin_SRC TopPIM.cpp )
+set(plugin_SRC TopPIM.cpp TopFinder.cpp )
 set(plugin_main_SRC top_main.cpp)
 
-add_executable(${PLUGIN_MAIN}  ${plugin_main_SRC} )
-target_link_libraries(${PLUGIN_MAIN} glib-2.0 dl)
+add_executable(${PLUGIN_MAIN}  ${plugin_main_SRC} ${plugin_SRC} )
+target_link_libraries(${PLUGIN_MAIN} util glib-2.0 dl )
 
 add_custom_command(TARGET infod POST_BUILD COMMAND cp -f infod ../bin)
 SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/infod;infod.8.gz") 

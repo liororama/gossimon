@@ -27,15 +27,20 @@
 #include <sys/time.h>
 
 
+#include <ModuleLogger.h>
 #include <msx_error.h>
 #include <msx_debug.h>
 #include <parse_helper.h>
 #include "infoitems.h"
 
+#include <TopFinder.h>
 
 char moduleName[] = "top";
 char im_name[] =  "top";
+int  im_debug = 0;
 int  im_period = 10;
+
+int mlog_id;
 
 typedef struct dummy_pim {
     char        dataStr[100];
@@ -44,61 +49,53 @@ typedef struct dummy_pim {
 
 int im_init(void **module_data, void *module_init_data)
 {
-    dummy_pim_t    *dummy;
+ 
+    mlog_registerModule("top", "Getting info about the most cpu intensive processes", "top");
+    mlog_getIndex("top", &mlog_id);
 
+    mlog_dg(mlog_id, "im_init() \n");
     //pim_init_data_t *pim_init = (pim_init_data_t *) module_init_data;
 
-    debug_lb(INFOD_DBG, "Dummy..... init()\n");
 
     //struct infod_runtime_info  *irti = (struct infod_runtime_info *)pim_init->init_data;
 
     //if(!irti)
     //        return 0;
-    dummy = (dummy_pim_t *)malloc(sizeof(dummy_pim_t));
-    if(!dummy) return 0;
-        
-    bzero(dummy, sizeof(dummy_pim_t));
-    dummy->value = 11;
-    *module_data = dummy;
+    TopFinder *tf = new TopFinder("/proc");
+    if(!tf) return 0;
+    tf->setMlogId(mlog_id);
+    
+    *module_data = (void *) tf;
     return 1;
 
 }
 
 int im_free(void **module_data) {
-    dummy_pim_t *dummy = (dummy_pim_t*) (*module_data);
+    TopFinder *tf = (TopFinder *) (*module_data);
 	
-    if(!dummy)
+    if(!tf)
         return 0;
-    free(dummy);
+    delete(tf);
     *module_data = NULL;
     return 1;
 }
 
 int im_update(void *module_data)
 {
-    //	dummy_pim_t   *dummy = (dummy_pim_t*)module_data;
+    TopFinder *tf = (TopFinder *) module_data;
 
-    struct timeval tim;
-
-    gettimeofday(&tim, NULL);
+    //struct timeval tim;
+    tf->update();
+    //gettimeofday(&tim, NULL);
     return 1;
-}
-
-static 
-void writedummyInfo(dummy_pim_t *dummy, char *buff) {
-
-    sprintf(buff, "<%s value=\"%d\">%d</%s>",
-            moduleName, dummy->value, dummy->value, moduleName);
 }
 
 int im_get(void *module_data, void *data, int *size)
 {
-    dummy_pim_t    *dummy = (dummy_pim_t *)module_data;
+    TopFinder *tf = (TopFinder *) module_data;
     char          *buff = (char *) data;
-     
-    writedummyInfo(dummy, buff);
-    *size = strlen(buff)+1;
-    debug_lg(INFOD_DBG, "Infod debug module:\n%s\n\n", buff);
+
+    tf->getTopXML(buff, size);
     return 1;
 }
 

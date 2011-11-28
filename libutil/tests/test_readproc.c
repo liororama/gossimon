@@ -34,9 +34,26 @@ void print_end()
 	printf("\n++++++++++++++++ %15s +++++++++++++++\n", curr_msg);
 }
 
+START_TEST(test_basic) {
+    int size = 100;
+    int res;
+    proc_entry_t p1;
+    //msx_set_debug(READPROC_DEBUG);
+
+    
+    res = read_process_stat("./proc-test/proc1/4649", &p1);
+    res = read_process_status("./proc-test/proc1/4649", &p1);
+
+    fail_unless(res != 0, "Failed to read process 4649 stats");
+    fail_unless(p1.utime == 1693, "Failed to read utime");
+    fail_unless(p1.uid == 0, "Failed to read uid");
+
+}
+END_TEST
 
 
-START_TEST (test_basic)
+
+START_TEST (test_basic_mosix)
 {
 	proc_entry_t   *procArr;
 	int            size = 100;
@@ -88,23 +105,25 @@ START_TEST (test_basic)
 	fail_unless(size == 3 , "Number of mosix processes is not 3");
         
 }
+
 END_TEST
 
 
 
 /*************************************************************/
-Suite *mapper_suite(void)
-{
-	Suite *s = suite_create("Read Mosix Processes");
-	
-	TCase *tc_core   = tcase_create("Core");
-	TCase *tc_stress = tcase_create("Stress"); 
-	
-	suite_add_tcase (s, tc_core);
-	suite_add_tcase (s, tc_stress);
-	
-	tcase_add_test(tc_core, test_basic);
-	return s;
+Suite *mapper_suite(void) {
+    Suite *s = suite_create("Read Process /proc info");
+
+    TCase *tc_core = tcase_create("Core");
+    TCase *tc_stress = tcase_create("Stress");
+
+    suite_add_tcase(s, tc_core);
+    suite_add_tcase(s, tc_stress);
+
+    tcase_add_test(tc_core, test_basic);
+    tcase_add_test(tc_core, test_basic_mosix);
+
+    return s;
 }
 
 int main(void)

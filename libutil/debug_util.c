@@ -30,7 +30,7 @@ unsigned long getMyMemSize() {
 
 
         sprintf(buff, "/proc/%d/", pid);
-        if(!readProcessStat(buff, &pEnt))
+        if(!read_process_stat(buff, &pEnt))
                 return 0;
 
         return pEnt.virt_mem;
@@ -45,7 +45,7 @@ unsigned long getMyRSS() {
 
 
         sprintf(buff, "/proc/%d/", pid);
-        if(!readProcessStat(buff, &pEnt))
+        if(!read_process_stat(buff, &pEnt))
                 return 0;
 
         return pEnt.rss_sz;

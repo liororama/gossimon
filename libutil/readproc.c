@@ -59,7 +59,7 @@ void print_mosix_processes(proc_entry_t *procArr, int size) {
         }
 }
 
-int readProcessStat(const char *proc_dir_name, proc_entry_t *e)
+int read_process_stat(const char *proc_dir_name, proc_entry_t *e)
 {
 	FILE   *f;
 	
@@ -164,12 +164,16 @@ int readProcessStat(const char *proc_dir_name, proc_entry_t *e)
 	e->virt_mem = vsize;
 	e->rss_sz = rss;
 
+        e->utime = utime;
+        e->stime = stime;
+
         // Note that we remove the ( ) around the name
         strncpy(e->name, name+1, MAX_PROC_NAME -2);
         e->name[strlen(e->name)-1] = '\0';
 
 	e->name[MAX_PROC_NAME -1] = '\0';
-	fclose(f);
+        e->pid = pid;
+        fclose(f);
 	return 1;
 }
 
@@ -218,7 +222,7 @@ int parseStatusBuff(char *buff, int size, proc_entry_t *e)
         return res;
 }
 
-int readProcessStatus(const char *proc_dir_name, proc_entry_t *e)
+int read_process_status(const char *proc_dir_name, proc_entry_t *e)
 {
         int            res = 0;
         int            fd = -1;
@@ -330,7 +334,7 @@ int getMosixProcessEntry(char *proc_dir_name, mosix_procs_type_t ptype,
 	// Finaly we have the MOSIX process we are interested in
         debug_lg(READPROC_DEBUG, "Reading process: (from %d where %d freezer: %d path:%s\n",
                  fromVal, whereVal, freezer, path);
-	if(readProcessStat(proc_dir_name, e) == 0) {
+	if(read_process_stat(proc_dir_name, e) == 0) {
 		return 0;
 	}
 	
@@ -415,7 +419,7 @@ int get_mosix_processes(char *proc_name, mosix_procs_type_t ptype,
 		// (running elsewere)
 		if(isMosixProcess == 0  ) {
                        	debug_ly(READPROC_DEBUG, "Process is not a mosix process %d\n", pid);
-                        if(!readProcessStatus(buff, &entry)) { 
+                        if(!read_process_status(buff, &entry)) {
                                 debug_lr(READPROC_DEBUG, "Error cant read process status file\n");
                                 goto out;
                         }

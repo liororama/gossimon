@@ -1,0 +1,24 @@
+
+
+
+glob_displayArr -> Array of diplsys
+
+
+
+display 
+
+   legend -->  head  -> list types presented for each node 
+          +-> legend_size
+
+
+   raw_data   -> all data received from infod after each info modules processed its part
+   data_count -> Number of machines in raw data 
+   block_length -> memory size allocated for each machine
+
+
+   life_arr -> Array in the size of data_count specifying 1 for live 0 for dead
+
+
+   display_data   -> An Array of pointers to the data parts to be displayed where for 
+                     each node we have legend_size pointers dedicated to it 
+   displayed      -> The number of displayed nodes

@@ -16,8 +16,15 @@
  *
  *****************************************************************************/
 
-#ifndef __PROCESS_WATCH_PIM
-#define __PROCESS_WATCH_PIM
+#ifndef __TOP_PIM
+#define __TOP_PIM
+
+
+int im_init(void **module_data, void *module_init_data);
+int im_free(void **module_data);
+int im_update(void *module_data);
+int im_get(void *module_data, void *data, int *size);
+int im_description(void *module_data, char *buff);
 
 
 #endif

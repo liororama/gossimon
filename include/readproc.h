@@ -14,6 +14,11 @@
 #ifndef __MOSIX2_READ_PROC_
 #define __MOSIX2_READ_PROC_
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+
 #define MAX_PROC_NAME (32)
 
 #include <sys/socket.h>
@@ -33,6 +38,9 @@ typedef struct  proc_entry_
 	unsigned long   virt_mem;
 	long            rss_sz;
 
+        unsigned long   utime;
+        unsigned long   stime;
+
 	char            whereIsHere;
 	char            fromIsHere;
 	struct in_addr  whereAddr;
@@ -49,7 +57,8 @@ void print_mosix_processes(proc_entry_t *procArr, int size);
 
 
 /* Read the status of a single process */
-int readProcessStat(const char *proc_dir_name, proc_entry_t *e);
+int read_process_stat(const char *proc_dir_name, proc_entry_t *e);
+int read_process_status(const char *proc_dir_name, proc_entry_t *e);
 
 
 typedef enum {
@@ -73,5 +82,10 @@ int is_mosix_process_deputy(proc_entry_t *e);
 int is_mosix_process_non_deputy(proc_entry_t *e);
 
 int is_mosix_process_guest(proc_entry_t *e);
+
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* __MOSIX2_READ_PROC_ */

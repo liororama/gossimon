@@ -1,4 +1,5 @@
 # Adding ignored files
+*~
 *.deb
 *.rpm
 *.tar.gz
@@ -27,5 +28,5 @@ install_manifest.txt
 libgossip/gossip-calc
 mmon/mmon
 testload/testload
-
+plugins/top/top_main
 
