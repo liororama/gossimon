@@ -95,7 +95,7 @@ char mlogBuff[1024];
 char mlogBuff2[1024];
 char mlogBuff3[1024];
 
-int noColor(color_t color, char *str, char *colorStr);
+int noColor(color_t color, char *str, char *colorStr, ...);
 void mlog_print(int moduleIndex, int level, color_t color, char *buff);
 int mlog_calcModulesInDebug();
 
@@ -144,7 +144,7 @@ int mlog_init()
     return 1;
 }
 
-int mlog_registerModule(char *name, char *desc, char *shortName)
+int mlog_registerModule(const char *name, const char *desc, const char *shortName)
 {
     if (!name) return 0;
 
@@ -178,13 +178,13 @@ int mlog_registerModule(char *name, char *desc, char *shortName)
     }
 
     // Adding the module
-    g_hash_table_insert(_mlog->nameHash, name, m);
+    g_hash_table_insert(_mlog->nameHash, (gpointer)name, m);
     _mlog->nr_modules++;
     mlog_modulesInDebug = mlog_calcModulesInDebug();
     return 1;
 }
 
-int mlog_getIndex(char *name, int *index)
+int mlog_getIndex(const char *name, int *index)
 {
     moduleInfo_t *m = g_hash_table_lookup(_mlog->nameHash, name);
     if (m) {
@@ -214,7 +214,7 @@ int mlog_setLevel(int level) {
     mlog_modulesInDebug = mlog_calcModulesInDebug();
 }
 
-int mlog_setModuleLevel(char *mode, int level)
+int mlog_setModuleLevel(const char *mode, int level)
 {
     moduleInfo_t *m;
 
@@ -228,13 +228,13 @@ int mlog_setModuleLevel(char *mode, int level)
         return 1;
     }// If the module does not exists we save the enable so if the modules is later defined it will be enabled
     else {
-        g_hash_table_insert(_mlog->pendingEnable, mode, mode);
+        g_hash_table_insert(_mlog->pendingEnable, (gpointer) mode, (gpointer)mode);
     }
 
     return 0;
 }
 
-int mlog_setModuleLevelFromStr(char *str, int level)
+int mlog_setModuleLevelFromStr(const char *str, int level)
 {
     if (level < 0) return 0;
     if (level > MLOG_MAX_LEVEL) level = MLOG_MAX_LEVEL;
@@ -246,7 +246,7 @@ int mlog_setModuleLevelFromStr(char *str, int level)
             return 1;
         }
     }
-    g_hash_table_insert(_mlog->pendingShortEnable, str, str);
+    g_hash_table_insert(_mlog->pendingShortEnable, (gpointer)str, (gpointer)str);
     mlog_modulesInDebug = mlog_calcModulesInDebug();
     return 0;
 }
@@ -266,7 +266,7 @@ char *mlog_getAllModulesDesc(char *buff)
     return buff;
 }
 
-void mlog(int moduleIndex, int level, int color, char *fmt, ...)
+void mlog(int moduleIndex, int level, int color, const char *fmt, ...)
 {
     if (moduleIndex < 0 || moduleIndex > MLOG_MAX_MODULES) {
         fprintf(stderr, "Error trying to access module out-of-range: %d", moduleIndex);
@@ -283,7 +283,7 @@ void mlog(int moduleIndex, int level, int color, char *fmt, ...)
     mlog_print(moduleIndex, level, color, mlogBuff);
 }
 
-void mlog_byName(char *moduleName, int level, int color, char *fmt, ...)
+void mlog_byName(const char *moduleName, int level, int color, char *fmt, ...)
 {
     moduleInfo_t *m = g_hash_table_lookup(_mlog->nameHash, moduleName);
     if (!m) return;
@@ -404,7 +404,7 @@ int mlog_registerColorFormatter(color_formatter_func_t colorFormatter)
     _mlog->color_formater = colorFormatter;
 }
 
-int noColor(color_t color, char *str, char *colorStr)
+int noColor(color_t color, char *str, char *colorStr, ...)
 {
     strcpy(colorStr, str);
     return strlen(str);

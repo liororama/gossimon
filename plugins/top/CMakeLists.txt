@@ -18,6 +18,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories("../libgossip")
 include_directories("/usr/include/glib-2.0/")
 include_directories("/usr/lib/glib-2.0/include")
+include_directories("/usr/include/libxml++-2.6")
+
+include_directories("/usr/include/libxml++-2.6") 
+include_directories("/usr/lib/libxml++-2.6/include") 
+include_directories("/usr/include/libxml2") 
+include_directories("/usr/include/glibmm-2.4") 
+include_directories("/usr/lib/glibmm-2.4/include") 
+include_directories("/usr/include/sigc++-2.0") 
+include_directories("/usr/lib/sigc++-2.0/include") 
+include_directories("/usr/include/glib-2.0") 
+include_directories("/usr/lib/glib-2.0/include")  
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -fPIC -Wall  -D__USE_GNU -D_GNU_SOURCE")
 
@@ -27,14 +38,14 @@ set(PLUGIN_MAIN "${PLUGIN_NAME}_main")
 #set(pim_DIR InfoModules)
 #include_directories(${pim_DIR})
 
-set(plugin_SRC TopPIM.cpp TopFinder.cpp )
+set(plugin_SRC TopPIM.cpp TopFinder.cpp TopSaxParser.cpp)
 set(plugin_main_SRC top_main.cpp)
 
 add_executable(${PLUGIN_MAIN}  ${plugin_main_SRC} ${plugin_SRC} )
-target_link_libraries(${PLUGIN_MAIN} util glib-2.0 dl )
+target_link_libraries(${PLUGIN_MAIN} util glib-2.0 dl pthread xml++-2.6 xml2 glibmm-2.4 gobject-2.0 sigc-2.0 gthread-2.0 rt  )
 
-add_custom_command(TARGET infod POST_BUILD COMMAND cp -f infod ../bin)
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/infod;infod.8.gz") 
+#add_custom_command(TARGET infod POST_BUILD COMMAND cp -f infod ../bin)
+#SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/infod;infod.8.gz") 
 
 add_library( ${PLUGIN_NAME} MODULE ${plugin_SRC} )
 set_target_properties( ${PLUGIN_NAME} PROPERTIES PREFIX "")

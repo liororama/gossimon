@@ -57,6 +57,7 @@ include_directories(${LibXml2_INCLUDE_DIR})
 include_directories(${GTK2_INCLUDE_DIRS})
 include_directories("/usr/include/glib-2.0")
 include_directories("/usr/lib/glib-2.0/include")
+include_directories("/usr/libxml++-2.6/")
 link_directories("${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # The CL_UTIL_PREFIX specifies the location to look for the libclutil installation

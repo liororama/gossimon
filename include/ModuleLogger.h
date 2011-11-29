@@ -32,8 +32,8 @@ extern "C" {
     extern int mlog_modulesInDebug;
 
     int mlog_init();
-    int mlog_registerModule(char *name, char *desc, char *shortName);
-    int mlog_getIndex(char *name, int *index);
+    int mlog_registerModule(const char *name, const char *desc, const char *shortName);
+    int mlog_getIndex(const char *name, int *index);
 
     //void mlog_diableAllModules();
     //int    mlog_disableModule(char *mode);
@@ -44,13 +44,13 @@ extern "C" {
     // Set all modules levels (including future registered modules)
     int mlog_setLevel(int level);
     // Set a specific module level
-    int mlog_setModuleLevel(char *name, int level);
-    int mlog_setModuleLevelFromStr(char *str, int level);
+    int mlog_setModuleLevel(const char *name, int level);
+    int mlog_setModuleLevelFromStr(const char *str, int level);
 
     char *mlog_getAllModulesDesc(char *buff);
 
-    void mlog(int moduleIndex, int level, int color, char *fmt, ...);
-    void mlog_byName(char *moduleName, int level, int color, char *fmt, ...);
+    void mlog(int moduleIndex, int level, int color, const char *fmt, ...);
+    void mlog_byName(const char *moduleName, int level, int color, char *fmt, ...);
 
 // Macros for error
 #define mlog_error(index,fmt,args...)\

@@ -41,6 +41,7 @@ int  im_debug = 0;
 int  im_period = 10;
 
 int mlog_id;
+int mlog_id_2;
 
 typedef struct dummy_pim {
     char        dataStr[100];
@@ -51,7 +52,10 @@ int im_init(void **module_data, void *module_init_data)
 {
  
     mlog_registerModule("top", "Getting info about the most cpu intensive processes", "top");
+    mlog_registerModule("top2", "Getting info about the most cpu intensive processes 2", "top2");
+
     mlog_getIndex("top", &mlog_id);
+    mlog_getIndex("top2", &mlog_id_2);
 
     mlog_dg(mlog_id, "im_init() \n");
     //pim_init_data_t *pim_init = (pim_init_data_t *) module_init_data;
@@ -64,7 +68,7 @@ int im_init(void **module_data, void *module_init_data)
     TopFinder *tf = new TopFinder("/proc");
     if(!tf) return 0;
     tf->setMlogId(mlog_id);
-    
+    tf->setMlogId2(mlog_id_2);
     *module_data = (void *) tf;
     return 1;
 
