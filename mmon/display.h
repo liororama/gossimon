@@ -16,6 +16,10 @@
 
 #include <glib-2.0/glib.h>
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include "DisplayModules.h"
 
 //LEGEND
@@ -159,5 +163,8 @@ int displayGetFirstNodeInViewNumber(mon_disp_prop_t *display);
 void displayIncSelectedNode(mmon_display_t *display, int step);
 void displayIncSideWindowWidth(mmon_display_t *display, int extraWidth);
 void displayDecSideWindowWidth(mmon_display_t *display, int extraWidth);
+#ifdef  __cplusplus
+}
+#endif
 
 #endif 

@@ -41,7 +41,7 @@ int main(int argc, char **argv)
         
         processVecT v;
         TopSaxParser parser;
-        parser.parseTop(std::string(buff), v);
+        parser.parse(std::string(buff), v);
        
         for(std::vector<ProcessStatusInfo>::iterator iter = v.begin() ; iter != v.end() ; iter++) {
             ProcessStatusInfo *pi = &(*iter);

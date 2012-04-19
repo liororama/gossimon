@@ -86,6 +86,7 @@
 #define ITEM_TOP_USAGE_NAME         "top-usage"
 #define ITEM_TOP_NAME               "top"
 #define ITEM_KERNEL_RELEASE_NAME    "kernel-version"
+#define ITEM_MEMINFO_NAME           "meminfo"
 
 /****************************************************************************
  * All the information items that can be obtained from the retrieved data.

@@ -22,11 +22,15 @@
 
 #include <info.h>
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /****************************************************************************
  * Interface used to parse the descirption
  ***************************************************************************/
 
-#define STR_LEN (32)
+#define STR_LEN         (32)
 #define ROOT_NAME       "local_info"
 #define BASE_TAG        "base"
 #define EXTRA_TAG       "extra"
@@ -41,7 +45,7 @@
 #define SIZE_TAG        "size"
 
 typedef struct var {
-        char class[ STR_LEN ];  // The base, extra, vlen ...>
+        char class_type[ STR_LEN ];  // The base, extra, vlen ...>
         char name[ STR_LEN ];   // The name of the item
         char type[ STR_LEN ];   // the type int, short, string...
         char unit[ STR_LEN ];   // Unit of item MB Kb/sec..
@@ -88,6 +92,9 @@ int is_var_vlen(var_t *v);
 void var_print( var_t *var );
 
 void variable_map_print( variable_map_t *mapping );
+#ifdef  __cplusplus
+}
+#endif
 
 #endif
 

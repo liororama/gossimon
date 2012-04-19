@@ -22,7 +22,7 @@ public:
   TopSaxParser();
   virtual ~TopSaxParser();
 
-  bool parseTop(std::string str, processVecT &vec);
+  bool parse(std::string str, processVecT &vec);
   
 protected:
   //overrides:
@@ -39,12 +39,12 @@ protected:
 
   
 private:
-    int                 _mlogId;
-    std::string         _errMsg;
+    int                 _mlog_id;
+    std::string         _err_msg;
     
     int                 _procNum;
-    bool                _inProcessEntry;
-    std::string         _currValueString;
+    bool                _in_process_entry;
+    std::string         _curr_value_string;
     std::vector<ProcessStatusInfo> _processVec;
     
 };

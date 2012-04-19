@@ -56,6 +56,12 @@ set(provider_SRC   provider.c
 		   infoModuleManager.c
 		   ${pim_SRC})
 
+set(run_pim_plugin_SRC   run_pim_plugin.c providerUtil.c infoModuleManager.c ${pim_SRC} )
+
+
+
+add_executable(run_pim_plugin ${run_pim_plugin_SRC})
+target_link_libraries(run_pim_plugin  m info mapper util glib-2.0 dl)
 
 add_executable(infod ${infod_SRC} ${provider_SRC})
 target_link_libraries(infod  m info infodctl mapper gossip util glib-2.0 dl)

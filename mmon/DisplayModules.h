@@ -14,8 +14,15 @@
 #ifndef __INFO_DISPLAY_MODULE
 #define __INFO_DISPLAY_MODULE
 
-#include "mmon.h"
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
+#include <curses.h>
+
+#include "mmon_info_map.h"
+#include "ConfigurationManager.h"
+    
 #include <info.h>
 #include <infolib.h>
 #include <info_reader.h>
@@ -133,7 +140,8 @@ int displayModule_registerStandardModules();
 int displayModule_detectExternalPlugins(PluginConfig_t *p);
 int displayModule_registerExternalPlugins(PluginConfig_t *p);
 
-typedef mon_display_module_t *mdPtr;
+typedef mon_display_module_t* mdPtr;
+
 int getMDWithSideWindow(mdPtr *modulePtrArr);
 
 extern mon_display_module_t name_mod_info;
@@ -183,5 +191,8 @@ extern mon_display_module_t seperator_mod_info;
 
 extern mon_display_module_t space_mod_info;
 
+#ifdef  __cplusplus
+}
+#endif
 
 #endif

@@ -67,8 +67,8 @@ int im_init(void **module_data, void *module_init_data)
     //        return 0;
     TopFinder *tf = new TopFinder("/proc");
     if(!tf) return 0;
-    tf->setMlogId(mlog_id);
-    tf->setMlogId2(mlog_id_2);
+    tf->set_mlog_id(mlog_id);
+    tf->set_mlog_id2(mlog_id_2);
     *module_data = (void *) tf;
     return 1;
 
@@ -99,7 +99,7 @@ int im_get(void *module_data, void *data, int *size)
     TopFinder *tf = (TopFinder *) module_data;
     char          *buff = (char *) data;
 
-    tf->getTopXML(buff, size);
+    tf->get_xml(buff, size);
     return 1;
 }
 

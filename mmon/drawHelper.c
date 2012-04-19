@@ -124,12 +124,10 @@ void display_bar(WINDOW* target, int base_row, int col, int total,
     wc_off(target, pDesc);
 }
 
-void display_part_bar(WINDOW* target, int base_row, int col,
-        int total, char freeChar,
-        ColorDescriptor *freeColor, int revfree,
-        int used, char usedChar,
-        ColorDescriptor *usedColor, int revused)
 //draws 2 bars - both max and actual values.
+void display_part_bar(WINDOW* target, int base_row, int col,
+                      int total, char freeChar, ColorDescriptor *freeColor, int revfree,
+                      int used,  char usedChar,  ColorDescriptor *usedColor, int revused)
 {
     if ((total < 0 || used < 0) || (total < used)) {
         display_rtr(target, &(pConfigurator->Colors._errorStr),
@@ -138,7 +136,7 @@ void display_part_bar(WINDOW* target, int base_row, int col,
     }
 
     display_bar(target, base_row - used, col, total - used, freeChar, freeColor, revfree);
-    display_bar(target, base_row, col, used, usedChar, usedColor, revused);
+    display_bar(target, base_row,        col, used,         usedChar, usedColor, revused);
 }
 
 void display_dead(WINDOW* graph, void* status,

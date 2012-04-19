@@ -226,7 +226,7 @@ int load_external_module(pim_entry_t *ent, char *path, char *name)
 
     /* open the file holding the funcs */
     if (!(hndl = dlopen(buff, RTLD_LAZY))) {
-        mlog_bn_error("pim", "Error :: %s\n", dlerror());
+        mlog_bn_error("pim", "Error dlopen:: %s\n", dlerror());
         return 0;
     }
     // Clearing the entry before starting
@@ -489,7 +489,6 @@ pim_entry_t pim_arr[] = {
         desc_func : idbg_pim_desc,
         period : 5,
         init_data : NULL,},
-
     // Last and empty module
     { name : NULL,
         init_func : NULL,

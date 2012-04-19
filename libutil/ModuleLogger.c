@@ -154,7 +154,7 @@ int mlog_registerModule(const char *name, const char *desc, const char *shortNam
     //printf("MLOG register %s\n", name);
     // Looking if the module already exists
     if (g_hash_table_lookup(_mlog->nameHash, name)) {
-        fprintf(stderr, "Found module %s in hash\n", name);
+        //fprintf(stderr, "Found module %s in hash\n", name);
         return 0;
     }
 

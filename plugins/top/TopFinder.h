@@ -40,16 +40,16 @@ public:
     TopFinder(const TopFinder& orig);
     virtual ~TopFinder();
 
-    void setMlogId(int id) { _mlogId = id ; }
-    void setMlogId2(int id) { _mlogId2 = id ; }
+    void set_mlog_id(int id) { _mlog_id = id ; }
+    void set_mlog_id2(int id) { _mlog_id2 = id ; }
     
-    std::string getTopXML() {return _xmlTopResult; }
-    bool getTopXML(char *buff, int *len);
+    std::string get_xml() {return _xml_result; }
+    bool get_xml(char *buff, int *len);
     void update();
 
-    void setMinCPUPercent(float minCPUPercent) { _minCPUPercent = minCPUPercent; }
-    void setMinMemPercent(float minMemPercent) { _minMemPercent = minMemPercent; }
-    void setTotalMem(float totalMemMB) { _totalMemMB = _totalMemMB; }
+    void setMinCPUPercent(float minCPUPercent) { _min_cpu_percent = minCPUPercent; }
+    void setMinMemPercent(float minMemPercent) { _min_mem_percent = minMemPercent; }
+    void setTotalMem(float totalMemMB) { _total_mem_mb = totalMemMB; }
     
 private:
     bool    readProcessStatus(std::string processProcDir, ProcessStatusInfo *pi);
@@ -61,22 +61,22 @@ private:
     void    updateTopProcessesXML();        
     
     std::unordered_map<int, ProcessStatusInfo   > _procHash;
-    std::vector<int>    _topProcessesVec;
-    std::string         _procDir;
-    std::string         _xmlTopResult;
-    int                 _mlogId;
-    int                 _mlogId2;
-    std::string         _errMsg;
+    std::vector<int>    _top_processes_vec;
+    std::string         _proc_dir;
+    std::string         _xml_result;
+    int                 _mlog_id;
+    int                 _mlog_id2;
+    std::string         _err_msg;
     
-    struct timeval      _currTime;
-    long                _clockTicksPerSec;
+    struct timeval      _curr_time;
+    long                _clock_ticks_per_sec;
 
-    float               _minCPUPercent;  // The minimal cpu percent processes to add to the result xml
-    float               _minMemPercent;  // The minimal memory percent processes to add to the result xml
-    float               _totalMemMB;
+    float               _min_cpu_percent;  // The minimal cpu percent processes to add to the result xml
+    float               _min_mem_percent;  // The minimal memory percent processes to add to the result xml
+    float               _total_mem_mb;
 
-    int                 _totalProcs;    // Total number of processes on this node
-    int                 _updateCount;   // Number of times the main update method was called
+    int                 _total_procs;    // Total number of processes on this node
+    int                 _update_count;   // Number of times the main update method was called
 };
 
 

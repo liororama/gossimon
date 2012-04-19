@@ -53,6 +53,7 @@ include("CMakeCheckPrerequisites.txt")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories("include")
+include_directories("mmon")
 include_directories(${LibXml2_INCLUDE_DIR})
 include_directories(${GTK2_INCLUDE_DIRS})
 include_directories("/usr/include/glib-2.0")
@@ -123,7 +124,7 @@ add_subdirectory(testload)
 add_subdirectory(infod)
 
 add_subdirectory(plugins/top)
-
+add_subdirectory(plugins/meminfo)
 
 include("CMakeInstallGossimon.txt")
 

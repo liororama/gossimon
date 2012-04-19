@@ -24,6 +24,7 @@ infod-ctl/infod-ctl
 *.8.gz
 *.so
 infod/infod
+infod/run_pim_plugin
 install_manifest.txt
 libgossip/gossip-calc
 mmon/mmon

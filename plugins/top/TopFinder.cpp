@@ -37,12 +37,12 @@ std::string ProcessStatusInfo::getProcessXML() {
 
 
 TopFinder::TopFinder(std::string procDir) {
-    _procDir = procDir;
-    _xmlTopResult = "test 12345";
-    _minCPUPercent = 20;
-    _minMemPercent = 20;
-    _totalMemMB = 1024; // Just a default of 1GB...
-    _updateCount = 0;
+    _proc_dir = procDir;
+    _xml_result = "test 12345";
+    _min_cpu_percent = 20;
+    _min_mem_percent = 20;
+    _total_mem_mb = 1024; // Just a default of 1GB...
+    _update_count = 0;
 }
 
 TopFinder::TopFinder(const TopFinder& orig) {
@@ -51,28 +51,28 @@ TopFinder::TopFinder(const TopFinder& orig) {
 TopFinder::~TopFinder() {
 }
 
-bool TopFinder::getTopXML(char *buff, int *len) {
+bool TopFinder::get_xml(char *buff, int *len) {
     
-    if((int)_xmlTopResult.length() > *len) {
-        mlog_error(_mlogId, "Error in TopFinder::getTopXML length of buffer is smaller than length of top xml string\n");
+    if((int)_xml_result.length() > *len) {
+        mlog_error(_mlog_id, "Error in TopFinder::getTopXML length of buffer is smaller than length of top xml string\n");
         return false;
     }
     
-    memcpy(buff, _xmlTopResult.c_str(), _xmlTopResult.length());
-    buff[_xmlTopResult.length()] = '\0';
-    *len = _xmlTopResult.length() + 1;
+    memcpy(buff, _xml_result.c_str(), _xml_result.length());
+    buff[_xml_result.length()] = '\0';
+    *len = _xml_result.length() + 1;
     return true;
 }
 
 
 void TopFinder::update() {
 
-    mlog_dg(_mlogId, "update\n");
+    mlog_dg(_mlog_id, "update\n");
     DIR *procDirHndl;
 
-    procDirHndl = opendir(_procDir.c_str());
+    procDirHndl = opendir(_proc_dir.c_str());
     if(!procDirHndl) {
-        mlog_error(_mlogId, (const char *)"Error opening dir [%s]\n", _procDir.c_str());
+        mlog_error(_mlog_id, (const char *)"Error opening dir [%s]\n", _proc_dir.c_str());
         return;
     }
 
@@ -81,8 +81,8 @@ void TopFinder::update() {
     int procNum = 0;
 
     clearProcessesFlg();
-    gettimeofday(&_currTime, NULL);
-    _clockTicksPerSec = sysconf(_SC_CLK_TCK);
+    gettimeofday(&_curr_time, NULL);
+    _clock_ticks_per_sec = sysconf(_SC_CLK_TCK);
     
     while((p_dir = readdir(procDirHndl))) {
         entries ++;
@@ -90,7 +90,7 @@ void TopFinder::update() {
         if(p_dir->d_name[0] >= '0' && p_dir->d_name[0] < '9') {
             procNum++;
             ProcessStatusInfo pi;
-            std::string processProcDir = _procDir + "/" + p_dir->d_name;
+            std::string processProcDir = _proc_dir + "/" + p_dir->d_name;
             
             // The readProcessStatus must return true (the process can die in between)
             if(readProcessStatus(processProcDir, &pi)) {
@@ -104,9 +104,9 @@ void TopFinder::update() {
     
     updateTopProcessesList();
     updateTopProcessesXML();
-    _totalProcs = procNum;
-    _updateCount ++;
-    mlog_dy(_mlogId, "Scanned: %d    Procs: %d   Updates: %d\n", entries, procNum, _updateCount);
+    _total_procs = procNum;
+    _update_count ++;
+    mlog_dy(_mlog_id, "Scanned: %d    Procs: %d   Updates: %d\n", entries, procNum, _update_count);
           
 }
 
@@ -135,20 +135,20 @@ void TopFinder::mergeProcessStatus(ProcessStatusInfo& pi) {
     float timeDiff = timeDiffFloat(&piOrig->_prevTime, &piOrig->_currTime);
     float utimeClockTicksDiff = pi._utime - piOrig->_utime;
     
-    piOrig->_cpuPercent = ((utimeClockTicksDiff/(float)_clockTicksPerSec) / timeDiff) * 100;
+    piOrig->_cpuPercent = ((utimeClockTicksDiff/(float)_clock_ticks_per_sec) / timeDiff) * 100;
     
     piOrig->_stime = pi._stime;
     piOrig->_utime = pi._utime;
     
-    if(_totalMemMB > 0) {
-        piOrig->_memPercent = (piOrig->_memoryMB / _totalMemMB) * 100;
+    if(_total_mem_mb > 0) {
+        piOrig->_memPercent = (piOrig->_memoryMB / _total_mem_mb) * 100;
     }
     
 }
 
 bool TopFinder::updateProcessStatus(ProcessStatusInfo &pi) {
     if(_procHash.count(pi._pid) == 0) {
-        mlog_db(_mlogId, "New process %d  \n", pi._pid);
+        mlog_db(_mlog_id, "New process %d  \n", pi._pid);
         
         _procHash[pi._pid] = pi;
     } 
@@ -168,19 +168,19 @@ void TopFinder::clearProcessesFlg() {
     }
 }
 bool TopFinder::removeOldProcesses() {
-    mlog_dy(_mlogId, "Removing old processes\n");
+    mlog_dy(_mlog_id, "Removing old processes\n");
     
     std::unordered_map<int, ProcessStatusInfo>::const_iterator iter;
     for(iter = _procHash.begin() ; iter != _procHash.end() ; iter++) {
         const ProcessStatusInfo *ps = &(iter->second);
-        //mlog_dy(_mlogId, "Checking %d\n", ps->_pid);
+        //mlog_dy(_mlog_id, "Checking %d\n", ps->_pid);
         
         if(!ps->_flg) {
-                mlog_dg(_mlogId, "Removing %d  \n", ps->_pid);
+                mlog_dg(_mlog_id, "Removing %d  \n", ps->_pid);
                 _procHash.erase(ps->_pid);
         }
     }
-    mlog_dy(_mlogId, "=================================\n");
+    mlog_dy(_mlog_id, "=================================\n");
 
     return true;
 }
@@ -202,21 +202,21 @@ bool TopFinder::readProcessStatus(std::string processProcDir, ProcessStatusInfo 
     pi->_stime = pe.stime;
     pi->_utime = pe.utime;
     pi->_uid = pe.uid;
-    pi->_currTime = _currTime;
-    mlog_dg(_mlogId2, "Proc %5d Comm: %15s mem %5.2f\n", pi->_pid, pi->_command.c_str(), pi->_memoryMB);
+    pi->_currTime = _curr_time;
+    mlog_dg(_mlog_id2, "Proc %5d Comm: %15s mem %5.2f\n", pi->_pid, pi->_command.c_str(), pi->_memoryMB);
     return true;
 }
 
 
 void TopFinder::updateTopProcessesList() {
     
-    _topProcessesVec.clear();
+    _top_processes_vec.clear();
     
     std::unordered_map<int, ProcessStatusInfo>::const_iterator iter;
     for(iter = _procHash.begin() ; iter != _procHash.end() ; iter++) {
         const ProcessStatusInfo *ps = &(iter->second);
-        if(ps->_cpuPercent > _minCPUPercent) {
-            _topProcessesVec.push_back(ps->_pid);
+        if(ps->_cpuPercent > _min_cpu_percent) {
+            _top_processes_vec.push_back(ps->_pid);
         }
 
     
@@ -229,22 +229,22 @@ void TopFinder::updateTopProcessesXML() {
     std::vector<int>::iterator iter;
     std::stringstream ss;
     
-    _xmlTopResult.clear();
-    _xmlTopResult = "<top>\n";
+    _xml_result.clear();
+    _xml_result = "<top>\n";
     
     // Internal module info
-    ss << "<total_processes>" << _totalProcs << "</total_processes>\n";
-    ss << "<update_count>" << _updateCount << "</update_count>\n"; 
-    _xmlTopResult += ss.str();
+    ss << "<total_processes>" << _total_procs << "</total_processes>\n";
+    ss << "<update_count>" << _update_count << "</update_count>\n"; 
+    _xml_result += ss.str();
     
     // Each process info
-    for(iter = _topProcessesVec.begin() ; iter != _topProcessesVec.end() ; iter++) {
+    for(iter = _top_processes_vec.begin() ; iter != _top_processes_vec.end() ; iter++) {
         int pid = *iter;
         ProcessStatusInfo *pi = &_procHash[pid];
-        _xmlTopResult += pi->getProcessXML();
+        _xml_result += pi->getProcessXML();
         
     }
-    _xmlTopResult += "</top>\n";
+    _xml_result += "</top>\n";
     
 }
     

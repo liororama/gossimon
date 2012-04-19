@@ -165,22 +165,22 @@ validate_tag_name(var_t *cur,  char *str ) {
 	ptr = remove_ws( str );
 
 	if( strncmp( XML_TAG_BASE, str, strlen( XML_TAG_BASE )) == 0 ) {
-                strcpy(cur->class, XML_TAG_BASE);
+                strcpy(cur->class_type, XML_TAG_BASE);
                 ptr += strlen( XML_TAG_BASE );
 		return ptr;
 	}
 	else if( strncmp( XML_TAG_EXTRA, str, strlen( XML_TAG_EXTRA )) == 0 ) {
-                strcpy(cur->class, XML_TAG_EXTRA);
+                strcpy(cur->class_type, XML_TAG_EXTRA);
 		ptr += strlen( XML_TAG_EXTRA );
 		return ptr;
 	}
         else if( strncmp( XML_TAG_VLEN, str, strlen( XML_TAG_VLEN )) == 0 ) {
-                strcpy(cur->class, XML_TAG_VLEN);
+                strcpy(cur->class_type, XML_TAG_VLEN);
 		ptr += strlen( XML_TAG_VLEN );
 		return ptr;
 	}
         else if( strncmp( XML_TAG_EXTERNAL, str, strlen( XML_TAG_EXTERNAL )) == 0 ) {
-                strcpy(cur->class, XML_TAG_EXTERNAL);
+                strcpy(cur->class_type, XML_TAG_EXTERNAL);
 		ptr += strlen( XML_TAG_EXTERNAL );
 		return ptr;
 	}
@@ -417,8 +417,8 @@ _create_info_mapping( char* desc, char **itemList ) {
                         // A string is currently allowed only in the external
                         // tag which should be at the end (for now)
                         else if( ( strcmp( cur.type, "string" )) == 0) {
-                                if(strcmp( cur.class, XML_TAG_EXTERNAL) == 0 ||
-                                   strcmp( cur.class, XML_TAG_VLEN) == 0)
+                                if(strcmp( cur.class_type, XML_TAG_EXTERNAL) == 0 ||
+                                   strcmp( cur.class_type, XML_TAG_VLEN) == 0)
                                 {
                                         cur.size = 0;
                                 }
@@ -523,7 +523,7 @@ get_var_desc( variable_map_t *mapping, char *key ) {
 void
 var_print( var_t *var ) {
 	debug_b( "Name=%-16sC=%-5sType=%-15sDef=%d\tUnit=%-12sOff=%d\tSz=%d\n",
-		 var->name, var->class, var->type, var->def_val,
+		 var->name, var->class_type, var->type, var->def_val,
                  var->unit, var->offset, var->size );
 }
 
@@ -546,7 +546,7 @@ int is_var_vlen(var_t *v)
 {
         if(!v)
                 return 0;
-        if(strcmp(v->class, XML_TAG_VLEN) == 0)
+        if(strcmp(v->class_type, XML_TAG_VLEN) == 0)
                 return 1;
         return 0;
 }
