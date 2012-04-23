@@ -33,14 +33,13 @@
 #include <parse_helper.h>
 #include "infoitems.h"
 
-#include <TopFinder.h>
-extern "C" {
-    
+#include <Meminfo.h>
 
-char moduleName[] = "top";
-char im_name[] =  "top";
+extern "C" {
+char moduleName[] = "meminfo";
+char im_name[] =  "meminfo";
 int  im_debug = 0;
-int  im_period = 10;
+int  im_period = 3;
 
 int mlog_id;
 int mlog_id_2;
@@ -53,11 +52,11 @@ typedef struct dummy_pim {
 int im_init(void **module_data, void *module_init_data)
 {
  
-    mlog_registerModule("top", "Getting info about the most cpu intensive processes", "top");
-    mlog_registerModule("top2", "Getting info about the most cpu intensive processes 2", "top2");
+    mlog_registerModule("meminfo", "Getting info about memory usage", "meminfo");
+    mlog_registerModule("meminfo2", "Getting info about memory usage 2", "meminfo2");
 
-    mlog_getIndex("top", &mlog_id);
-    mlog_getIndex("top2", &mlog_id_2);
+    mlog_getIndex("meminfo", &mlog_id);
+    mlog_getIndex("meminfo2", &mlog_id_2);
 
     mlog_dg(mlog_id, "im_init() \n");
     //pim_init_data_t *pim_init = (pim_init_data_t *) module_init_data;
@@ -67,7 +66,7 @@ int im_init(void **module_data, void *module_init_data)
 
     //if(!irti)
     //        return 0;
-    TopFinder *tf = new TopFinder("/proc");
+    MeminfoDetector *tf = new MeminfoDetector("/proc");
     if(!tf) return 0;
     tf->set_mlog_id(mlog_id);
     tf->set_mlog_id2(mlog_id_2);
@@ -77,7 +76,7 @@ int im_init(void **module_data, void *module_init_data)
 }
 
 int im_free(void **module_data) {
-    TopFinder *tf = (TopFinder *) (*module_data);
+    Meminfo *tf = (Meminfo *) (*module_data);
 	
     if(!tf)
         return 0;
@@ -88,7 +87,7 @@ int im_free(void **module_data) {
 
 int im_update(void *module_data)
 {
-    TopFinder *tf = (TopFinder *) module_data;
+    MeminfoDetector *tf = (MeminfoDetector *) module_data;
 
     //struct timeval tim;
     tf->update();
@@ -98,7 +97,7 @@ int im_update(void *module_data)
 
 int im_get(void *module_data, void *data, int *size)
 {
-    TopFinder *tf = (TopFinder *) module_data;
+    MeminfoDetector *tf = (MeminfoDetector *) module_data;
     char          *buff = (char *) data;
 
     tf->get_xml(buff, size);

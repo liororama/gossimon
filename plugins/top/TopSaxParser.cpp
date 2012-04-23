@@ -33,7 +33,11 @@ TopSaxParser::~TopSaxParser()
 }
 
 bool TopSaxParser::parse(std::string str, processVecT &vec) {
-
+    
+    _procNum = 0;
+    _in_process_entry = false;
+    _processVec.clear();
+    
     try {
 
         set_substitute_entities(true); //

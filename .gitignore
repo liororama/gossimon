@@ -30,4 +30,6 @@ libgossip/gossip-calc
 mmon/mmon
 testload/testload
 plugins/top/top_main
+plugins/meminfo/meminfo_main
+unit_tester
 

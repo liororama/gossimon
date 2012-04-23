@@ -10,20 +10,19 @@
 
 #include <string>
 #include <vector>
-#include <TopFinder.h>
+#include <Meminfo.h>
 
 #include <libxml++/libxml++.h>
 
-typedef std::vector<ProcessStatusInfo> processVecT;
 
-class TopSaxParser : public xmlpp::SaxParser
+class MeminfoSaxParser : public xmlpp::SaxParser
 {
 public:
-  TopSaxParser();
-  virtual ~TopSaxParser();
+  MeminfoSaxParser();
+  virtual ~MeminfoSaxParser();
 
-  bool parse(std::string str, processVecT &vec);
-  std::string get_error() {return _err_msg;}
+  bool parse(std::string str, Meminfo &mi);
+  
 protected:
   //overrides:
   virtual void on_start_document();
@@ -42,10 +41,9 @@ private:
     int                 _mlog_id;
     std::string         _err_msg;
     
-    int                 _procNum;
-    bool                _in_process_entry;
+    bool                _in_meminfo_entry;
     std::string         _curr_value_string;
-    std::vector<ProcessStatusInfo> _processVec;
+    Meminfo             _meminfo;
     
 };
 

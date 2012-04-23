@@ -16,10 +16,11 @@
  *
  *****************************************************************************/
 
-#ifndef __TOP_PIM
-#define __TOP_PIM
+#ifndef __MEMINFO_PIM
+#define __MEMINFO_PIM
 
-extern "C" {
+extern "C"
+{
 int im_init(void **module_data, void *module_init_data);
 int im_free(void **module_data);
 int im_update(void *module_data);

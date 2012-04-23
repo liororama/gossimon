@@ -1,8 +1,9 @@
 #include <iostream>
 
 #include <ModuleLogger.h>
-#include <TopPIM.h>
-#include <TopSaxParser.h>
+#include <Meminfo.h>
+#include <MeminfoSaxParser.h>
+#include <MeminfoPIM.h>
 #include <string.h>
 
 char buff[8192];
@@ -11,15 +12,15 @@ int main(int argc, char **argv)
 {
     void *data;
     mlog_init();
-    TopSaxParser parser1;
+//    MeminfoSaxParser parser1;
         
     // Debugging if argc > 1
     if(argc > 1) {
 
         mlog_registerColorFormatter((color_formatter_func_t)sprintf_color);
         mlog_addOutputFile((char *)"/dev/tty", 1);
-        mlog_setModuleLevel((char *)"top", LOG_DEBUG);
-        mlog_setModuleLevel((char *)"topparser", LOG_DEBUG);
+        mlog_setModuleLevel((char *)"meminfo", LOG_DEBUG);
+        mlog_setModuleLevel((char *)"meminfoparser", LOG_DEBUG);
     
     }
     // init
@@ -35,18 +36,16 @@ int main(int argc, char **argv)
         int i = 8192;
         im_get(data, buff, &i);
         //system("clear");
-        //printf("%s", buff);
-        //printf("\n");
+        printf("%s", buff);
+        printf("\n");
 
         
-        processVecT v;
-        TopSaxParser parser;
-        parser.parse(std::string(buff), v);
-        std::cout << "===============================================" << std::endl;
-        for(std::vector<ProcessStatusInfo>::iterator iter = v.begin() ; iter != v.end() ; iter++) {
-            ProcessStatusInfo *pi = &(*iter);
-            std::cout << "XML:" << std::endl << pi->getProcessXML();
-        }
+        MeminfoSaxParser parser;
+        Meminfo mi;
+        parser.parse(std::string(buff), mi);
+       
+        std::cout << mi.get_xml();
+        std::cout << "====================================================" << std::endl << std::endl;
         sleep(1);
 
     }
