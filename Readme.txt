@@ -114,7 +114,12 @@ package.
   1.3. Install libglib-2.0 
        o Debian/Ubuntu: apt-get install  libglib2.0-0 libglib2.0-dev
        o RH based systems: yum install glib2 glib2-devel
-
+ 
+  1.4. Install libxml++
+       o Debian/Ubuntu: apt-get install libxml++2.6-dev
+	
+       o RH based: yum install libxml++-devel.x86_64
+		   yum install glibmm24-deve
 2. Open the gossimon tarball (once you download it...)
    tar xvf gossimon-1.8.3-Source.tar.gz
 

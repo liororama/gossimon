@@ -30,6 +30,23 @@ if( NOT GLIB2_FOUND )
   message(FATAL_ERROR "libglib-2.0 (including headers) is required : please install!!")
 endif()
 
+
+pkg_check_modules(LIB_XML_PLUS_PLUS libxml++-2.6)
+if ( NOT LIB_XML_PLUS_PLUS_FOUND )
+  message(FATAL_ERROR "libxml++-2.6 (including headers) is required : please install!!")
+endif()
+message("Found libxml++-2.6 ${LIB_XML_PLUS_PLUS_INCLUDE_DIRS}")
+include_directories(${LIB_XML_PLUS_PLUS_INCLUDE_DIRS})
+
+pkg_check_modules(CPPUNIT cppunit)
+if ( NOT CPPUNIT_FOUND )
+  message(FATAL_ERROR "cppunit (including headers) is required : please install!!")
+endif()
+message("Found libcppunit ${CPPUNIT_INCLUDE_DIRS}")
+include_directories(${CPPUNIT_INCLUDE_DIRS})
+
+
+
 #### Curses library
 #find_package(Curses REQUIRED)
 #if( NOT CURSES_FOUND ) 
