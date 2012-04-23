@@ -1,4 +1,4 @@
-------** Version: 1.8.15 By: Lior Date 23/4/2012 **-------
+------** Version: 1.8.14 By: Lior Date 23/4/2012 **-------
 * Added top a top like plugin to show top using processes on each node
 * Added meminfo a better memory monitoring plugin to see also how much
   memory is cached and buffered.
