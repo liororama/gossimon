@@ -44,7 +44,7 @@ install(CODE "FILE(MAKE_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/share/$
 include (InstallRequiredSystemLibraries)
 
 set (CPACK_PACKAGE_NAME  "${PROJECT_NAME}")
-set (CPACK_PACKAGE_VENDOR "Cluster Logic Ltd")
+set (CPACK_PACKAGE_VENDOR "Lior Amar")
 set (CPACK_PACKAGE_CONTACT "liororama@gmail.com")
 
 set (CPACK_RESOURCE_FILE_LICENSE   "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
@@ -75,7 +75,7 @@ set(CPACK_PACKAGE_DESCRIPTION "
  .
  .
  This package is currently developed by:
-            ClusterLogic Ltd (www.clusterlogic.net)
+            Lior Amar (liororama@gmail.com)
   ")
 
 set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.txt")

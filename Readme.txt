@@ -30,10 +30,11 @@ Infod was used as the information layer of the MOSIX cluster operating system.
 During time Infod proved to be a valuable tool for any type of cluster and 
 support was added for general Linux based clusters.
 
-Gossimon is currently developed and maintained by ClusterLogic Ltd 
-(www.clusterlogic.net)
+Gossimon was developed and maintained by ClusterLogic Ltd between the years 2009-2011
+(www.clusterlogic.net). Once ClusterLogic Ltd cease to exist the developent was continued
+by Lior Amar (liororama@gmail.com)
 
-
+Currently gossimon is developed and maintained by Lior Amar as an open source project.
 
 
 Gossimon programs:
