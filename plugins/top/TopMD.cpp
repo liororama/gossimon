@@ -135,15 +135,15 @@ void top_display_item(WINDOW* graph, Configurator* pConfigurator, const void* so
         char *tmp_buff = buff;
         int len;
         
-        len = sprintf(tmp_buff, "%-6s %-5s %-5s %-5s %s\n", "PID", "USER", "CPU", "MEM", "COMM");
+        len = sprintf(tmp_buff, "%-6s %-8s %-5s %-5s %s\n", "PID", "USER", "CPU", "MEM", "COMM");
         tmp_buff += len;
         //len = sprintf(tmp_buff, "size %d\n", proc_vec.size());
         //tmp_buff += len;
         
         for( int i=0 ; i< proc_vec.size() ; i++) {
-            len = sprintf(tmp_buff, "%-6d %-5d %-5.0f %-5.1f %s\n", 
+            len = sprintf(tmp_buff, "%-6d %-8s %-5.0f %-5.1f %s\n", 
                     proc_vec[i]._pid,
-                    proc_vec[i]._uid, 
+                    u2u.get_user(proc_vec[i]._uid), 
                     proc_vec[i]._cpuPercent, 
                     proc_vec[i]._memoryMB,
                     proc_vec[i]._command.c_str());

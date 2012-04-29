@@ -83,7 +83,7 @@ set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.txt")
 set (CPACK_GENERATOR "TGZ;DEB;RPM")
 set (CPACK_SOURCE_GENERATOR "TGZ")
 #set (CPACK_SOURCE_IGNORE_FILES "/\\.svn/;\\.swp$;/\.\#/;/\#/;/\.*~/")
-set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/;.*\\\\.cmake;/CMakeFiles/;CMakeCache.txt;Makefile;Makefile.old;/prep/;\\\\.*~;${PROJECT_NAME}-.*-Source.*;${PROJECT_NAME}_.*rpm;${PROJECT_NAME}_.*deb;${PROJECT_NAME}_.*tar.gz;install_manifest.txt;/_CPack_Packages/;CHANGELOG")
+set (CPACK_SOURCE_IGNORE_FILES "/\\\\.svn/;.*\\\\.cmake;/CMakeFiles/;CMakeCache.txt;Makefile;Makefile.old;/prep/;\\\\.*~;${PROJECT_NAME}-.*-Source.*;${PROJECT_NAME}_.*rpm;${PROJECT_NAME}_.*deb;${PROJECT_NAME}_.*tar.gz;install_manifest.txt;/_CPack_Packages/;CHANGELOG;.git;.gitignore")
 
 
 ###########################################
