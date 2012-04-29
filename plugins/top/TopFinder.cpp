@@ -190,19 +190,24 @@ void TopFinder::clearProcessesFlg() {
     }
 }
 bool TopFinder::removeOldProcesses() {
-    mlog_dy(_mlog_id, "Removing old processes\n");
+    mlog_dy(_mlog_id, "Removing old processes [%d] proc in map\n", _procHash.size());
     
     std::unordered_map<int, ProcessStatusInfo>::const_iterator iter;
+    std::vector<int> vec_proc_to_remove;
     for(iter = _procHash.begin() ; iter != _procHash.end() ; iter++) {
         const ProcessStatusInfo *ps = &(iter->second);
         //mlog_dy(_mlog_id, "Checking %d\n", ps->_pid);
         
         if(!ps->_flg) {
                 mlog_dg(_mlog_id, "Removing %d  \n", ps->_pid);
-                _procHash.erase(ps->_pid);
-        }
+		vec_proc_to_remove.push_back(ps->_pid);
+	}
     }
-    mlog_dy(_mlog_id, "=================================\n");
+    for(int i=0 ; i < vec_proc_to_remove.size() ; i++) {
+    	_procHash.erase(vec_proc_to_remove[i]);
+    }
+
+    mlog_dy(_mlog_id, "=========== Done removing ===============\n");
 
     return true;
 }
