@@ -143,7 +143,7 @@ void top_display_item(WINDOW* graph, Configurator* pConfigurator, const void* so
         for( int i=0 ; i< proc_vec.size() ; i++) {
             len = sprintf(tmp_buff, "%-6d %-8s %-5.0f %-5.1f %s\n", 
                     proc_vec[i]._pid,
-                    u2u.get_user(proc_vec[i]._uid), 
+                    u2u.get_user(proc_vec[i]._uid).c_str(), 
                     proc_vec[i]._cpuPercent, 
                     proc_vec[i]._memoryMB,
                     proc_vec[i]._command.c_str());
