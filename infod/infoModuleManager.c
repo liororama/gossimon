@@ -424,7 +424,7 @@ int pim_packInfo(pim_t pim, node_info_t *ninfo)
         if (!pim->validPim[i])
             continue;
 
-        //debug_ly(INFOD_DEBUG, "Adding name %s\n", ent->name);
+        debug_ly(INFOD_DEBUG, "Adding name %s\n", ent->name);
         size = 4096;
         res = (*ent->get_func)(ent->private_data, (void *) pim->tmpBuff, &size);
 

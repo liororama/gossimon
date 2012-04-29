@@ -38,6 +38,7 @@ set(CMAKE_C_FLAGS "-g -std=gnu99 -fgnu89-inline -Wl,--whole-archive -L../  -lxml
 
 set(PLUGIN_NAME "meminfo")
 set(PLUGIN_MAIN "${PLUGIN_NAME}_main")
+set(PLUGIN_CONF "meminfo.conf")
 
 #set(pim_DIR InfoModules)
 #include_directories(${pim_DIR})
@@ -81,6 +82,13 @@ set_target_properties( ${PLUGIN_NAME} PROPERTIES PREFIX "")
 # #################
 # # Install       #
 # #################
+install(TARGETS ${PLUGIN_NAME}
+        DESTINATION share/gossimon/plugins)
+
+install(FILES ${PLUGIN_CONF}
+        DESTINATION ${GOSSIMON_INSTALL_ETC}/gossimon/plugins-available/)
+
+
 
 # install(TARGETS infod
 #   RUNTIME DESTINATION sbin)

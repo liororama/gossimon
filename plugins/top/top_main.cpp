@@ -5,7 +5,7 @@
 #include <TopSaxParser.h>
 #include <string.h>
 
-char buff[8192];
+char buff[16000];
 
 int main(int argc, char **argv) 
 {
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
         // update
         im_update(data);
         
-        int i = 8192;
+        int i = 16000;
         im_get(data, buff, &i);
         //system("clear");
         //printf("%s", buff);
@@ -42,12 +42,12 @@ int main(int argc, char **argv)
         processVecT v;
         TopSaxParser parser;
         parser.parse(std::string(buff), v);
-        std::cout << "===============================================" << std::endl;
+        std::cout << "================= Top Processes: " << v.size() << " ======================" << std::endl;
         for(std::vector<ProcessStatusInfo>::iterator iter = v.begin() ; iter != v.end() ; iter++) {
             ProcessStatusInfo *pi = &(*iter);
             std::cout << "XML:" << std::endl << pi->getProcessXML();
         }
-        sleep(1);
+        sleep(3);
 
     }
     

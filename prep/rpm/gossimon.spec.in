@@ -73,11 +73,15 @@ fi
 "/usr/share/man/man1/mmon.1.gz*"
 "/usr/share/man/man1/testload.1.gz*"
 "/usr/share/man/man1/infod-client.1.gz*"
+"/usr/share/gossimon/plugins/top.so"
+"/usr/share/gossimon/plugins/meminfo.so"
 "/usr/bin/infod-client"
 "/usr/bin/infod-best"
 "/usr/bin/repeat-bg"
 "/usr/bin/mmon"
 "/usr/bin/testload"
+"/etc/gossimon/plugins-available/top.conf
+"/etc/gossimon/plugins-available/meminfo.conf
 "/etc/gossimon/plugins-available/README"
 "/etc/gossimon/plugins-enabled/README"
 

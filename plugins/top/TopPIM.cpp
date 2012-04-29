@@ -72,6 +72,10 @@ int im_init(void **module_data, void *module_init_data)
     tf->set_mlog_id(mlog_id);
     tf->set_mlog_id2(mlog_id_2);
     *module_data = (void *) tf;
+
+    mlog_dg(mlog_id, "After TopFinder constructor\n%s\n", tf->get_info().c_str());
+    
+    sleep(3);
     return 1;
 
 }
@@ -101,8 +105,9 @@ int im_get(void *module_data, void *data, int *size)
     TopFinder *tf = (TopFinder *) module_data;
     char          *buff = (char *) data;
 
-    tf->get_xml(buff, size);
-    return 1;
+    if(tf->get_xml(buff, size))
+    	return 1;
+    return 0;
 }
 
 

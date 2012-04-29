@@ -16,6 +16,8 @@
 #include <dirent.h>
 #include <sstream>
 #include <iomanip>
+#include <sys/sysinfo.h>
+
 
 std::string ProcessStatusInfo::getProcessXML() {
     std::stringstream xmlStream;
@@ -39,10 +41,15 @@ std::string ProcessStatusInfo::getProcessXML() {
 TopFinder::TopFinder(std::string procDir) {
     _proc_dir = procDir;
     _xml_result = "test 12345";
-    _min_cpu_percent = 20;
-    _min_mem_percent = 20;
-    _total_mem_mb = 1024; // Just a default of 1GB...
+    _min_cpu_percent = 10;
+    _min_mem_percent = 10;
     _update_count = 0;
+
+    struct sysinfo si;
+    sysinfo(&si);
+    
+    _total_mem_mb = ((float)si.totalram * (float)si.mem_unit)/(1024.0*1024.0);
+
 }
 
 TopFinder::TopFinder(const TopFinder& orig) {
@@ -51,10 +58,22 @@ TopFinder::TopFinder(const TopFinder& orig) {
 TopFinder::~TopFinder() {
 }
 
+std::string TopFinder::get_info() {
+	std::stringstream ss;
+
+	ss << "Proc Dir:        " << _proc_dir << std::endl;	
+	ss << "Min cpu percent: " << _min_cpu_percent <<std::endl;
+	ss << "Min mem percent: " << _min_mem_percent <<std::endl;
+	ss << "Total Ram MB:    " << _total_mem_mb <<std::endl;
+	ss << "Update count:    " << _update_count << std::endl;
+	return ss.str();
+}
+
 bool TopFinder::get_xml(char *buff, int *len) {
     
     if((int)_xml_result.length() > *len) {
-        mlog_error(_mlog_id, "Error in TopFinder::getTopXML length of buffer is smaller than length of top xml string\n");
+        mlog_error(_mlog_id, "Error in TopFinder::getTopXML length of buffer is smaller than length of top xml string (%d : %d) \n", (int)_xml_result.length() , *len);
+	//fprintf(stderr, _xml_result.c_str());
         return false;
     }
     
@@ -67,7 +86,7 @@ bool TopFinder::get_xml(char *buff, int *len) {
 
 void TopFinder::update() {
 
-    mlog_dg(_mlog_id, "update\n");
+    mlog_dg(_mlog_id, "update %d\n", _update_count);
     DIR *procDirHndl;
 
     procDirHndl = opendir(_proc_dir.c_str());
@@ -135,8 +154,11 @@ void TopFinder::mergeProcessStatus(ProcessStatusInfo& pi) {
     float timeDiff = timeDiffFloat(&piOrig->_prevTime, &piOrig->_currTime);
     float utimeClockTicksDiff = pi._utime - piOrig->_utime;
     
-    piOrig->_cpuPercent = ((utimeClockTicksDiff/(float)_clock_ticks_per_sec) / timeDiff) * 100;
-    
+    // The first cycle is ignored - since there is not enough info collected
+    if(_update_count > 1) 
+	    piOrig->_cpuPercent = ((utimeClockTicksDiff/(float)_clock_ticks_per_sec) / timeDiff) * 100;
+    else 
+    	    piOrig->_cpuPercent = 0;	    
     piOrig->_stime = pi._stime;
     piOrig->_utime = pi._utime;
     
@@ -215,7 +237,8 @@ void TopFinder::updateTopProcessesList() {
     std::unordered_map<int, ProcessStatusInfo>::const_iterator iter;
     for(iter = _procHash.begin() ; iter != _procHash.end() ; iter++) {
         const ProcessStatusInfo *ps = &(iter->second);
-        if(ps->_cpuPercent > _min_cpu_percent) {
+        mlog_dy(_mlog_id2, "Proc %f %f %d\n", ps->_cpuPercent, _min_cpu_percent, _update_count);
+	if(ps->_cpuPercent > _min_cpu_percent) {
             _top_processes_vec.push_back(ps->_pid);
         }
 

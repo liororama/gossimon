@@ -32,6 +32,7 @@ struct ProcessStatusInfo {
                           // marking the process that were already processed
 
     std::string getProcessXML();
+    ProcessStatusInfo() { _cpuPercent = 0; _memPercent = 0;}	
 };
 
 class TopFinder {
@@ -50,7 +51,8 @@ public:
     void setMinCPUPercent(float minCPUPercent) { _min_cpu_percent = minCPUPercent; }
     void setMinMemPercent(float minMemPercent) { _min_mem_percent = minMemPercent; }
     void setTotalMem(float totalMemMB) { _total_mem_mb = totalMemMB; }
-    
+    std::string get_info();
+ 
 private:
     bool    readProcessStatus(std::string processProcDir, ProcessStatusInfo *pi);
     bool    updateProcessStatus(ProcessStatusInfo &pi);

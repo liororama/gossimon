@@ -37,6 +37,7 @@ set(CMAKE_C_FLAGS "-g -std=gnu99 -fgnu89-inline -Wl,--whole-archive -L../  -lxml
 set(PLUGIN_NAME "top")
 set(PLUGIN_LIB_NAME "toplib")
 set(PLUGIN_MAIN "${PLUGIN_NAME}_main")
+set(PLUGIN_CONF "top.conf")
 
 #set(pim_DIR InfoModules)
 #include_directories(${pim_DIR})
@@ -83,6 +84,11 @@ ENDFOREACH(test_file)
 # #################
 # # Install       #
 # #################
+install(TARGETS ${PLUGIN_NAME}
+        DESTINATION share/gossimon/plugins)
+
+install(FILES ${PLUGIN_CONF}
+        DESTINATION ${GOSSIMON_INSTALL_ETC}/gossimon/plugins-available/)
 
 # install(TARGETS infod
 #   RUNTIME DESTINATION sbin)
