@@ -1099,6 +1099,8 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     mlog_registerModule("plugins", "Plugins management", "plugins");
     mlog_registerModule("mmon", "General mmon sections", "mmon");
     mlog_registerModule("disp", "Display section", "disp");
+    mlog_registerModule("disp2", "Display section 2", "disp2");
+    
     mlog_registerModule("info", "Info methods", "info");
 
     mlog_registerModule("side", "Side window", "side");

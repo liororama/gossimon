@@ -133,6 +133,7 @@ int parseCommandLine(mmon_data_t *md, int argc, char **argv, mon_disp_prop_t *pr
                     printf("Got debug mode [%s]\n", debugItems[i]);
                     mlog_setModuleLevelFromStr(debugItems[i], LOG_DEBUG);
                 }
+                sleep(2);
             }
             break;
 

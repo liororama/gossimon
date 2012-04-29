@@ -856,11 +856,16 @@ void displayDrawNumberingHorizontal(mon_disp_prop_t *display, int max_width)
         offset += index2;
 
         //the number itself
+        
+        mlog_bn_dr("disp", "BBBBBB ===================\n");
+        
         int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
         if (display->side_win_type == SIDE_WIN_NODE_INFO &&
-                nodeNum == display->selected_node)
+                nodeNum == display->selected_node) {
+            
+            mlog_bn_dr("disp", "ATTRON UNDERLINE ------------------------------------\n");
             attron(A_UNDERLINE);
-
+        }
         printw("%i", nodeNum);
 
         if (display->side_win_type == SIDE_WIN_NODE_INFO &&
@@ -896,16 +901,21 @@ void displayDrawNumberingVertical(mon_disp_prop_t *display, int max_width)
 
         int nodeNum = *((int*) ((long) temp_p + get_pos(dm_getIdByName("num"))));
         sprintf(title, "%i", nodeNum);
-
+        
+        int rev = 0;
+        if (display->side_win_type == SIDE_WIN_NODE_INFO &&
+                        nodeNum == display->selected_node) 
+            rev = 1;
+        
         //mlog_bn_dg("disp", "Node %d\n", nodeNum);
         display_rtr(stdscr, &(pConfigurator->Colors._vertNodeName),
                 display->max_row - display->bottom_spacing
                 + index2 + display->show_cluster, //row
                 index * (display->legend).legend_size + offset
                 + display->left_spacing + 1, //col
-                title, strlen(title), 0);
+                title, strlen(title), rev);
     }
-
+    
     free(title);
 }
 
@@ -1135,7 +1145,7 @@ void displayRedrawGraph(mon_disp_prop_t* display)
                         0, index + 1, //col index
                         display->last_max, //max value
                         display->wmode); //width mode
-                    mlog_bn_dy("disp", "max_type is data type\n");
+                    //mlog_bn_dy("disp2", "max_type is data type\n");
                 }
                 else {
                     display_item(lgd_ptr->data_type, //data type
@@ -1145,7 +1155,7 @@ void displayRedrawGraph(mon_disp_prop_t* display)
                         0, index + 1, //col index
                         get_max(display, lgd_ptr->data_type), //max value
                         display->wmode); //width mode
-                    mlog_bn_dy("disp", "max_type is NOT data type\n");
+                    //mlog_bn_dy("disp2", "max_type is NOT data type\n");
                 }
             }
             // The corresponding cell is dead
