@@ -85,8 +85,8 @@ Supported Linux distributions:
 ------------------------------
 Gossimon was successfuly compiled and installed on the following:
 
-* Ubuntu 10.05 (64bit)
-* Centos 5.5   (64bit)
+* Ubuntu 10.04, 12.04 (64bit)
+* Centos 5.5, 5.6, 5.7  (64bit)
 
 Feel free to send me a short email if you manage to install it on other 
 systems (liororama@gmail.com).
@@ -121,6 +121,18 @@ package.
 	
        o RH based: yum install libxml++-devel.x86_64
 		   yum install glibmm24-deve
+
+  1.5 Install libxml++
+       o Debian/Ubuntu apt-get install libxml++2.6-dev
+       o RH based: You might need to install a repository like rpmforge that
+         contains the packages (does not appear in the regular repo for Centos5
+                   yum install glibmm24-devel
+       	    	   yum install libxml++-devel
+
+  1.6 Install cppunit
+       o Debian/Ubuntu apt-get install libcppunit-dev
+       o RH based: yum install cppunit-devel
+  
 2. Open the gossimon tarball (once you download it...)
    tar xvf gossimon-1.8.3-Source.tar.gz
 
@@ -130,6 +142,12 @@ package.
 
    In case you see errors regarding missing required libraries, go an install
    the missing libraries...
+   
+   Note: on Centos 5 you shoud install gcc44 (including g++44). You will need
+   to tell cmake to use these compilers instead of the normal gcc
+
+   COMPILER_CMAKE_FLAGS="-D CMAKE_C_COMPILER=gcc44 -D CMAKE_CXX_COMPILER=g++44"
+   cmake $COMPILER_CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
 
 
 4. Compile:
