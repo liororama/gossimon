@@ -11,7 +11,7 @@ if grep -q "CentOS" /etc/issue ; then
 	COMPILER_CMAKE_FLAGS=" -D CMAKE_C_COMPILER=gcc44 -D CMAKE_CXX_COMPILER=g++44"
 fi
 
-/usr/local/bin/cmake $COMPILER_CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
+cmake $COMPILER_CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
 make package
 
 echo 
