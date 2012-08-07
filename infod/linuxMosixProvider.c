@@ -1308,7 +1308,7 @@ ep_periodic_admin( ivec_t vec )
      static struct timeval last_called = { 0, 0 };
      static struct timeval last_extra_called = { 0, 0};
      struct timeval curr_time;
-     unsigned long up2age_time;
+     //unsigned long up2age_time;
      unsigned long time_diff;
 	
      int i = 0, how_many = 0, selected_size = 0;
@@ -1345,7 +1345,7 @@ ep_periodic_admin( ivec_t vec )
      // information to mosixd
      ep_fast_update_extra_info(&myInfo.extra);
 
-     up2age_time = mosix_periodic_data.milli*1000;
+     //up2age_time = mosix_periodic_data.milli*1000;
      //vec_entries = ivec_ret_up2age( vec, up2age_time, &how_many );
      selected_size = SELECTED_MAX_SIZE;
 	

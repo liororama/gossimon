@@ -33,7 +33,7 @@ include_directories("/usr/lib/glib-2.0/include")
 include_directories("${GOSSIMON_SRC_DIR}/include")
 include_directories("${GOSSIMON_SRC_DIR}/mmon")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -fPIC -Wall  -D__USE_GNU -D_GNU_SOURCE, -Wl,--whole-archive -L../  -lxml++-2.6 -lxml2 -Wl,--no-whole-archive")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -fPIC -Wall  -D __USE_GNU -D _GNU_SOURCE -Wl,--whole-archive -L../  -lxml++-2.6 -lxml2 -Wl,--no-whole-archive")
 set(CMAKE_C_FLAGS "-g -std=gnu99 -fgnu89-inline -Wl,--whole-archive -L../  -lxml2 -Wl,--no-whole-archive ")
 
 set(PLUGIN_NAME "meminfo")

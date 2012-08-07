@@ -24,7 +24,7 @@ static const char* MMON_VERSION = "2a"; //The current version
 #include "DisplayModules.h"
 
 // Color Configuration file settings
-static  const char *defConfFileName = MMON_DEF_CONFIG_FILE; //default file name
+static const char *defConfFileName = MMON_DEF_CONFIG_FILE; //default file name
 static char *homeDir = NULL; //optional string for working directory
 static char* const defConfDir = GOSSIMON_CONFIG_DIR; //default directory
 Configurator* pConfigurator = NULL; //for color configuration structure
@@ -46,8 +46,8 @@ char *glob_info_desc = NULL;
 variable_map_t *glob_info_var_mapping = NULL;
 
 //Quick reference maps:
- mon_display_module_t** infoModulesArr; 
- 
+mon_display_module_t** infoModulesArr;
+
 
 int* pos_map; //holds the relative position of the item in a block.
 int** key_map; //holds key bindings of all display types: each cell is an array
@@ -181,14 +181,14 @@ void init_clusters_list(mon_disp_prop_t* display)
 
     // We got the -h option so we use it as a single cluster
     // or if there was no -h and there was no multy cluster option -c -f
-    if (!(display->mosix_host) &&
+    if (!(display->info_src_host) &&
             (cl_size(display->clist) == 0))
         //if no valid compiled list available:
     {
-        display->mosix_host = localhost_str;
+        display->info_src_host = localhost_str;
         display->need_dest =
-                !(cl_set_single_cluster(display->clist, display->mosix_host));
-        display->mosix_host = NULL;
+                !(cl_set_single_cluster(display->clist, display->info_src_host));
+        display->info_src_host = NULL;
     }
 
     if ((!display->need_dest) &&
@@ -199,10 +199,10 @@ void init_clusters_list(mon_disp_prop_t* display)
         ce = cl_curr(display->clist);
         mosix_cluster = ce->name;
         mon_hosts = &(ce->host_list);
-        display->mosix_host = mh_current(mon_hosts);
+        display->info_src_host = mh_current(mon_hosts);
 
         if (dbg_flg)
-            fprintf(dbg_fp, "Host = %s \n", display->mosix_host);
+            fprintf(dbg_fp, "Host = %s \n", display->info_src_host);
 
         display->need_dest = 0; //mark host as aquired
         display->cluster = cl_curr(display->clist);
@@ -386,7 +386,6 @@ void new_user(mon_disp_prop_t* display)
     mmon_redraw(display);
 }
 
-
 void new_yardstick(mon_disp_prop_t* display)
 //Opens a new yardstick dialogue:
 //First you choose one of the three options (1-3):
@@ -421,18 +420,18 @@ void new_yardstick(mon_disp_prop_t* display)
         switch (new_speed)
             //act according to choice:
         {
-        case 1:
-            mvwprintw(display->dest, 3, 21, ": ");
-            echo();
-            wscanw(display->dest, "%f", &(display->sspeed));
-            noecho();
-            break;
-        case 2:
-            display->sspeed = get_max(display, dm_getIdByName("speed"));
-            break;
-        case 3:
-            display->sspeed = MOSIX_STD_SPEED;
-            break;
+            case 1:
+                mvwprintw(display->dest, 3, 21, ": ");
+                echo();
+                wscanw(display->dest, "%f", &(display->sspeed));
+                noecho();
+                break;
+            case 2:
+                display->sspeed = get_max(display, dm_getIdByName("speed"));
+                break;
+            case 3:
+                display->sspeed = MOSIX_STD_SPEED;
+                break;
         }
     } while ((1 > new_speed) || (new_speed > 3));
     //iterated while choice input is invalid (not 1-3)
@@ -466,6 +465,13 @@ int canRev(int item)
 //The function returns 1 iff the reverse boolean is asserted
 {
     return infoModulesArr[item]->md_canrev;
+}
+
+int isFiller(int item) {
+    if (strcmp(infoModulesArr[item]->md_name, "space") == 0 ||
+        strcmp(infoModulesArr[item]->md_name, "seperator") == 0)
+        return 1;
+    return 0;
 }
 
 int isScalar(int item)
@@ -516,8 +522,7 @@ char** display_help(int item)
     return infoModulesArr[item]->md_help_func();
 }
 
-int get_text_info_byName(char *name, void *nodeDataPtr, char *buff, int *len, int width)
-{
+int get_text_info_byName(char *name, void *nodeDataPtr, char *buff, int *len, int width) {
     int item = dm_getIdByName(name);
     int pos = get_pos(item);
 
@@ -561,13 +566,15 @@ double get_max(mon_disp_prop_t* display, int item)
     if (!(item == itemNumId) && (!(isScalar(item)) || (display->displayed_bar_num <= 0)))
         return 0;
 
+    if(!display->displayed_bars_data)
+        return 0;
+    
     // Find first node alive (or not) to compare to
     int index = -1; //index over the display data array
 
-    if(item == itemNumId) {
+    if (item == itemNumId) {
         temp = scalar_div_x(item, (void*) ((long) display->displayed_bars_data[0] + itemPos), 1);
-    }
-    else {
+    } else {
         do {
             index++;
             temp = scalar_div_x
@@ -576,15 +583,15 @@ double get_max(mon_disp_prop_t* display, int item)
         } while ((!(display->alive_arr[get_raw_pos(display, index)])) &&
                 (index < display->displayed_bar_num - 1));
 
-    
+
         if ((index == display->displayed_bar_num - 1) &&
-            (!(display->alive_arr[get_raw_pos(display, index)]))) {
+                (!(display->alive_arr[get_raw_pos(display, index)]))) {
             //no living nodes found
             if (dbg_flg) fprintf(dbg_fp, "All nodes are down.");
             return 0;
         }
     }
-    
+
     //if(item == itemNumId)
     //    mlog_bn_dg("mmon", "Temp %d \n", item, itemNumId);
 
@@ -595,19 +602,17 @@ double get_max(mon_disp_prop_t* display, int item)
         if (lgd_ptr == NULL) //reset lgd_ptr...
             lgd_ptr = (display->legend).head;
 
-        
-        if (item != itemNumId && lgd_ptr->data_type != item)  continue;  // Same item
+
+        if (item != itemNumId && lgd_ptr->data_type != item) continue; // Same item
         if (!display->alive_arr[get_raw_pos(display, index)] && !(item == dm_getIdByName("num"))) continue;
 
-        double val = scalar_div_x(item,(void*) ((long) display->displayed_bars_data[index] + get_pos(item)), 1);
+        double val = scalar_div_x(item, (void*) ((long) display->displayed_bars_data[index] + get_pos(item)), 1);
         //mlog_bn_dg("mmon", "Val for max %.3f\n", val);
         if (val > temp) temp = val;
         //replace max
     }
     return temp;
 }
-
-
 
 double avg_by_item(mon_disp_prop_t* display, int item)
 //This function calculates the averege value of the display
@@ -702,8 +707,6 @@ void toggle_disp_type(mon_disp_prop_t* display, int item, int action)
         if (dbg_flg) fprintf(dbg_fp, "Added at end\n");
     }
 }
-
-
 
 int get_str_length(char** man_str)
 //this function recieves a null truncated array of strings,
@@ -837,7 +840,7 @@ void display_totals(mon_disp_prop_t* display, int draw)
         return;
     }
 
-    if ((infolib_get_stats(display->mosix_host,
+    if ((infolib_get_stats(display->info_src_host,
             glob_host_port, &stats)) == 1)
         //if data is available:
     {
@@ -858,7 +861,7 @@ void display_totals(mon_disp_prop_t* display, int draw)
             sprintf(totals_str,
                     "[Nodes: %d][Live: %d][Host: %s][Info age: %.1f][Max age: %.1f]",
                     stats.total_num, stats.num_alive,
-                    display->mosix_host,
+                    display->info_src_host,
                     stats.avgage,
                     stats.maxage);
 
@@ -867,7 +870,7 @@ void display_totals(mon_disp_prop_t* display, int draw)
                 //swich to "economic" mode:
                 sprintf(totals_str,
                     "[Nodes: %d/%d] [host: %s]",
-                    stats.num_alive, stats.total_num, display->mosix_host);
+                    stats.num_alive, stats.total_num, display->info_src_host);
         }
 
         c_on(&(pConfigurator->Colors._bottomStatusbar));
@@ -896,9 +899,6 @@ void display_totals(mon_disp_prop_t* display, int draw)
     }
     free(totals_str);
 }
-
-
-
 
 /****************************************************************************
  *                         
@@ -952,8 +952,7 @@ void move_right(mon_disp_prop_t* display)
             (display->show_dead)))
         //if we have more room to move right...
     {
-        for (index = 0; index < display->displayed_bar_num - (display->legend).legend_size; index++)
-        {
+        for (index = 0; index < display->displayed_bar_num - (display->legend).legend_size; index++) {
             display->displayed_bars_data[index] =
                     display->displayed_bars_data[index + (display->legend).legend_size]; //offset*
         }
@@ -980,8 +979,7 @@ void move_right(mon_disp_prop_t* display)
 //  2 - black and white
 //  3 - configuration file
 
-void loadConfigFile(mmon_data_t *md)
-{
+void loadConfigFile(mmon_data_t *md) {
     //if requested, load BW mode
     if (md->colorMode == 2) {
         if (dbg_flg)
@@ -1043,8 +1041,8 @@ void loadConfigFile(mmon_data_t *md)
 //In the event of a change in the screen size or amount of displays,
 //this function recalculates the positions of all displays.
 //The new screens are redrawn only if redraw is asserted.
-void size_recalculate(int redraw)
-{
+
+void size_recalculate(int redraw) {
     int index; //temp var for loops
 
     int dispNum = 0;
@@ -1100,7 +1098,7 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     mlog_registerModule("mmon", "General mmon sections", "mmon");
     mlog_registerModule("disp", "Display section", "disp");
     mlog_registerModule("disp2", "Display section 2", "disp2");
-    
+
     mlog_registerModule("info", "Info methods", "info");
 
     mlog_registerModule("side", "Side window", "side");
@@ -1205,8 +1203,7 @@ void mmon_init(mmon_data_t *md, int argc, char** argv)
     mlog_bn_dy("mmon", " ---- INIT COMPLETE -----\n\n");
 }
 
-void mmon_free()
-{
+void mmon_free() {
     if (glob_info_desc)
         free(glob_info_desc);
     if (glob_info_var_mapping)
@@ -1219,8 +1216,7 @@ void mmon_free()
     free(glob_displaysArr);
 }
 
-void mmon_exit(int status)
-{
+void mmon_exit(int status) {
     mmon_free();
     endwin();
     if (dbg_flg) fprintf(dbg_fp, "\nEnded.\n");
@@ -1229,8 +1225,7 @@ void mmon_exit(int status)
     exit(status);
 }
 
-void delete_curr_display()
-{
+void delete_curr_display() {
     mon_disp_prop_t *display;
     int index = 0;
 
@@ -1255,8 +1250,7 @@ void delete_curr_display()
 }
 //terminates the current display
 
-void terminate()
-{
+void terminate() {
     int screenLeft = 0; //total screens left
     int p_usage = (glob_curr_display == NULL);
 
@@ -1289,8 +1283,7 @@ void terminate()
     size_recalculate(1);
 }
 
-void mmon_setDefaults(mmon_data_t * md)
-{
+void mmon_setDefaults(mmon_data_t * md) {
     memset(md, 0, sizeof (mmon_data_t));
 
     md->colorMode = 3;
@@ -1307,19 +1300,18 @@ void mmon_setDefaults(mmon_data_t * md)
 
     md->nodesArgStr = NULL;
     md->filterNodesByName = 0;
-    
+
 }
 
-int setStartWindows(mmon_data_t * md)
-{
+int setStartWindows(mmon_data_t * md) {
     for (int i = 0; md->startWinStrArr[i]; i++) {
         mlog_bn_dg("mmon", "---- Setting %d display ---- %s \n", i, md->startWinStrArr[i]);
         if (!md->displayArr[i]) {
             mlog_bn_dg("mmon", "allocating and initializing display %d\n", i);
-        
+
             md->displayArr[i] = (mmon_display_t*) malloc(sizeof (mmon_display_t));
             displayInit(md->displayArr[i]);
-         
+
         }
         displayInitFromStr(md->displayArr[i], md->startWinStrArr[i]);
         md->displayArr[i]->recount = 1;
@@ -1329,8 +1321,7 @@ int setStartWindows(mmon_data_t * md)
     return 1;
 }
 
-int saveCurrentWindows(mmon_data_t * md)
-{
+int saveCurrentWindows(mmon_data_t * md) {
     char str[1024];
     char *arr[MAX_SPLIT_SCREENS];
 
@@ -1355,8 +1346,7 @@ int saveCurrentWindows(mmon_data_t * md)
     return 1;
 }
 
-int loadCurrentWindows(mmon_data_t * md)
-{
+int loadCurrentWindows(mmon_data_t * md) {
 
 
     int size = MAX_START_WIN;
@@ -1368,17 +1358,17 @@ int loadCurrentWindows(mmon_data_t * md)
 }
 
 int mmon_redraw(mmon_display_t *display) {
-    if(!display)
+    if (!display)
         return 0;
     int res;
     res = get_nodes_to_display(display);
-    if(res) {
+    if (res) {
         displayRedraw(display);
     }
     return res;
 }
-int main(int argc, char** argv)
-{
+
+int main(int argc, char** argv) {
     mmon_data_t mmonData;
     int index, res;
 
@@ -1389,7 +1379,7 @@ int main(int argc, char** argv)
 
     res = 1;
     for (index = 0; index < MAX_SPLIT_SCREENS; index++) {
-        if(!glob_displaysArr[index]) continue;
+        if (!glob_displaysArr[index]) continue;
         res = res && mmon_redraw(glob_displaysArr[index]);
     }
     mlog_bn_info("mmon", "After First redraw: res = %d \n", res);
@@ -1410,7 +1400,9 @@ int main(int argc, char** argv)
 
         // TODO fix this to use break instead of continue.
         for (index = 0; index < MAX_SPLIT_SCREENS; index++) {
-            if(!glob_displaysArr[index]) continue;
+            if (!glob_displaysArr[index]) {
+                continue;
+            }
             res = res && mmon_redraw(glob_displaysArr[index]);
             mlog_bn_info("mmon", "Display %p:  res = %d \n", glob_displaysArr[index], res);
         }
@@ -1420,7 +1412,7 @@ int main(int argc, char** argv)
     }
     mlog_bn_info("mmon", "mmon done res = %d disp0 = %p \n", res, glob_displaysArr[0]);
     mmon_exit(res);
-    if(!res) {
+    if (!res) {
         fprintf(stderr, "Error - when tring to draw screen - probably infod is not there\n");
     }
     return 0;

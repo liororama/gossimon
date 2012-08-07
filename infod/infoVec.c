@@ -1053,7 +1053,7 @@ infoVecPackQueryReplay( ivec_entry_t** ivecptr, int size, char *buff, int *buffS
 	void            *rep_buff = NULL;
 	int              rep_size  = 0;
     
-	int              i = 0, j = 0;
+	int              i = 0;
 	struct timeval   curtime;
 	void            *base_ptr;
 	int              cur_len;
@@ -1077,7 +1077,7 @@ infoVecPackQueryReplay( ivec_entry_t** ivecptr, int size, char *buff, int *buffS
 	gettimeofday( &curtime, NULL );
 	
 	/* Arrange the reply in the sent buffer */       
-	for( i = 0, j = 0; i < size ; i++  )
+	for( i = 0 ; i < size ; i++  )
 	{
 		idata_entry_t *cur = ((idata_entry_t*)(base_ptr + cur_len));
 		cur_len      += INFO_REPLAY_ENTRY_SIZE;

@@ -5,8 +5,8 @@
  * Created on October 9, 2011, 7:40 AM
  */
 
-#ifndef TOPFINDER_H
-#define	TOPFINDER_H
+#ifndef MEMINFO_H
+#define	MEMINFO_H
 
 #include <sys/time.h>
 #include <string>

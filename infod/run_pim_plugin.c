@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
 #include <infoModuleManager.h>
 #include <ModuleLogger.h>
 /*
@@ -48,7 +50,7 @@ int main(int argc, char** argv) {
     for(int i=0; i< 10 ; i++) {
         (pim_entry.update_func)(pim_entry.private_data);
          res = (pim_entry.get_func)(pim_entry.private_data, (void *) buff, &size);
-         printf(buff);
+         printf("%s", buff);
          sleep(1);
     }
     

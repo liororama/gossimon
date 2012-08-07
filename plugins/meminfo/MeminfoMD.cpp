@@ -23,7 +23,7 @@ extern "C" {
         
     
     char* mem_desc[] = {
-        " Used Memory plugin, showing also cached and buffers memory  ",
+        (char *)" Used Memory plugin, showing also cached and buffers memory  ",
         (char*) NULL
     };
 
@@ -68,8 +68,8 @@ extern "C" {
     }
 
     void meminfo_del_item(void* address) {
-        if (*((char**) address))
-            free(*((char**) address));
+       // if (*((char**) address))
+       //     free(*((char**) address));
     }
 
     void meminfo_display_item(WINDOW* graph, Configurator* pConfigurator, const void* source, 
@@ -141,8 +141,8 @@ extern "C" {
                 "Used:   %7.2f GB\n"
                 "Buff:   %7.2f GB\n"
                 "Cached: %7.2f GB\n"
-                "Dirty:  %7d KB\n"
-                "Locked: %7d KB",
+                "Dirty:  %7ld KB\n"
+                "Locked: %7ld KB",
                 total_gb, free_gb, used_gb, buffer_gb, cached_gb, mi._dirty_kb, mi._mlocked_kb);
         return *size;
     }

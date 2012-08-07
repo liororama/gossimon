@@ -1,3 +1,10 @@
+------** Version: 1.8.15 By: Lior Date 7/8/2012 **-------
+* TODO - fix memory detection to get the correct cpu speed (max)
+* Fixed bugs in big xml buffers
+* Added fstest cpu std speed selection
+* Few bug fixes regarding empty displays
+
+
 ------** Version: 1.8.14 By: Lior Date 23/4/2012 **-------
 * Moved to be developed and maintained by Lior Amar (liororama@gmail.com) since
   ClusterLogic Ltd is no longer up and running.

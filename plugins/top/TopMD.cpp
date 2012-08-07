@@ -22,7 +22,7 @@ extern "C" {
     static UidToUser u2u;
     
     char* top_desc[] = {
-        " Top plugin, show top cpu users  ",
+        (char *)" Top plugin, show top cpu users  ",
         (char*) NULL
     };
 
@@ -83,14 +83,14 @@ void get_users_from_uids(std::vector<int> &uid_vec, std::vector<std::string> &us
 void print_users_bar(std::vector<std::string> &users_vec, int max_len, std::string &bar_str)
 {
     int tmp_len = 0;
-    int users_to_print = 0;
-    for( int i=0 ; i< users_vec.size() ; i++) {
+    unsigned int users_to_print = 0;
+    for( unsigned int i=0 ; i< users_vec.size() ; i++) {
         if(tmp_len + users_vec[i].size() > bar_str.size() - 3)
             break;
         users_to_print ++;
         tmp_len += users_vec[i].size() + 1;
     }
-    for( int i=0 ; i< users_to_print ; i++) {
+    for( unsigned int i=0 ; i< users_to_print ; i++) {
         bar_str += users_vec[i] + " ";
     }
     if(users_to_print < users_vec.size())
@@ -140,7 +140,7 @@ void top_display_item(WINDOW* graph, Configurator* pConfigurator, const void* so
         //len = sprintf(tmp_buff, "size %d\n", proc_vec.size());
         //tmp_buff += len;
         
-        for( int i=0 ; i< proc_vec.size() ; i++) {
+        for( unsigned int i=0 ; i< proc_vec.size() ; i++) {
             len = sprintf(tmp_buff, "%-6d %-8s %-5.0f %-5.1f %s\n", 
                     proc_vec[i]._pid,
                     u2u.get_user(proc_vec[i]._uid).c_str(), 

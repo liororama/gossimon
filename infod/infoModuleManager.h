@@ -112,4 +112,6 @@ int     pim_packInfo(pim_t pim, node_info_t *ninfo);
 pim_entry_t *pim_getDefaultPIMs();
 
 void    pim_appendDescription(pim_t pim, char *desc);
+
+int load_external_module(pim_entry_t *ent, char *path, char *name);
 #endif

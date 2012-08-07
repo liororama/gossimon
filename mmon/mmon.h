@@ -275,6 +275,8 @@ void new_user(mon_disp_prop_t* display);
 // Data module
 int canRev(int item);
 int isScalar(int item);
+// Return true or false depending if the item is a filler (space or seperator)
+int isFiller(int item);
 int get_length(int item);
 void new_item(int item, mmon_info_mapping_t* iMap,
         void* source, void* dest, settings_t* setup);

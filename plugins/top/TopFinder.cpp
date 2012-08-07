@@ -203,7 +203,7 @@ bool TopFinder::removeOldProcesses() {
 		vec_proc_to_remove.push_back(ps->_pid);
 	}
     }
-    for(int i=0 ; i < vec_proc_to_remove.size() ; i++) {
+    for(unsigned int i=0 ; i < vec_proc_to_remove.size() ; i++) {
     	_procHash.erase(vec_proc_to_remove[i]);
     }
 

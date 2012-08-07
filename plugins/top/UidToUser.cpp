@@ -68,11 +68,11 @@ std::string UidToUser::_get_user(int uid) {
 
     pw = getpwuid(uid);
     if (pw) {
-        mlog_bn_dg("u2u", "Found name [%s] to uid [%d]\n", pw->pw_name, uid );
+        mlog_bn_dg((char *)"u2u", (char *)"Found name [%s] to uid [%d]\n", pw->pw_name, uid );
         return (std::string(pw->pw_name));
 
     }
-    mlog_bn_dg("u2u", "Uid [%d] can not be translated to \n", pw->pw_name, uid );
+    mlog_bn_dg((char*)"u2u", (char *)"Uid [%d] can not be translated to \n", pw->pw_name, uid );
         
     std::stringstream str_stream;
     str_stream << uid;

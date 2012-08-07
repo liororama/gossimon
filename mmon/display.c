@@ -21,6 +21,7 @@
 #include "display.h"
 #include "drawHelper.h"
 
+void displaySetStdSpeed(mon_disp_prop_t *display);
 //SCREEN INIT
 void displayInit (mmon_display_t* display)  
 {
@@ -43,7 +44,7 @@ void displayInit (mmon_display_t* display)
   display->displayed_bars_data = NULL;  //displayed data
   display->raw_data     = NULL;  //all available data for display
   display->alive_arr     = NULL;  //index of availability of nodes
-  display->mosix_host   = NULL;  //host address char array
+  display->info_src_host   = NULL;  //host address char array
   display->last_host    = NULL;  //last successful host string
 
   display->graph        = NULL;  // The territory of the graph
@@ -75,6 +76,7 @@ void displayInit (mmon_display_t* display)
   display->last_max     = -1;    //holds the previous max value 
   display->help_start   = 0;     //notes where to start the help string
 
+  display->sspeed_mode  = SSPEED_FASTEST_NODE;
   display->sspeed       = MOSIX_STD_SPEED;
 
   display->left_spacing = 
@@ -483,7 +485,7 @@ void displayPrint(mmon_display_t *display, FILE *fp) {
              "last_max:    %f \n"
              "last_max_type %d\n",
              d->min_row, d->max_row, d->min_col, d->max_col,
-             d->mosix_host, d->last_host,
+             d->info_src_host, d->last_host,
              d->lgdw, d->show_dead, d->show_help, 
              d->show_side_win,
              d->side_win_type, 
@@ -1043,6 +1045,12 @@ void displayDrawYAxisValues(mmon_display_t *display)
 {
     legend_node_t *lgd_ptr = (display->legend).head;
 
+    // Find the first legend which is not space or seperator
+    while(lgd_ptr && isFiller(lgd_ptr->data_type)) {
+        lgd_ptr = lgd_ptr->next;
+    }
+    if(!lgd_ptr) return;
+    
     // Displays Y axis valus (if scalar)
     if ((isScalar(lgd_ptr->data_type)) &&
             !(display->show_help)) {
@@ -1233,6 +1241,9 @@ void displayRedraw(mon_disp_prop_t* display)
     legend_node_t* lgd_ptr; //for manipulating the legend list
     double temp;
 
+    // The following will take affect only on the next time
+    displaySetStdSpeed(display);
+    
     display->left_spacing = LSPACE + (display->wlegend != NULL) * (display->lgdw);
     display->bottom_spacing = display->show_cluster + display->show_status + 2;
 
@@ -1407,4 +1418,10 @@ void displayRedraw(mon_disp_prop_t* display)
 
     refresh();
     wrefresh(display->graph);
+}
+
+void displaySetStdSpeed(mon_disp_prop_t *display) {
+    if(display->sspeed_mode == SSPEED_FASTEST_NODE) {
+        display->sspeed = get_max(display, dm_getIdByName("speed"));
+    }
 }

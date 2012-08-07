@@ -430,11 +430,10 @@ int handle_kcomm_event(fd_set *rfds, fd_set *wfds, fd_set *efds)
 }
 int handle_ctl_event(fd_set *rfds, fd_set *wfds, fd_set *efds)
 {
-     int res;
      
      if( infodctl_is_new_connection( rfds )) {
 	  debug_lg( CTL_DEBUG, "New CTL connection\n" );
-	  res = infodctl_setup_connection();
+	  infodctl_setup_connection();
      }
      
      /* A ctl request has arrived */
@@ -1346,7 +1345,7 @@ int
 handle_client_request(  msx_comm_t *comm, mapper_t map,
 			comm_inprogress_recv_t* comm_msg ){
 
-	char    *msgargs      = NULL ; 
+	//char    *msgargs; 
 	infolib_req_t request = 0;
 
 	/* will hold the answer from the information vector */
@@ -1361,7 +1360,7 @@ handle_client_request(  msx_comm_t *comm, mapper_t map,
 //	unsigned long    age    = 0;
 	int size = 0, ret = -1;
 
-	msgargs = ((infolib_msg_t*)(comm_msg->data))->args;
+	//msgargs = ((infolib_msg_t*)(comm_msg->data))->args;
 	request =((infolib_msg_t*)(comm_msg->data))->request; 
 
 	debug_lb( INFOD_DEBUG, "The Request is %d\n", request ) ;

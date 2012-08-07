@@ -1,5 +1,5 @@
-This is gossimon, the distributed gossip based, open-sorce information system
-Gossimon is distributed unther the BSD License, see Copyright.txt.
+This is gossimon, the distributed gossip based, open-source information system
+Gossimon is distributed under the BSD License, see Copyright.txt.
 
 
 Readme Index:
@@ -30,11 +30,15 @@ Infod was used as the information layer of the MOSIX cluster operating system.
 During time Infod proved to be a valuable tool for any type of cluster and 
 support was added for general Linux based clusters.
 
-Gossimon was developed and maintained by ClusterLogic Ltd between the years 2009-2011
-(www.clusterlogic.net). Once ClusterLogic Ltd cease to exist the developent was continued
-by Lior Amar (liororama@gmail.com)
+Gossimon was developed and maintained by ClusterLogic Ltd between the years 
+2009-2011 (www.clusterlogic.net). During those years gossimon was release as
+an open source project under the BSD license (after getting the permission to
+do so from Prof Amnon Barak).
+Once ClusterLogic Ltd cease to exist the development was continued by 
+Lior Amar (liororama@gmail.com)
 
-Currently gossimon is developed and maintained by Lior Amar as an open source project.
+Currently gossimon is developed and maintained by Lior Amar as an open source 
+project under the BSD license.
 
 
 Gossimon programs:
@@ -147,7 +151,8 @@ package.
    to tell cmake to use these compilers instead of the normal gcc
 
    COMPILER_CMAKE_FLAGS="-D CMAKE_C_COMPILER=gcc44 -D CMAKE_CXX_COMPILER=g++44"
-   cmake $COMPILER_CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
+   cmake $COMPILER_CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=/usr \
+      -DGOSSIMON_INSTALL_ETC=/etc .
 
 
 4. Compile:
