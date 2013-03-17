@@ -112,31 +112,39 @@ package.
       o On other systems: look for a package, download a precompiled tar ball 
         or be bold and compile cmake yourself (it is a very easy task.. :-))
 
-  1.2. Install libxml2
+  1.2. Install libxml2:
        o Debian/Ubuntu: apt-get install libxml2 libxml2-dev
        o RH based systems: yum install libxml2 libxml2-devel 
 
-  1.3. Install libglib-2.0 
+  1.3. Install libglib-2.0: 
        o Debian/Ubuntu: apt-get install  libglib2.0-0 libglib2.0-dev
        o RH based systems: yum install glib2 glib2-devel
  
-  1.4. Install libxml++
+  1.4. Install libxml++:
        o Debian/Ubuntu: apt-get install libxml++2.6-dev
 	
        o RH based: yum install libxml++-devel.x86_64
 		   yum install glibmm24-deve
 
-  1.5 Install libxml++
+  1.5 Install libxml++:
        o Debian/Ubuntu apt-get install libxml++2.6-dev
        o RH based: You might need to install a repository like rpmforge that
          contains the packages (does not appear in the regular repo for Centos5
                    yum install glibmm24-devel
        	    	   yum install libxml++-devel
 
-  1.6 Install cppunit
+  1.6 Install cppunit:
        o Debian/Ubuntu apt-get install libcppunit-dev
        o RH based: yum install cppunit-devel
+
+  1.7 Install check:
+	Debian/Ubuntu: apt-get install check
+	RH based: 	
   
+  1.8 Install ncurses devel:
+	Debian/Ubuntu: apt-get install libncurses5-dev
+	RH based: 
+
 2. Open the gossimon tarball (once you download it...)
    tar xvf gossimon-1.8.3-Source.tar.gz
 
