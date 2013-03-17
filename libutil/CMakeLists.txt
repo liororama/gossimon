@@ -48,15 +48,19 @@ set (load_constraint_SOURCES LoadConstraints.c)
 
 
 add_library(util STATIC ${util_SOURCES})
+add_library(gossimon_util SHARED ${util_SOURCES})
+
 add_library(mapper STATIC ${mapper_SOURCES})
 add_library(loadconstraints STATIC ${load_constraint_SOURCES})
 
 
 add_custom_command(TARGET util POST_BUILD COMMAND cp -f libutil.a ../bin)
+add_custom_command(TARGET gossimon_util POST_BUILD COMMAND cp -f libgossimon_util.so ../bin)
 add_custom_command(TARGET util POST_BUILD COMMAND cp -f libmapper.a ../bin)
 add_custom_command(TARGET util POST_BUILD COMMAND cp -f libloadconstraints.a ../bin)
 
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/libutil.a;../bin/libmapper.a;../bin/libloadconstraints.a") 
+# Removing the files from ../bin on make clean
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/libutil.a;../libgossimon_util.so;../bin/libmapper.a;../bin/libloadconstraints.a") 
 
 
 

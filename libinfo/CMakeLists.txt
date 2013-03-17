@@ -21,8 +21,15 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(info_SOURCES  infolib.c infoxml.c info_reader.c info_iter.c)
 
 add_library(info STATIC ${info_SOURCES})
+add_library(gossimon_client SHARED ${info_SOURCES})
+
 add_custom_command(TARGET info POST_BUILD COMMAND cp -f libinfo.a ../bin)
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/libinfo.a") 
+add_custom_command(TARGET gossimon_client POST_BUILD COMMAND cp -f libgossimon_client.so ../bin)
+
+SET(extra_files ../bin/libinfo.a ../bin/libgossimon_client.so)
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${extra_files}" ) 
+
+
 
 
 file(GLOB unit_tests_SRCS  "./tests/test_*.c" )
