@@ -43,7 +43,7 @@
 #include <provider.h>
 #include <infod.h>
 #include <linuxMosixProvider.h>
-#include <mconf.h>
+//#include <mconf.h>
 #include <parse_helper.h>
 #include <infoModuleManager.h>
 /****************************************************************************

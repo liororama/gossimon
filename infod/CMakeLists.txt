@@ -61,10 +61,10 @@ set(run_pim_plugin_SRC   run_pim_plugin.c providerUtil.c infoModuleManager.c ${p
 
 
 add_executable(run_pim_plugin ${run_pim_plugin_SRC})
-target_link_libraries(run_pim_plugin  m info mapper util glib-2.0 dl)
+target_link_libraries(run_pim_plugin  m info pim_util mapper util glib-2.0 dl)
 
 add_executable(infod ${infod_SRC} ${provider_SRC})
-target_link_libraries(infod  m info infodctl mapper gossip util glib-2.0 dl)
+target_link_libraries(infod  m info infodctl pim_util mapper gossip util glib-2.0 dl)
 
 add_custom_command(TARGET infod POST_BUILD COMMAND cp -f infod ../bin)
 SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/infod;infod.8.gz") 

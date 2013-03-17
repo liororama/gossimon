@@ -25,21 +25,35 @@ include_directories("/usr/lib/glib-2.0/include")
 ###################
 file(GLOB util_SOURCES "./*.c" )
 file(GLOB util_HEADERS "../include/*.h")
-set(util_SOURCES  mem_cache.c  msx_proc.c pe.c 
-	   easy_args.c mconf.c  msx_error.c  
-	   parse_helper.c  readproc.c comm.c 
-	   crc32.c debug_util.c
-	   host_list.c  
-	   TimeUtil.c 
-	   DiskInfo.c 
-	   UsedByInfo.c LocalUsageRetriever.c 
-	   ProcessWatchInfo.c FreezeInfo.c 
-	   InfodDebugInfo.c EcoInfo.c JMigrateInfo.c 
-           ConfFileReader.c
-           pluginUtil.c
-           ColorPrint.c
-           ModuleLogger.c
-)
+
+# mconf.c was taken out of util_SOURCES (it is not needed anymore)
+set(util_SOURCES  
+  mem_cache.c  
+  msx_proc.c 
+  pe.c 
+  easy_args.c 
+  msx_error.c  
+  parse_helper.c  
+  readproc.c 
+  comm.c 
+  crc32.c 
+  debug_util.c
+  host_list.c  
+  TimeUtil.c 
+  DiskInfo.c 
+  UsedByInfo.c 
+  ProcessWatchInfo.c 
+  FreezeInfo.c 
+  InfodDebugInfo.c 
+  EcoInfo.c 
+  JMigrateInfo.c 
+  ConfFileReader.c
+  pluginUtil.c
+  ColorPrint.c
+  ModuleLogger.c
+  )
+
+set(pim_util_SOURCES LocalUsageRetriever.c)
 
 set (mapper_SOURCES Mapper.c MapperBuilder.c 
                     UserViewMapBuilder.c PartnersMapBuilder.c 
@@ -49,18 +63,21 @@ set (load_constraint_SOURCES LoadConstraints.c)
 
 add_library(util STATIC ${util_SOURCES})
 add_library(gossimon_util SHARED ${util_SOURCES})
+target_link_libraries(gossimon_util xml2 glib-2.0)
 
 add_library(mapper STATIC ${mapper_SOURCES})
 add_library(loadconstraints STATIC ${load_constraint_SOURCES})
 
+add_library(pim_util STATIC ${pim_util_SOURCES})
 
 add_custom_command(TARGET util POST_BUILD COMMAND cp -f libutil.a ../bin)
 add_custom_command(TARGET gossimon_util POST_BUILD COMMAND cp -f libgossimon_util.so ../bin)
-add_custom_command(TARGET util POST_BUILD COMMAND cp -f libmapper.a ../bin)
-add_custom_command(TARGET util POST_BUILD COMMAND cp -f libloadconstraints.a ../bin)
+add_custom_command(TARGET mapper POST_BUILD COMMAND cp -f libmapper.a ../bin)
+add_custom_command(TARGET loadconstraints POST_BUILD COMMAND cp -f libloadconstraints.a ../bin)
+add_custom_command(TARGET pim_util POST_BUILD COMMAND cp -f libpim_util.a ../bin)
 
 # Removing the files from ../bin on make clean
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/libutil.a;../libgossimon_util.so;../bin/libmapper.a;../bin/libloadconstraints.a") 
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/libutil.a;../libgossimon_util.so;../bin/libmapper.a;../bin/libloadconstraints.a;../bin/libpim_util.a") 
 
 
 
@@ -100,9 +117,8 @@ ENDFOREACH(test_file)
 #  DESTINATION include/cbox_util
 #)
 
-#install(TARGETS cbox_util
-#        ARCHIVE DESTINATION lib)
 
+install(TARGETS gossimon_util DESTINATION lib/)
 
 
 

@@ -22,6 +22,7 @@ set(info_SOURCES  infolib.c infoxml.c info_reader.c info_iter.c)
 
 add_library(info STATIC ${info_SOURCES})
 add_library(gossimon_client SHARED ${info_SOURCES})
+target_link_libraries(gossimon_client gossimon_util)
 
 add_custom_command(TARGET info POST_BUILD COMMAND cp -f libinfo.a ../bin)
 add_custom_command(TARGET gossimon_client POST_BUILD COMMAND cp -f libgossimon_client.so ../bin)
@@ -51,5 +52,7 @@ FOREACH(test_file ${unit_tests_SRCS})
 
 ENDFOREACH(test_file)
 
+### INSTALL
+install(TARGETS gossimon_client DESTINATION lib/)
 
 
