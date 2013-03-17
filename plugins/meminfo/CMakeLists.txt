@@ -53,6 +53,8 @@ target_link_libraries(${PLUGIN_MAIN} util glib-2.0 dl pthread xml++-2.6 xml2 gli
 #SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/infod;infod.8.gz") 
 
 add_library( ${PLUGIN_NAME} MODULE ${plugin_SRC} )
+target_link_libraries(${PLUGIN_NAME}  glib-2.0 dl pthread xml++-2.6 xml2 glibmm-2.4 gobject-2.0 sigc-2.0 gthread-2.0 rt )
+
 set_target_properties( ${PLUGIN_NAME} PROPERTIES PREFIX "")
 
 # ##################
