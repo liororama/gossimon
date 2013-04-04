@@ -1,18 +1,12 @@
 Gossimon package 1.8 
-Current version - 1.8.11 
+Current version - 1.8.16
 
-Sources: gossimon-1.8.11-Source.tar.gz 
-DEB:     gossimon_1.8.11_amd64.deb 
-RPM:     gossimon_1.8.11_x86_64.rpm 
+Sources: gossimon-1.8.16-Source.tar.gz 
 
 
-Changes in 1.8.11
+Changes in 1.8.16
 ----------------------------------------------------------------------------
-* Added toggling between modules side windows using 'a'
-* Modified the free memory calculation to not included buffers
-* Added version printout to syslog once infod starts
-* Added kernel version to information and to mmon
-* Added iowait information to infod + mmon
-* Fixed a bug with multiples plugins not generating the same description
-  due to bug in sorting the modules by names
-
+* Fixed several issues of window buffer too small
+* Buffer to PIM module increased
+* Added 2 shared libraries (libgossimon_client.so and libgossimon_util.so)
+  as part of the installation to support the gossipy project.

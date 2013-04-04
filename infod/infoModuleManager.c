@@ -351,7 +351,7 @@ pim_t pim_init(pim_entry_t *internalArr, char *configFile)
         pim->pimArrSize++;
     }
 
-    pim->tmpBuff = malloc(4096);
+    pim->tmpBuff = malloc(PIM_BUFFER_SIZE);
     if (!pim->tmpBuff)
         goto failed;
     return pim;
@@ -425,7 +425,7 @@ int pim_packInfo(pim_t pim, node_info_t *ninfo)
             continue;
 
         debug_ly(INFOD_DEBUG, "Adding name %s\n", ent->name);
-        size = 4096;
+        size = PIM_BUFFER_SIZE;
         res = (*ent->get_func)(ent->private_data, (void *) pim->tmpBuff, &size);
 
         // Adding the info only if the get_func return good status and
