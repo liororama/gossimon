@@ -1,3 +1,19 @@
+------** Version: 1.8.16 By: Lior Date 4/4/2013 **-------
+* Issue Fixed: When building the window to be sent to another machine, the buffer to hold
+  the window might not be large enough to hold all entries. In this case an error message
+  was issued and sent to syslog. This can cause a problem in clusters with many cores per
+  node since there will always not be enough space for building a full window (especially 
+  when the topfinder plugin is there). For this reason the error message was changed to 
+  debug message. 
+
+* Issue Fixed: The buffer passed from the infoModuleManager to the PIM module was 4096
+  which is very small in clusters with multi (32,48,64) cores nodes. The buffer size was
+  increased to 16K
+
+* Added libgossimon_client.so and libgossimon_util.so as a seperate shared libraries installed
+  as part of the installation. This is in order to support the gosipy project (on bitbucket) 
+  which allows a python code to access in information vector (same as infod-client).
+
 ------** Version: 1.8.15 By: Lior Date 7/8/2012 **-------
 * TODO - fix memory detection to get the correct cpu speed (max)
 * Fixed bugs in big xml buffers

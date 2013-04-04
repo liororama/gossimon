@@ -20,7 +20,7 @@ enable_testing()
 
 set (GOSSIMON_VERSION_MAJOR  1)
 set (GOSSIMON_VERSION_MINOR  8)
-set (GOSSIMON_VERSION_PATCH  15)
+set (GOSSIMON_VERSION_PATCH  16)
 
 #message("Command: ${gossimon_SOURCE_DIR}/prep/prep-helper/detect-version.pl ${gossimon_SOURCE_DIR}/CHANGELOG")
 

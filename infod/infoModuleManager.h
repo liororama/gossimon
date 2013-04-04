@@ -24,6 +24,8 @@
 #define PIM_MAX_PATH_LEN       (1024)
 #define PIM_MAX_NAME_LEN       (256)
 
+#define PIM_BUFFER_SIZE        (1024*16)
+
 /*************************************************************
  * info functions handling. Beside the regular information,
  * the mosix provider support usage of info modules. Each such

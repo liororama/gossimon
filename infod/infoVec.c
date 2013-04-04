@@ -1398,7 +1398,7 @@ inline int addEntToBuff(ivec_t vec,
 
 	// Checking that there is ehough space in the 
 	if(nodeInfoSize > size) {
-		mlog_bn_error("vec", "Error remaining space in message in not big enough %d < %d\n", size, nodeInfoSize);	
+		mlog_bn_dr("vec", "Error remaining space in message in not big enough %d < %d\n", size, nodeInfoSize);	
 		return 0;
 	}
 
@@ -1475,7 +1475,7 @@ infoVecGetWindow( ivec_t vec, int *size, int size_flag  ) {
 		         	     (unsigned int *)&(vec->win.data[i].priority));
 		
 		if(!res) {
-			mlog_bn_error("vec", "Error adding entry to window message (not enough space) skipping ..\n");
+			mlog_bn_dr("vec", "Error adding entry to window message (not enough space) skipping ..\n");
 			break;			
 		}	
 		// Deacreasing the priority by one for each window sent
