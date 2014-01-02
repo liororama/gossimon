@@ -37,7 +37,8 @@ mv $RPM_BUILD_ROOT "@CPACK_TOPLEVEL_DIRECTORY@/tmpBBroot"
 %install
 if [ -e $RPM_BUILD_ROOT ];
 then
-  mv "@CPACK_TOPLEVEL_DIRECTORY@/tmpBBroot/*" $RPM_BUILD_ROOT
+  mv "@CPACK_TOPLEVEL_DIRECTORY@/tmpBBroot/etc" $RPM_BUILD_ROOT
+  mv "@CPACK_TOPLEVEL_DIRECTORY@/tmpBBroot/usr" $RPM_BUILD_ROOT
 else
   mv "@CPACK_TOPLEVEL_DIRECTORY@/tmpBBroot" $RPM_BUILD_ROOT
 fi
@@ -80,8 +81,10 @@ fi
 "/usr/bin/repeat-bg"
 "/usr/bin/mmon"
 "/usr/bin/testload"
-"/etc/gossimon/plugins-available/top.conf
-"/etc/gossimon/plugins-available/meminfo.conf
+"/usr/lib/libgossimon_util.so"
+"/usr/lib/libgossimon_client.so"
+"/etc/gossimon/plugins-available/top.conf"
+"/etc/gossimon/plugins-available/meminfo.conf"
 "/etc/gossimon/plugins-available/README"
 "/etc/gossimon/plugins-enabled/README"
 

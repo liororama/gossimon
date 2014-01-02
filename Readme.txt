@@ -91,6 +91,7 @@ Gossimon was successfuly compiled and installed on the following:
 
 * Ubuntu 10.04, 12.04 (64bit)
 * Centos 5.5, 5.6, 5.7  (64bit)
+* Centos 6.4 6.5 (64bit)
 
 Feel free to send me a short email if you manage to install it on other 
 systems (liororama@gmail.com).
@@ -98,7 +99,7 @@ systems (liororama@gmail.com).
 
 
 
-Compilation:
+Manuall Compilation:
 ------------
 This part is relevant only in case you are trying to install the source 
 package.
@@ -109,7 +110,7 @@ package.
 
   1.1. Install CMake (http://www.cmake.org) on your node. 
       o On Debain/Ubuntu systems, "apt-get install cmake" would do the trick
-      o On other systems: look for a package, download a precompiled tar ball 
+      o On other systems: look for a package, download a precompiled tarball 
         or be bold and compile cmake yourself (it is a very easy task.. :-))
 
   1.2. Install libxml2:
@@ -120,30 +121,24 @@ package.
        o Debian/Ubuntu: apt-get install  libglib2.0-0 libglib2.0-dev
        o RH based systems: yum install glib2 glib2-devel
  
-  1.4. Install libxml++:
-       o Debian/Ubuntu: apt-get install libxml++2.6-dev
-	
-       o RH based: yum install libxml++-devel.x86_64
-		   yum install glibmm24-deve
-
-  1.5 Install libxml++:
+  1.4 Install libxml++:
        o Debian/Ubuntu apt-get install libxml++2.6-dev
        o RH based: You might need to install a repository like rpmforge that
          contains the packages (does not appear in the regular repo for Centos5
                    yum install glibmm24-devel
        	    	   yum install libxml++-devel
 
-  1.6 Install cppunit:
+  1.5 Install cppunit:
        o Debian/Ubuntu apt-get install libcppunit-dev
        o RH based: yum install cppunit-devel
 
-  1.7 Install check:
+  1.6 Install check:
 	Debian/Ubuntu: apt-get install check
-	RH based: 	
+	RH based: yum install check-devel	
   
-  1.8 Install ncurses devel:
+  1.7 Install ncurses devel:
 	Debian/Ubuntu: apt-get install libncurses5-dev
-	RH based: 
+	RH based: yum install ncurses-devel
 
 2. Open the gossimon tarball (once you download it...)
    tar xvf gossimon-1.8.3-Source.tar.gz
@@ -168,10 +163,19 @@ package.
 
 If all goes O.K. all required binaries are compiled and ready for install
 
+Generating packages (deb, rpm):
+--------------------------------
+You can generate rpms or debs using the script located at the prep directory.
+From gossimon top dir run:
+
+./prep/gen-bin-packages
+
+This script should generate and rpm or deb depending on the system you are running
+the script on (it will actually generate both deb and rpm but I always use the
+rpm when it is generated over centos and the deb when it is generated over ubuntu/debian
 
 
-
-Installation:
+Manuall Installation:
 -------------
 This part is relevant only in case you are trying to install the source package
 

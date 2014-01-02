@@ -77,7 +77,8 @@ add_custom_command(TARGET loadconstraints POST_BUILD COMMAND cp -f libloadconstr
 add_custom_command(TARGET pim_util POST_BUILD COMMAND cp -f libpim_util.a ../bin)
 
 # Removing the files from ../bin on make clean
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../bin/libutil.a;../libgossimon_util.so;../bin/libmapper.a;../bin/libloadconstraints.a;../bin/libpim_util.a") 
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+"../bin/libutil.a;../bin/libgossimon_util.so;../bin/libmapper.a;../bin/libloadconstraints.a;../bin/libpim_util.a") 
 
 
 

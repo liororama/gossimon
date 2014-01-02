@@ -6,10 +6,10 @@ make clean
 rm -f CMakeCache.txt
 
 COMPILER_CMAKE_FLAGS=
-if grep -q "CentOS" /etc/issue ; then
-	echo "On centos... need gcc44 (the default of 4.1 does not have -std=cxx-0 for g++"
-	COMPILER_CMAKE_FLAGS=" -D CMAKE_C_COMPILER=gcc44 -D CMAKE_CXX_COMPILER=g++44"
-fi
+#if grep -q "CentOS" /etc/issue ; then
+#	echo "On centos... need gcc44 (the default of 4.1 does not have -std=cxx-0 for g++"
+#	COMPILER_CMAKE_FLAGS=" -D CMAKE_C_COMPILER=gcc44 -D CMAKE_CXX_COMPILER=g++44"
+#fi
 
 cmake $COMPILER_CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=/usr -DGOSSIMON_INSTALL_ETC=/etc .
 make package

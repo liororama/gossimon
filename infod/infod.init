@@ -32,7 +32,7 @@
 
 PATH=/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin
 
-[ -x /etc/init.d/functions ] && . /etc/init.d/functions
+[ -f /etc/init.d/functions ] && . /etc/init.d/functions
 
 # Reading the possible arguments from this file
 if test -f /etc/default/infod; then
